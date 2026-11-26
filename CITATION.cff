@@ -17,7 +17,7 @@ authors:
   - family-names: Dubanevics
     given-names: Igors
     affiliation: "Okinawa Institute of Science and Technology Graduate University"
-    # orcid: can be added here as "https://orcid.org/0000-0000-0000-0000"
+    orcid: "https://orcid.org/0000-0002-9989-6649"
 references:
   - type: article
     title: "A rugged yet easily navigable fitness landscape"
