@@ -1,0 +1,3 @@
+# Median-reflected point-estimate graph; bootstrap holds the selected graph fixed.
+[clamped]
+candidate_functional_threshold = { rule = "median_reflected", decimals = 6 }

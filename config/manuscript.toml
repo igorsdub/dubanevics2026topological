@@ -1,0 +1,240 @@
+# Manuscript map: the only place manuscript numbering lives.
+#
+# Code, render records and fingerprints keep the stable figure identifier; the
+# namer (`dubanevics2026topological.naming`) copies each canonical render to
+# `output/figures/<section>/fig<number>_<desc>.png` (tables:
+# `output/tables/<section>/tab<number>_<desc>.<ext>`). Renumbering a figure is
+# an edit here and a rerun of the namer; nothing is re-rendered.
+#
+# Keys of each entry:
+#   source   canonical file stem under output/figures/canonical/ (tables:
+#            output/tables/canonical/); omitted while the render does not exist
+#   section  "main", "supplementary" or "exploratory"
+#   number   "1", "S3", ...; omitted for exploratory and unassigned entries
+#   desc     snake_case file description (single words joined by underscores)
+#   external true for panels made outside this repository (Google Slides);
+#            exported by hand to output/figures/external/<desc>.png
+#   status   "planned" for figures not yet built
+
+[[figure]]
+number = "1"
+section = "main"
+desc = "graph_tree_persistence"
+source = "graph_tree_persistence"
+
+[[figure]]
+number = "2"
+section = "main"
+desc = "workflow"
+external = true
+
+[[figure]]
+number = "3"
+section = "main"
+desc = "published_tree_metrics"
+source = "study_tree_persistence_metrics"
+
+[[figure]]
+number = "4"
+section = "main"
+desc = "published_tree_biology"
+source = "study_tree_persistence_biology"
+
+[[figure]]
+number = "5"
+section = "main"
+desc = "full_tree_persistence"
+source = "full_tree_persistence_vertical_histogram"
+
+[[figure]]
+number = "6"
+section = "main"
+desc = "peak_uncertainty"
+source = "peak_uncertainty"
+
+[[figure]]
+number = "7"
+section = "main"
+desc = "merge_tree_simplification_parametric_bootstrap"
+external = true
+
+[[figure]]
+number = "8"
+section = "main"
+desc = "candidate_fdr_tree_band_simplification"
+external = true
+
+[[figure]]
+number = "9"
+section = "main"
+desc = "bootstrap_codon_entropy"
+source = "bootstrap_codon_entropy"
+
+# Supplementary: numbered S1, S2, ... in file order. Unnumbered entries are
+# written to exploratory/ until they get a number.
+
+[[figure]]
+section = "supplementary"
+number = "S1"
+desc = "full_tree_persistence_top_histogram"
+source = "full_tree_persistence"
+
+[[figure]]
+section = "supplementary"
+number = "S2"
+desc = "tree_comparison"
+source = "tree_comparison"
+
+[[figure]]
+section = "supplementary"
+number = "S3"
+desc = "published_tree_histogram"
+source = "published_tree_histogram"
+
+[[figure]]
+section = "supplementary"
+number = "S4"
+desc = "full_tree_histogram"
+source = "full_tree_histogram"
+
+[[figure]]
+section = "supplementary"
+number = "S5"
+desc = "candidate_tree_histogram"
+source = "candidate_tree_histogram"
+
+[[figure]]
+section = "supplementary"
+number = "S6"
+desc = "branch_vertex_counts_2x2"
+source = "branch_vertex_counts_2x2"
+
+[[figure]]
+section = "supplementary"
+number = "S7"
+desc = "fitness_se_correlation"
+source = "fitness_se_correlation"
+
+[[figure]]
+section = "supplementary"
+number = "S8"
+desc = "functional_counts_vs_q"
+source = "functional_counts_vs_q"
+
+[[figure]]
+section = "supplementary"
+number = "S9"
+desc = "reflected_fdr_trees"
+source = "reflected_fdr_trees"
+
+[[figure]]
+section = "supplementary"
+number = "S10"
+desc = "published_fdr_tree"
+source = "tree_persistence__thr=published_fdr=by_q=0.05_tree=nominal_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S11"
+desc = "bootstrap_tree_histogram"
+source = "bootstrap_tree_histogram"
+
+[[figure]]
+section = "supplementary"
+number = "S12"
+desc = "global_stability"
+source = "bootstrap_global_stability"
+
+[[figure]]
+section = "supplementary"
+number = "S13"
+desc = "band_quantile_scan"
+source = "bootstrap_band_quantile_scan_grid"
+
+[[figure]]
+section = "supplementary"
+number = "S14"
+desc = "band_quantile_scan_seeds"
+source = "bootstrap_band_quantile_scan_seeds"
+
+[[figure]]
+section = "supplementary"
+number = "S15"
+desc = "candidate_bootstrap_simplification_stops"
+source = "bootstrap_stops__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S16"
+desc = "candidate_bootstrap_simplification_synonymous"
+source = "bootstrap_synonymous__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S17"
+desc = "candidate_bootstrap_simplification_combined"
+source = "bootstrap_combined__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S18"
+desc = "published_bootstrap_simplification_stops"
+source = "bootstrap_stops__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S19"
+desc = "published_bootstrap_simplification_synonymous"
+source = "bootstrap_synonymous__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+
+[[figure]]
+section = "supplementary"
+number = "S20"
+desc = "published_leaf_persistence"
+source = "published_leaf_persistence"
+
+[[figure]]
+section = "supplementary"
+number = "S21"
+desc = "published_leaf_swarm"
+source = "published_leaf_swarm"
+
+[[figure]]
+section = "supplementary"
+number = "S22"
+desc = "candidate_leaf_persistence"
+source = "candidate_leaf_persistence"
+
+[[figure]]
+section = "supplementary"
+number = "S23"
+desc = "candidate_leaf_swarm"
+source = "candidate_leaf_swarm"
+
+[[figure]]
+section = "supplementary"
+number = "S24"
+desc = "candidate_leaf_persistence_band"
+source = "candidate_leaf_persistence_band"
+
+[[figure]]
+section = "supplementary"
+number = "S25"
+desc = "candidate_leaf_swarm_band"
+source = "candidate_leaf_swarm_band"
+
+# Exploratory renders (kept, not in the manuscript) need no entry: the namer
+# copies every canonical render that no numbered entry claims into
+# exploratory/ under its canonical stem.
+
+[[table]]
+number = "1"
+section = "main"
+desc = "graph_summary"
+source = "papkou2023_full_vs_published"
+
+[[table]]
+number = "2"
+section = "main"
+desc = "candidate_corrections"
+source = "papkou2023_candidate_corrections"

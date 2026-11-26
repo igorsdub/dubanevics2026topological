@@ -1,0 +1,6 @@
+# Papkou's original cutoff is the 0.999 quantile of the bell-shaped component
+# of his three-component Gaussian mixture; see ADR 2026-10-24 (mixture-quantile functional classification).
+# norm.ppf(0.999, loc=-0.721, scale=0.069), evaluated at exact formula precision
+# (threshold/classification_probability_scans.py). This cutoff stays fixed across bootstrap draws.
+[clamped]
+candidate_functional_threshold = { rule = "fixed_cutoff", decimals = 16, value = -0.5077739708744209 }

@@ -1,0 +1,239 @@
+# Scientific settings consumed by the publication analysis build.
+[dataset]
+name = "Papkou2023"
+landscape = "full"
+fitness_wt = "data/raw/papkou2023_fitness_wt.parquet"
+fitness_diff = "data/raw/papkou2023_fitness_diff.parquet"
+
+[tree]
+kind = "split"
+
+[persistence]
+kind = "extended_h0"
+
+# Local validation references copied from Topographer at the pinned revision
+# recorded in data/raw/README.md. The files are ignored and never rediscovered
+# through a sibling checkout.
+[clamped]
+graphml = "data/raw/papkou2023_graph.graphml"
+peaks = "data/raw/papkou2023_peaks.csv"
+# Papkou et al. (2023), supplement pp. 14–15: qnorm(0.999, -0.721, 0.069)
+# = -0.507773970874421, rounded to six decimals for the Published graph.
+# The BY snapshot retains full formula precision; see docs/component-persistence-threshold.md.
+published_functional_threshold = -0.507774
+# The Candidate functional threshold is never typed as a bare float. Active publication
+# Selection rule (user lock 2026-11-12): fdr_fixed_cutoff with the median-reflected
+# cutoff under Benjamini–Yekutieli at nominal q = 0.05. T and the Functional class are
+# read from data/processed/classification/reflected (written by `just classification-probability-scans`);
+# the folder's MANIFEST.tsv is the integrity check. Rule "mixture_quantile" remains available
+# as config/variants/mixture_quantile.toml (ADR 2026-10-24). Rule "median_reflected"
+# (point-estimate, no FDR) remains the comparison rule (ADR 2026-10-23).
+candidate_functional_threshold = { rule = "fdr_fixed_cutoff", decimals = 6, cutoff = "median_reflected", method = "by", q = 0.05, input_dir = "data/processed/classification/reflected" }
+reference_topographer_commit = "577fde267d73b3a29c1f5293ff1fac70123d4687"
+# Value-level digests of the two reference files (rawdata/value_digest.py): the GraphML node and edge
+# attributes, and the sorted peak set. A rebuilt `just make-raw` file with the same values passes
+# whatever its bytes are. These are the checked pins.
+graphml_value_sha256 = "d34947c108873009f64765c3081d34ee1a8edb272a6bb8d54a863b939e41ce2e"
+peaks_value_sha256 = "95a3d984f1a7551cf2c2850d56251a3eb7ce6e228ed5313d7453272ce53fbad0"
+# Byte hashes of the original reference files: recorded for reference only, never checked
+# (`just make-raw` warns when a rebuild differs from them).
+graphml_bytes_sha256 = "8a83925aec4aeb08eeeeb446e79ffaffad11efe81f4d912dc9be77d189204dad"
+peaks_bytes_sha256 = "362726e64ce215d2f0dfffaefe43d7a824224de06c4083e937c07aaac57d01a5"
+
+# Codon-entropy Candidate simplified-tree population and positional-entropy analysis.
+[codon_entropy]
+sweep_points = 100
+aa_alphabet = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y", "%", "^", "&"]
+dna_alphabet = ["A", "C", "G", "T"]
+stop_codons = ["TAA", "TAG", "TGA"]
+ridge_membership = "strictly_above_common_saddle_excluding_saddle"
+candidate_population = "all_candidate_selected_graph_vertices_including_fringe"
+two_functional_ridges_share_minimum = 0.9
+kem_summit_dna_sequence = "AAGGAAATG"
+tcl_summit_dna_sequence = "ACCTGTCTT"
+reported_saddle_dna_sequence = "CTCTGCTTG"
+
+# Merge-flow product settings (retired from active publication views; Ticket 19 abandoned
+# in favor of branch transparency / Ticket 20 log-opacity convention). Kept for historical
+# product rebuilds only; K was provisional.
+# This table is present for legacy `merge-flow-product` CLI / direct use of historical code;
+# it is NOT part of required publication config or D10_VIEWS.
+[merge_flow]
+min_functional_count_K = 10
+level_grid = "exact_breakpoints"
+
+# Biology annotation evidence threshold for the Candidate graph.
+[candidate_peak_biology]
+q_value_threshold = 0.05
+
+# Conceptual two-peak landscape used to explain the decreasing split-tree sweep.
+# This is an algorithm illustration, not a biological sequence-fitness dataset.
+[graph_tree_persistence]
+grid_rows = 6
+grid_columns = 6
+surface_resolution = 121
+gaussian_width = 0.20
+left_peak_amplitude = 0.72
+right_peak_amplitude = 1.0
+fitness_baseline = 0.04
+left_gaussian_center = [0.25, 0.25]
+right_gaussian_center = [0.75, 0.75]
+global_minimum_coordinate = [1.0, 0.0]
+newton_iterations = 20
+opening_threshold = 1.0
+first_peak_threshold = 0.99
+second_peak_threshold = 0.70
+complete_sweep_threshold = 0.0
+
+[graph_tree_persistence.critical_sample_indices]
+left_peak = 7
+saddle = 15
+right_peak = 28
+global_minimum = 5
+
+# All-Candidate mutation-edge evidence; exploratory alpha is not canonical.
+[candidate_edge_evidence]
+correction = "benjamini_hochberg"
+family = "all_fitness_diff_rows_including_zero_deltas"
+
+# Tree-edge contrast evidence for the Candidate split tree (issue #50, ADR 0006,
+# superseded by ADR 0008). The bootstrap stage no longer reads it.
+# time_unit follows TIME_UNIT = "generations" in barseqfit tests/_papkou.py.
+# elapsed_time is the inferred replication generation 3.5166197103891137 stated in
+# barseqfit docs/plan.md (provenance in its r/validation/papkou2023/PROVENANCE.md).
+# It equals max(time) - min(time) of the exported samples, which barseqfit checks
+# within 1e-9, so contrasts are in the same per-generation units as the raw
+# fitness in data/raw/papkou2023_fitness_wt.parquet.
+[candidate_tree_contrast]
+alpha = 0.05
+barseq_export_env = "PAPKOU2023_BARSEQ_EXPORT"
+elapsed_time = 3.5166197103891137
+time_unit = "generations"
+correction = "benjamini_hochberg"
+family = "candidate_split_tree_edges"
+
+# Per-sequence growth rates r for the bootstrap-smoothed tree (ADR 0008).
+# elapsed_time and time_unit repeat [candidate_tree_contrast] on purpose: both
+# stages read the same BarSeq export. The fit's r is the slope of
+# logit(count / sample_total) per time_unit, and r_i - r_wt must reproduce the
+# published wild-type-relative s in data/raw/papkou2023_fitness_wt.parquet
+# within identity_tolerance (barseqfit reproduces fit_wt's m to 1e-7, so 1e-6
+# leaves headroom for solver differences without admitting a different model).
+[sequence_growth_rates]
+barseq_export_env = "PAPKOU2023_BARSEQ_EXPORT"
+elapsed_time = 3.5166197103891137
+time_unit = "generations"
+identity_tolerance = 1e-6
+
+# Mixture-quantile Candidate functional threshold and the Functional probability
+# classes (ADR 2026-10-24-mixture-quantile-functional-classification, Decision items
+# 2-6; `just functional-classification`). bic_k_range: the component counts tried, the
+# chosen one has the lowest BIC. A component is non-functional when it holds at least
+# stop_anchor_min_responsibility of the summed responsibility of the sequences with
+# stop_codon_count_for_anchor stop codons. T is the `quantile` of the union of those
+# components, rounded to `decimals` places. A sequence is functional at Functional
+# probability >= functional_confidence and non-functional at <= 1 - that.
+[functional_classification]
+bic_k_range = [1, 5]
+stop_anchor_min_responsibility = 0.10
+stop_codon_count_for_anchor = 2
+quantile = 0.999
+functional_confidence = 0.95
+decimals = 6
+random_seed = 20261024
+n_init = 5
+max_iter = 1000
+tol = 1e-6
+
+# Sensitivity scan of the functional threshold (ADR 2026-10-24-mixture-quantile-
+# functional-classification, Decisions 7 and 8; analysis/functional_threshold_scan.py).
+# It reports how far the classification moves when one choice changes one step and is
+# never used to pick the rule. families x k_range (inclusive) x quantiles x confidences
+# x component_rules is the grid. n_resamples nonparametric resamples (sequences drawn with
+# replacement, seed random_seed + resample index) give a 95% interval on T per
+# (family, k). n_init, max_iter and tol mean what they do in [functional_classification]
+# (tol is scikit-learn's: the absolute change of the mean log-likelihood per value) and
+# must equal its values, so the scan's Gaussian cell reproduces the stage's.
+# Acceptance checks, declared before the run: at least double_stop_below_min of the
+# double-stop sequences lie below T; the interval on T is narrower than 2 x 1.96 x the
+# median pooled standard error; one scan step from canonical on any axis flips less than
+# flip_fraction_limit of the Functional set. A failed check is reported, not re-tuned.
+# n_jobs sets worker processes only (one resample each) and is in no fingerprint or
+# record: every resample is seeded by its own index, so the result is the same for every
+# n_jobs. $FITNESSTREE_N_JOBS (a positive integer) overrides it at run time.
+[functional_threshold_scan]
+families = ["gaussian", "skew_normal", "student_t"]
+k_range = [1, 5]
+quantiles = [0.95, 0.99, 0.999, 0.9999]
+confidences = [0.95, 0.99, 0.999]
+component_rules = ["stop_anchored", "lowest_mean"]
+n_resamples = 200
+random_seed = 20261025
+n_init = 5
+max_iter = 1000
+tol = 1e-6
+flip_fraction_limit = 0.05
+double_stop_below_min = 0.99
+n_jobs = 8
+
+# Peak-uncertainty figure scatter (ADR 2026-10-22-pooled-standard-error-for-bootstrap): each point is x = se_pooled and
+# y = r - r_wt from the growth-rate table, the wild type included. The table covers
+# the Candidate network only, so the other measured sequences keep the published s
+# (equal to r - r_wt within [sequence_growth_rates] identity_tolerance, rechecked at
+# render time) and take the pooled standard error as the published one with the
+# wild-type term removed in quadrature. standard_error_tolerance is the largest
+# relative gap allowed between se_pooled and that reconstruction on the sequences
+# that have a fit (1.9e-4 on the 104,664 of 2026-10-22).
+[peak_uncertainty_scatter]
+standard_error_tolerance = 1e-3
+
+# Bootstrap distances on a fixed selected graph, followed by direct band
+# simplification. A flat-landscape run provides descriptive distance checks.
+# band_quantile: the global verdict is a bootstrap confidence band (Fasy et al.
+# 2014): c is this quantile of the real draws' bottleneck distance to the nominal
+# diagram, and a nominal point with persistence above 2c is distinguishable from
+# noise at that level. Must lie strictly between 0 and 1.
+# n_jobs sets worker processes only: the draws are seeded per draw, so the
+# result is the same for every n_jobs.
+# $FITNESSTREE_N_JOBS (a positive integer) overrides n_jobs at run time.
+# chunk_size: the draws run and are saved in chunks of this many, so a stopped or
+# crashed run resumes from the saved chunks (see ADR 0008). Like n_jobs it
+# does not change the result and is not in the checkpoint fingerprint. Chunks go
+# to $FITNESSTREE_BOOTSTRAP_CHUNK_DIR, else ~/.local/share/fitnesstree/bootstrap.
+[bootstrap_smoothed_tree]
+n_replicates = 10000
+seed = 20261019
+band_quantile = 0.95
+n_jobs = 8
+chunk_size = 250
+
+[bootstrap_band_quantile_scan]
+# Resolution of the band-quantile grid q = 0, step, 2 * step, ..., 1.
+# 1 / grid_step must be a whole number, and the stage's band_quantile must be a
+# grid point (round(band_quantile / grid_step) * grid_step == band_quantile); a
+# whole 1 / grid_step alone does not put 0.95 on the grid (0.1 does not).
+grid_step = 0.001
+
+# Branch decomposition of a smoothed Candidate split tree (exploratory stage,
+# `just branch-decomposition`; ADR 0008 and ADR 0013). Every edge of the smoothed
+# tree is one branch; Horton–Strahler orders are computed on the smoothed tree
+# itself, so absorbed hills no longer raise them.
+# tree: "band" is the direct band-simplified tree (only hills whose persistence
+# exceeds 2c survive); "nominal" is the unsmoothed tree. Historical core trees
+# are legacy-only and cannot be produced by this stage.
+[branch_decomposition]
+tree = "band"
+
+# Peak-pair distances (`just peak-pair-distances`; docs/peak-pair-distance-design.md).
+# For every pair of peaks of the tree: Hamming and fitness distance directly and
+# via their common saddle, and Mantel tests of Spearman's rho between Hamming and
+# fitness distance (raw fitness).
+# tree: "band" is the direct band-simplified tree (only hills whose persistence
+# exceeds 2c survive); its peaks are the pair table's peaks.
+# mantel_permutations: label permutations per Mantel test; the two-sided p-value is
+# (1 + #{|rho_perm| >= |rho_obs|}) / (1 + mantel_permutations).
+# seed: seeds the permutations of every test (a date, as the other seeds).
+[peak_pair_distances]
+tree = "band"
+mantel_permutations = 9999
+seed = 20261121

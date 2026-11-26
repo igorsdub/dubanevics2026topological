@@ -1,0 +1,6 @@
+# Variant overlay (FITNESSTREE_ANALYSIS_VARIANT=fdr_by_q0.05_median_reflected), merged table by table over
+# config/analysis.toml. Median-reflected fixed cutoff, Benjamini-Yekutieli, nominal q = 0.05 (full downstream run).
+# Run with FITNESSTREE_OUTPUT_ROOT=output/variants/fdr_by_q0.05_median_reflected so no default output is touched.
+# The applied T is read from the snapshot's authenticated provenance, never typed; table_sha256 is the reviewed table.
+[clamped]
+candidate_functional_threshold = { rule = "fdr_fixed_cutoff", decimals = 6, cutoff = "median_reflected", method = "by", q = 0.05, input_dir = "data/processed/classification/reflected" }

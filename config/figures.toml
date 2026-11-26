@@ -1,0 +1,1506 @@
+# Appearance settings for publication figures. Panel dimensions are layout pixels;
+# PNG is the default export; SVG is opt-in via `just figures-svg`. PNG exports use 300 dpi and the linked panels target 180 mm at reproduction size.
+formats = ["png"]
+variants = ["vanilla", "annotated"]
+png_dpi = 300
+fitness_domain = [-1.2, 1.4]
+
+# Figures `--with-bootstrap` leaves out, each with the reason (printed on every run).
+# Explicit figure requests still use their identity guards.
+[bootstrap_identity_exclusions]
+
+# Default figures left out while a product they read is missing (printed on every run).
+# Remove the entry once the product exists; the figure then renders again.
+[missing_product_exclusions]
+
+[rendering]
+manuscript_width_mm = 180
+font_family = "Arial, Liberation Sans, Helvetica, sans-serif"
+font_size = 15
+heading_font_size = 18
+subtitle_font_size = 14
+legend_font_size = 15
+tree_axis_title = "Fitness (WT = 0)"
+shared_tree_axis_title = "Fitness (at birth, WT = 0)"
+persistence_x_title = "Fitness at death"
+persistence_y_title = "Fitness (at birth, WT = 0)"
+# Horizontal order of the branches in every tree this repository lays out with
+# Topographer's make_tree_layout (the band-smoothed trees and the conceptual
+# graph_tree_persistence tree), read by tree_horizontal_layout() in
+# figures/_layout_config.py and passed to the builders as horizontal_layout (the
+# default of the builders is the same value). "subtree_extremum" puts first the child whose whole subtree
+# reaches the highest peak, so the highest peak is the leftmost leaf at every fork;
+# Topographer also offers "leaf_order" (its default: children by ascending scalar of
+# the child node) and "iplotx". The Papkou2023 backbone trees are laid out inside
+# Topographer's example, which fixes subtree_extremum itself; this key does not reach
+# them. Branch order is presentation only.
+tree_horizontal_layout = "subtree_extremum"
+
+# Shared figure geometry and visual defaults. The tree panel size (tree_width x
+# tree_height) and persistence panel size are set here once; a figure's `tree` or
+# `persistence` table leaves width and height out to use them (load_settings fills
+# them) and sets them only to override.
+tree_width = 420
+tree_height = 250
+persistence_width = 250
+persistence_height = 250
+persistence_point_size = 70
+persistence_point_shape = "triangle-up"
+persistence_grid = false
+panel_gap = 10
+
+# Logarithmic count scale: one colour whose opacity grows with the count (count one is the faintest, with no swatch of its own).
+branch_count_title = "Branch\nvertex count"
+fitness_tick_step = 0.1
+fitness_padding_fraction = 0.05
+legend_length = 110
+colorbar_top_inset = 8
+count_color = "#000000"
+# Opacity at count one: clearly visible; the largest count is fully opaque (alpha_max 1.0).
+count_alpha_min = 0.3
+count_alpha_max = 1.0
+# Top histogram above a persistence diagram: the count axis runs from 0 to
+# top_histogram_headroom times the tallest bin of the panels that share it (never below the
+# last tick), so no bin is clipped; the ticks are exactly top_histogram_count_ticks.
+top_histogram_bins = 200
+top_histogram_count_ticks = [0, 20000]
+top_histogram_headroom = 1.05
+# Count labels of the band-smoothed trees of the bootstrap figures (the figures that
+# colour a tree by count and carry labels). branch_count_label_mode picks the
+# branches: "all" writes the post-absorption vertex count on every branch (the
+# terminal ones above their tips, the others under their steps), "tips" only on the
+# terminal branches whose count is at most branch_count_label_max. The two main
+# ridges of the codon-entropy excerpts keep their own ridge count labels, whatever
+# the mode. Every figure with count labels uses this one setting; "all" stays
+# available but is not used.
+branch_count_label_mode = "tips"
+branch_count_label_max = 9
+# How a label that collides with another is moved. "nudge" shifts it vertically
+# (up above a tip, down under a step, a label height at a time, with a thin leader
+# line back to its branch). "rotate" turns every label a quarter turn (reading
+# upward), a digit's height wide instead of the text's length, and nudges only a
+# collision that remains. Presentation only: changing it re-renders every figure.
+branch_count_label_collision = "nudge"
+edge_width = 1.2
+node_size = 30
+# Uncoloured trees (the slide renders' coloring = "none" axis): one plain edge colour, no count colour bar.
+plain_edge_color = "#000000"
+
+# WT marker appearance applies to every tree; the stop-codon cross applies to annotated exports.
+wild_type_shape = "star"
+wild_type_color = "#d62728"
+wild_type_size = 200
+wild_type_label_color = "#d62728"
+wild_type_label_dx = -9
+# Wild type and stop codon are solid, never translucent (ADR 0012): they take no
+# opacity setting. Red means wild type only; a stop codon is dark crimson (ADR 0012).
+stop_codon_shape = "x"
+stop_codon_color = "#a50f15"
+stop_codon_size = 42
+# Size of the stop-codon X on every tree figure, and of the persistence-diagram triangles
+# and stop crosses of the combined stop-and-synonymous encoding (the one size setting:
+# full_tree_persistence, tree_persistence_combined, bootstrap_combined). Unit: Vega
+# point-mark `size`, an AREA in px^2.
+stop_codon_tree_size = 70
+# Opacity of the stop-codon X on trees (the stroke is thin, 0.5 px).
+stop_codon_tree_opacity = 0.7
+# Which KINDS of tree node may carry the stop-codon X (the node's own sequence must
+# contain a stop codon). Shared by every tree figure and slide. Allowed values:
+#   "maximum" - a peak (local maximum, a leaf of the merge tree)
+#   "minimum" - a valley: the global minimum (the root of the tree)
+#   "saddle"  - a merge point (split or join saddle)
+#   "regular" - any other, non-critical vertex of the tree
+# Default: peaks and valleys, not saddles. An unknown value stops the build with an error.
+stop_codon_tree_node_kinds = ["maximum", "minimum"]
+# Trees mark a stop codon with a cross; a persistence panel marks a stop-codon peak
+# with a crimson triangle (count opacity, drawn above the other points, no cross).
+# Persistence diagram key: inside the diagram, bottom right, one entry per line;
+# persistence_legend_inset is the pixel gap to the right and bottom edges.
+persistence_legend_inset = 10
+# Font size of that key; the long stop label "Stop codon containing peaks" must fit.
+persistence_legend_font_size = 11
+persistence_legend_line_gap = 4
+stop_codon_stroke_width = 0.5
+# Synonymous variants are green on the study biological figure (leaf branches and
+# persistence triangles); no tree draws them as a square marker.
+synonymous_color = "#1b9e77"
+synonymous_opacity = 0.95
+# The combined stop-and-synonymous encoding (full-graph figures and the *_combined D10
+# files): a synonymous peak or valley is teal. synonymous_teal is the diagram marker and
+# key glyph (faded by the branch-count opacity); the tree's synonymous leaf branches run
+# from synonymous_teal_light (count one) to synonymous_teal_dark (largest count) on the
+# same log scale as the grey count ramp. A stop codon is the red cross drawn on top of
+# the marker, in exactly the tree's cross style (stop_codon_color, stop_codon_stroke_width,
+# stop_codon_tree_opacity, stop_codon_tree_size).
+synonymous_teal = "#00897b"
+synonymous_teal_light = "#a1dad2"
+synonymous_teal_dark = "#00362f"
+
+[figures.tree_comparison]
+annotation_legend_spacing = 190
+notebook = "notebooks/papkou2023_tree_comparison.py"
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+count_legend_ticks = [1, 100, 10000]
+branch_count_title = "Branch\nvertex\ncount"
+# One horizontal bar inside the top tree panel, top right; its range is the union of
+# the plotted branch counts. The fraction is the bar's centre across the panel width;
+# the bar is nudged inward to stay inside.
+colorbar_x_fraction = 1.0
+# The Published and Candidate rows draw their functional threshold as a dashed rule
+# across the tree and across its histogram (the global line-style rule: threshold =
+# dashed, median = dotted). The rule carries no text: its value is an extra
+# three-decimal tick on the fitness axis.
+threshold_color = "#555555"
+threshold_width = 1.2
+threshold_dash = [5, 4]
+threshold_label_font_size = 14
+threshold_label_padding = 8
+
+[figures.tree_comparison.tree]
+width = 520
+height = 250
+
+[figures.candidate_tree_histogram]
+annotation_legend_spacing = 190
+notebook = "notebooks/papkou2023_candidate_tree_histogram.py"
+colorbar_x_fraction = 0.9
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+legend_length = 110
+count_legend_ticks = [1, 100, 10000]
+
+[figures.candidate_tree_histogram.tree]
+
+[figures.bootstrap_tree_histogram]
+annotation_legend_spacing = 190
+# Band-smoothed tree from the bootstrap checkpoint (ADR 0008, step 2); no notebook.
+colorbar_x_fraction = 0.9
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+legend_length = 110
+count_legend_ticks = [1, 100, 10000]
+
+[figures.bootstrap_tree_histogram.tree]
+
+[figures.full_tree_histogram]
+annotation_legend_spacing = 190
+notebook = "notebooks/papkou2023_full_tree_histogram.py"
+colorbar_x_fraction = 0.9
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+legend_length = 110
+count_legend_ticks = [1, 100, 10000]
+
+# Full-graph raw-fitness histogram with the leading saddle band's landmarks (no
+# notebook; opt-in until the `leading-saddle-band` stage has run). Each landmark has
+# a rule and a label on its own row, ordered by fitness from the top, so landmarks a
+# few hundredths apart do not overprint; label_row_height is one row in pixels and
+# the histogram keeps the space below the last row. The band is the closed interval
+# between the two trailing saddles. Median is dotted and thresholds dashed in code
+# (the line-style rule). labels names each landmark key; the value appended to it is
+# the manuscript quantity registry's display text, printed as is.
+[figures.full_tree_fitness_landmarks]
+histogram_bins = 200
+histogram_color = "#bdbdbd"
+width = 640
+height = 320
+band_color = "#9e9e9e"
+band_opacity = 0.35
+rule_color = "#222222"
+rule_width = 1.0
+label_color = "#222222"
+label_font_size = 11
+label_row_height = 14
+# A label whose rule lies beyond this fraction of the x domain is written left of it.
+label_flip_fraction = 0.8
+x_title = "Fitness (WT = 0)"
+y_title = "Count"
+
+[figures.full_join_tree]
+# Opt-in: `build figures --figure full_join_tree`. One vanilla export.
+# The tree panel matches full_tree_persistence (count bar, fitness axis).
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+band_color = "#9e9e9e"
+band_opacity = 0.35
+
+[figures.full_join_tree.tree]
+
+[figures.full_tree_fitness_landmarks.labels]
+global_minimum = "Global minimum"
+split_trailing_saddle = "Split-tree trailing saddle"
+join_trailing_saddle = "Join-tree trailing saddle"
+median = "Median"
+split_leading_saddle = "Split-tree leading saddle"
+join_leading_saddle = "Join-tree leading saddle"
+published_functional_threshold = "Published functional threshold"
+candidate_functional_threshold = "Candidate functional threshold"
+
+[figures.full_tree_histogram.tree]
+
+[figures.published_tree_histogram]
+annotation_legend_spacing = 190
+notebook = "notebooks/papkou2023_published_tree_histogram.py"
+colorbar_x_fraction = 0.9
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+legend_length = 110
+count_legend_ticks = [1, 100, 10000]
+
+[figures.published_tree_histogram.tree]
+
+[figures.linked_tree_persistence]
+notebook = "notebooks/papkou2023_linked_tree_persistence.py"
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+
+[figures.linked_tree_persistence.tree]
+
+[figures.linked_tree_persistence.persistence]
+point_size = 70
+
+[figures.full_tree_persistence]
+notebook = "notebooks/papkou2023_full_tree_persistence.py"
+colorbar_x_fraction = 0.9
+# Bin count of the marginal death histogram above the persistence diagram: the
+# tree-histogram figures' 200, so the bars have the same width in fitness.
+histogram_bins = 200
+histogram_color = "#bdbdbd"
+count_legend_ticks = [1, 100, 10000]
+
+[figures.full_tree_persistence.tree]
+
+# Alternative layout (opt-in): vertical fitness histogram | tree | persistence diagram.
+# Every key not set here is read from [figures.full_tree_persistence].
+[figures.full_tree_persistence_vertical_histogram]
+# The tree's "Wild type" key is smaller than the diagram's key so the two look balanced.
+annotation_legend_font_size = 12
+
+[figures.full_tree_persistence_vertical_histogram.tree]
+# The tree's x scale is its exact extent, no padding: it touches the histogram on its left
+# and the diagram's tick labels on its right.
+tight_horizontal = true
+
+[figures.full_tree_persistence_vertical_histogram.persistence]
+# Plot-area width (px) of the vertical histogram on the left (its Count axis).
+histogram_width = 45
+# Offsets (px) of the median and threshold values written at the left of their lines
+# on the diagram, from the diagram's left edge and above the line.
+line_value_dx = 4
+line_value_dy = -3
+# The key straddles the dotted median rule on the right of the point cloud: peak and
+# valley just above it, synonymous and stop codon just below it, persistence_legend_rule_gap
+# px clear of it, right-aligned persistence_legend_inset_x px from the right edge (far
+# enough to clear the global-minimum point in the bottom-right corner), no backing box.
+# Its font size is median_label_font_size, the "Median-reflected threshold" caption's.
+persistence_legend_inset_x = 26
+persistence_legend_rule_gap = 6
+persistence_legend_line_gap = 2
+# The tree's "WT" label overhangs the tree's plot area on the left by about 25 px; Vega-Lite
+# would leave that as blank room between the histogram and the tree, so that seam is closed
+# by this much (the label overlaps the histogram's empty right edge). Vega stops at the
+# histogram's own bounds, so any value of 30 or more leaves the tree 5 px from the bars.
+tree_left_overlap_px = 30
+# Gap (px) between the histogram, the tree and the diagram: none, the panels touch. The
+# diagram's own tick labels (the threshold value) are the only room between tree and diagram.
+seam_gap = 0
+
+[figures.full_tree_persistence.persistence]
+# Move the in-diagram key (px, from the right and bottom edges of the 250 x 250 panel)
+# well clear of the global-minimum point in the bottom-right corner (~x 239, y 239):
+# its right edge sits 45 px from the right edge and its last line 50 px above the
+# bottom, a gap of about 25 px or more to that point in both directions.
+persistence_legend_inset_x = 45
+persistence_legend_inset_y = 36
+# Width and height both equal tree.height: square, on the shared fitness axis.
+# The triangle size is rendering.stop_codon_tree_size, the tree's cross size.
+point_color = "#737373"
+point_opacity = 1.0
+# Annotated export: the median-reflected threshold (noise_band_upper) is a dashed
+# rule across the diagram, styled by [figures.graph_tree_persistence]
+# tree_threshold_*, with its one y label and this caption just above the rule at the
+# diagram's right edge. The vanilla export draws none of it.
+threshold_apex_label = "Median-reflected\nthreshold"
+threshold_apex_label_dy = -4
+# The grey noise square (data minimum to the median-reflected threshold on both axes)
+# sits at the very back of the diagram, filled like the bootstrap band (band_color at
+# band_opacity, the D10 band figures' values).
+band_color = "#9e9e9e"
+band_opacity = 0.3
+# Functional threshold m + h: a dashed horizontal rule, unlabelled; its value is a
+# three-decimal tick on the fitness axis (drawn only for a graph that has a threshold).
+# Line styles: threshold = dashed, median = dotted; the colour and width match.
+threshold_color = "#555555"
+threshold_width = 1.2
+threshold_dash = [5, 4]
+x_title = "Fitness at death"
+histogram_height = 65
+histogram_gap = 8
+histogram_y_title = "Count"
+median_color = "#555555"
+median_dash = [1, 3]
+median_width = 1.2
+median_label_font_size = 14
+diagonal_color = "#737373"
+diagonal_width = 1.0
+key_padding = 48
+
+[figures.study_tree_persistence_metrics]
+notebook = "notebooks/papkou2023_study_tree_persistence_metrics.py"
+colorbar_x_fraction = 0.9
+legend_length = 55
+# Same length as the other tree figures' count colour bar (legend_length = 110).
+colorbar_length = 110
+count_legend_ticks = [1, 100, 10000]
+inset_legend_font_size = 11
+font_size = 15
+branch_count_title = "Branch\nvertex\ncount"
+# Altair/Vega scheme for the discrete amino-acid Hamming bins (tree edges, persistence
+# points and colour bar): sampled by the figure the way Vega samples it.
+aa_hamming_color_scheme = "bluepurple"
+# Same four steps as figures.palette.HORTON_STRAHLER_COLORS (Oranges, light to dark).
+horton_strahler_colors = ["#bcbddc", "#807dba", "#54278f", "#2a0a4a"]
+
+[figures.study_tree_persistence_metrics.tree]
+
+[figures.study_tree_persistence_metrics.persistence]
+point_size = 70
+
+[figures.study_tree_persistence_biology]
+notebook = "notebooks/papkou2023_study_tree_persistence_biology.py"
+font_size = 15
+biology_tree_color = "#b3b3b3"
+biology_persistence_color = "#737373"
+biology_persistence_opacity = 1.0
+synonymous_opacity = 1.0
+# Synonymous peak branches are drawn thicker than the tree edges (edge_width).
+synonymous_edge_width = 2.2
+
+[figures.study_tree_persistence_biology.tree]
+
+[figures.study_tree_persistence_biology.persistence]
+point_size = 70
+# Stop and synonymous diagram markers. Both sizes are mark AREAS in px squared (the drawn
+# width goes as the square root): 160 is 2.3x the area of 70, about 1.5x the plain
+# points' drawn width (~8.4 px to ~12.6 px).
+marker_size = 160
+# Count-driven opacity (0.3 at one vertex up to 1) of these markers never falls below
+# this floor; the plain points are fully opaque.
+marker_opacity_floor = 0.6
+
+[figures.candidate_tree_bootstrap_biology]
+font_size = 15
+heading_font_size = 16
+legend_font_size = 15
+outcome_legend_corner = "bottom-left"
+# The band-simplified tree (row 2) is coloured by branch vertex count with the shared
+# horizontal count colour bar inside its panel.
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+biology_tree_color = "#b3b3b3"
+biology_persistence_color = "#737373"
+biology_persistence_opacity = 1.0
+synonymous_opacity = 1.0
+# Band outcome of a peak: survives (persistence > threshold) or absorbed.
+survives_color = "#737373"
+absorbed_color = "#111111"
+# Strip of the diagram where persistence <= the threshold (simultaneous confidence band).
+band_color = "#9e9e9e"
+band_opacity = 0.3
+band_label_color = "#595959"
+band_label = "band: persistence ≤ threshold"
+band_label_font_size = 12
+dataset_label = "Papkou et al. (2023) · candidate graph"
+legend_title = "Peak"
+# Outcome key inside the nominal tree, at the corner that holds the least of the
+# tree (top-right on a tie; filled mid-grey survives, filled black absorbed); the
+# nominal tree draws only its absorbed branches in black and every other branch
+# light grey, and the smoothed tree is light grey. The clearance is the margin
+# (pixels) that breaks a tie between corners the key does not overlap.
+outcome_legend_inset = 8
+outcome_legend_line_height = 21
+outcome_legend_marker_size = 70
+outcome_legend_clearance = 6
+# The diagram shares the tree's fitness scale; label its y ticks too.
+persistence_y_tick_labels = true
+# Row titles and subtitles: str.format templates over the manuscript quantity
+# registry's display text (printed as is, no format specs). Row 1 fills {peaks},
+# {survive}, {absorbed}, {stops}; row 2 fills {peaks}, {input_peaks}, {absorbed},
+# {retained}, {saddles}; both fill {dataset}, {draws}, {seed}, {threshold},
+# {band_quantile}, {percent}.
+nominal_row_title = "Nominal tree · {peaks} peaks · {survive} survive and {absorbed} are absorbed (persistence ≤ threshold) · {stops} stop-codon containing"
+nominal_row_subtitle = [
+  "{dataset} · {draws} bootstrap draws · seed {seed}",
+  "Bootstrapped persistence threshold {threshold} at band quantile {band_quantile} · {percent}% simultaneous confidence band (parametric bootstrap)",
+  "Stop-codon containing peaks: crimson × on the tree, crimson triangle on the diagram",
+]
+band_row_title = "Band-simplified tree · {peaks} peaks, all with persistence > threshold · {absorbed} of {input_peaks} nominal peaks absorbed"
+band_row_subtitle = [
+  "{dataset} · {draws} bootstrap draws · seed {seed} · bootstrapped persistence threshold {threshold} at band quantile {band_quantile}",
+  "{retained} sequences retained · {saddles} saddles removed · raw fitness unchanged",
+]
+
+[figures.candidate_tree_bootstrap_biology.legend_labels]
+survives = "survives: persistence > threshold ({count})"
+absorbed = "absorbed: persistence ≤ threshold ({count})"
+
+[figures.candidate_tree_bootstrap_biology.tree]
+
+[figures.candidate_tree_bootstrap_biology.persistence]
+point_size = 70
+
+# One figure: the real and flat bottleneck-distance histograms overlaid (250 x 100,
+# the two-entry legend centred at the top inside the panel) stacked over the nominal
+# diagram (death on x, birth on y; the shared
+# 250 x 250 persistence size). No grid, no spines; peaks are mid-grey triangles,
+# filled above 2c (mid-grey) and filled black below it (absorbed); no hollow markers.
+[figures.bootstrap_global_stability]
+font_size = 10
+heading_font_size = 11
+subtitle_font_size = 9
+subtitle_wrap = 52
+title = "Nominal persistence diagram against the bootstrap confidence band"
+real_title = "Nominal landscape"
+flat_title = "Flat landscape"
+bottleneck_axis_title = "Bottleneck distance"
+count_axis_title = "Draws"
+birth_axis_title = "Birth (peak fitness, WT = 0)"
+death_axis_title = "Depth, saddle or root"
+legend_label_limit = 240
+real_color = "#595959"
+flat_color = "#bdbdbd"
+bar_opacity = 0.7
+bottleneck_bins = 40
+peak_color = "#737373"
+rule_color = "#111111"
+rule_dash = [4, 3]
+rule_width = 1.0
+band_color = "#9e9e9e"
+band_opacity = 0.25
+diagonal_color = "#111111"
+diagonal_width = 1.0
+point_stroke_width = 1.2
+point_opacity = 1.0
+axis_padding_fraction = 0.04
+histogram_width = 250
+histogram_height = 100
+panel_gap = 40
+
+# The panel size (the shared 420 x 250 tree size) and every font size (axis, tick
+# and note text 15, heading 18, subtitle 14) are those of
+# linked_tree_persistence: this table sets neither, so [rendering] applies.
+# The subtitle is a list of phrases; each wraps on its own, to `subtitle_wrap`
+# characters, so it fits the panel and its axis.
+[figures.bootstrap_band_quantile_scan]
+title = "Nominal peaks surviving a persistence threshold"
+dataset_label = "Papkou 2023 Candidate landscape"
+x_axis_title = "Persistence threshold (fitness units)"
+y_axis_title = "Peaks with persistence > threshold"
+top_axis_title = "Band quantile at its bootstrapped threshold"
+# Marker and subtitle templates fill the manuscript quantity registry's display text
+# as is: {draws}, {seed}, {threshold}, {band_quantile}, {count} (surviving peaks),
+# {total} (nominal peaks), {threshold_min}, {threshold_max}.
+marker_label_template = "{band_quantile} quantile: {threshold}, {count} peaks"
+subtitle_wrap = 72
+subtitle_templates = [
+    "{dataset}; {draws} bootstrap draws, seed {seed}",
+    "Bootstrapped persistence threshold {threshold} at band quantile {band_quantile}, where {count} of {total} nominal peaks survive",
+    "The threshold is twice the radius, the band quantile of the bootstrap bottleneck distance",
+    "shaded: the smallest threshold the bootstrap can produce ({threshold_min}, band quantile 0) to the largest ({threshold_max}, band quantile 1)",
+    "A peak survives when its persistence is strictly above the threshold.",
+]
+top_axis_quantiles = [0.0, 0.05, 0.95, 0.99]
+line_color = "#111111"
+line_width = 1.4
+rule_color = "#111111"
+rule_dash = [4, 3]
+rule_width = 1.0
+tau_axis_max = 1.5
+shade_color = "#9e9e9e"
+shade_opacity = 0.25
+# Ticks on the shading's top edge (pixels); the axis title and labels above them
+# are part of the chart, so title_offset is only the gap to the subtitle.
+top_tick_length = 5
+top_tick_width = 1
+title_offset = 10
+
+# Supplementary S13: the same survival chart in each cell. One row of two BY q = 0.05 panels:
+# the Published graph (left) and the Candidate graph (right). Panel size and fonts fall
+# through to [rendering] unless set here.
+# Square panels (panel_size, as peak_uncertainty), the x scale shared at
+# [0, tau_axis_max] with one x title and no gridlines, one y title, y scales per panel.
+[figures.bootstrap_band_quantile_scan_grid]
+panel_size = 300
+grid = false
+tau_axis_max = 1.5
+title = "Nominal peaks surviving a persistence threshold"
+marker_label_template = "{band_quantile} quantile: {threshold}, {count} peaks"
+
+# Band-quantile scan of the live (10,000-draw) run: the one scan of the processed
+# reflected_by state. No other run is read or drawn.
+[figures.bootstrap_band_quantile_scan_seeds]
+# Panel size and font sizes are those of linked_tree_persistence ([rendering]).
+title = "Band-quantile scan of the bootstrap run"
+dataset_label = "Papkou 2023 Candidate landscape"
+x_axis_title = "Band quantile"
+y_axis_title = "Peaks with persistence > threshold"
+# The run's legend and marker templates fill the manuscript quantity registry's
+# display text as is ({draws}, {seed}, {threshold}, {count}).
+run_label_template = "current run, {draws} draws, seed {seed}"
+# The dashed rule is at the band quantile, so the label gives the threshold and the
+# count only.
+marker_label_template = "{threshold}, {count} peaks"
+subtitle_wrap = 72
+subtitle_templates = [
+    "{dataset}; peaks surviving the bootstrapped persistence threshold against the band quantile (the threshold is twice the radius, the band quantile of the bootstrap bottleneck distance)",
+    "One step line; shaded: the band-quantile interval over which the run's count at band quantile {band_quantile} holds.",
+    "Marker label: bootstrapped persistence threshold, surviving peaks. A peak survives when its persistence is strictly above the threshold.",
+]
+# One run, so no legend (the marker label names its threshold and peak count).
+show_legend = false
+live_color = "#111111"
+line_width = 1.4
+rule_dash = [4, 3]
+rule_width = 1.0
+q_axis_min = 0.90
+q_axis_max = 1.00
+y_padding = 2
+legend_label_limit = 260
+# The run label breaks into two lines at legend_label_split, which keeps the legend narrower than the strip left of the shaded bands;
+# legend_box_fraction is that legend's (width, height) as a fraction of the plot,
+# the box a corner must leave free of ink.
+legend_label_split = ", "
+legend_row_padding = 6
+legend_box_fraction = [0.36, 0.34]
+# The run legend sits inside the plot area, in the emptier of these corners (the
+# first on a tie), judged against the step lines and the marker labels;
+# label_char_width is a marker label's width in font sizes per character.
+legend_corners = ["top-right", "bottom-left"]
+label_char_width = 0.55
+# [align, dx, dy, baseline] of the point label.
+label_placement = ["left", 7, -9, "bottom"]
+# White rectangle behind each marker label (the label_segment estimate, plus
+# marker_label_backing_pad pixels) so a step line cannot cross the glyphs.
+marker_label_backing = "white"
+marker_label_backing_pad = 3
+shade_opacity = 0.25
+title_offset = 16
+
+[figures.bootstrap_four_graphs]
+# Opt-in composite of four separately verified bootstrap band-tree products.
+# Fixed pixel width of every tree's fitness-axis tick-label area, so the four plot
+# areas start at the same x whatever each panel's own tick labels measure.
+tree_y_axis_extent = 60
+
+[figures.peak_uncertainty]
+notebook = "notebooks/papkou2023_peak_uncertainty.py"
+panel_size = 300
+panel_gap = 30
+# Shared axes for all four panels. Fitness matches the file-level fitness_domain.
+fitness_domain = [-1.2, 1.4]
+standard_error_domain = [-0.006, 0.126]
+# Arial when it is installed, then Liberation Sans (metric-compatible, so a machine without
+# Arial draws the same widths), then Helvetica, then the generic sans-serif face. A bare
+# "Arial" drops every glyph in the PNG when that face is absent.
+font_family = "Arial, Liberation Sans, Helvetica, sans-serif"
+font_size = 15
+axis_padding_fraction = 0.05
+fitness_tick_step = 0.1
+standard_error_tick_step = 0.04
+fitness_padding_fraction = 0.05
+standard_error_title = "Pooled fitness SE"
+fitness_axis_title = "Fitness (WT = 0)"
+sequence_point_size = 12
+sequence_color = "#bdbdbd"
+sequence_opacity = 0.65
+peak_point_size = 112
+peak_color = "#111111"
+peak_opacity = 1.0
+# One legend, inside the top-right panel (Candidate graph, no FDR), upper right.
+# Peak above Not peak above Wild type. Each glyph repeats its plotted mark.
+# Right-aligned legend_padding pixels from the panel's top and right edges. Its font
+# size is the panel title's (heading_font_size). Label widths are label length times
+# that size times legend_char_width.
+title_offset = 10
+legend_padding = 8
+legend_char_width = 0.6
+legend_marker_gap = 10
+legend_row_gap = 2
+# The functional threshold: a dashed, unlabelled rule styled by `threshold_*`
+# (repo-wide: threshold = dashed; the value is in the panel subtitle).
+threshold_color = "#555555"
+threshold_dash = [5, 4]
+threshold_width = 1.2
+axis_label_padding = 4
+axis_title_padding = 8
+grid = false
+row_gap = 18
+# Row titles of the 2×2: Published graph above Candidate graph. Columns are Nominal
+# and BY q = 0.05, taken from each panel's saved diagnostics (not from this list).
+row_labels = ["Published graph", "Candidate graph"]
+
+[figures.bootstrap_codon_entropy]
+# Band-smoothed tree from the bootstrap checkpoint (ADR 0008, step 2); no notebook.
+# Row 1: the simplified Candidate tree. Row 2: the KEM, TCL and all-codon sweeps side by
+# side, sharing position and fitness axes and one colour bar. Both rows are
+# figure_width (plot area, px), kept equal to [figures.tree_comparison.tree] width: the
+# figure is as wide as the tree figure.
+layout = [["candidate_tree"], ["kem_entropy", "tcl_entropy", "core_entropy"]]
+figure_width = 520
+tree_width = 520
+tree_height = 250
+sweep_height = 250
+# The KEM and TCL branches (and their sweep panels) take hues used by nothing else in
+# the palette (figures/palette.py). Each branch runs from its peak down to the shared
+# saddle; peaks carry a genotype label and no marker, the saddle a filled diamond.
+kem_color = "#56b4e9"
+tcl_color = "#e7298a"
+highlight_edge_width = 3.0
+sweep_tie_width = 4
+saddle_marker_size = 90
+peak_label_offset = 9
+# The saddle genotype stands saddle_label_offset px left of the diamond and
+# saddle_label_dy px below it.
+saddle_label_offset = 10
+saddle_label_dy = 8
+label_font_size = 13
+# The one vertical entropy bar to the right of the three sweeps: box width (title and
+# end labels) and gradient width, in px.
+entropy_legend_width = 56
+entropy_legend_bar_width = 12
+# The vertical bar is this fraction of the heat-map height, top-aligned under its title.
+entropy_legend_bar_fraction = 0.5
+candidate_title = "Band-smoothed candidate graph"
+fitness_tick_format = ".1f"
+tree_edge_width = 1.2
+ridge_context_padding_fraction = 0.08
+entropy_scheme = "viridis"
+# One vertical colour bar right of the sweeps, drawn in pixels (legend_length and
+# orient are kept for the encoding-legend fallback).
+entropy_legend_length = 120
+entropy_legend_orient = "right"
+entropy_title = ["Entropy", "(bits)"]
+# Equal y-axis width on every tree panel, so the entropy column lines up down the rows.
+tree_y_axis_extent = 60
+position_axis_title = "Amino-acid position"
+panel_gap = 8
+row_gap = 8
+font_size = 15
+ridge_labels = ["KEM ridge", "TCL ridge"]
+
+# Branches are coloured by branch vertex count (the top tree carries the colour bar;
+# the ridge excerpts use its colours on its scale). In an excerpt the focused ridge is
+# drawn at full opacity and every other branch at this opacity, colour unchanged; the
+# entropy heat map and its colour bar stay fully opaque.
+dimmed_branch_opacity = 0.25
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+entropy_outside_color = "#f5f5f5"
+
+[figures.published_leaf_persistence]
+# Persistence diagram of the unsimplified split tree of the Published graph, one marker per
+# leaf (no notebook). x is the paired death fitness, y the birth fitness. Marker area
+# is proportional to the hill's sequence count: max_marker_area (pixels squared) for
+# the largest hill, scaled linearly, with min_marker_area as a legibility floor applied
+# only where the proportional area falls below it. A singleton hill is filled like the others
+# (no hollow markers); the global maximum's pair is outlined and labelled.
+panel_size = 420
+max_marker_area = 400
+min_marker_area = 12
+open_marker_stroke_width = 1.6
+global_pair_stroke_width = 2.0
+global_pair_label = "Global maximum pair"
+global_pair_label_dx = 12
+diagonal_width = 1.0
+grid = false
+title_offset = 10
+# Legend in the empty lower-right corner (below the diagonal), one entry per row, the
+# area rule last; label widths are label length times the font size times legend_char_width.
+legend_padding = 8
+legend_row_gap = 4
+legend_marker_gap = 12
+legend_marker_area = 80
+legend_char_width = 0.6
+area_legend_label = "Area proportional to hill sequences"
+
+[figures.candidate_leaf_persistence]
+# Persistence diagram of the unsimplified split tree of the Candidate graph, one marker per
+# leaf (no notebook). x is the paired death fitness, y the birth fitness. Marker area
+# is proportional to the hill's sequence count: max_marker_area (pixels squared) for
+# the largest hill, scaled linearly, with min_marker_area as a legibility floor applied
+# only where the proportional area falls below it. A singleton hill is filled like the others
+# (no hollow markers); the global maximum's pair is outlined and labelled.
+panel_size = 420
+max_marker_area = 400
+min_marker_area = 12
+open_marker_stroke_width = 1.6
+global_pair_stroke_width = 2.0
+global_pair_label = "Global maximum pair"
+global_pair_label_dx = 12
+diagonal_width = 1.0
+grid = false
+title_offset = 10
+# Legend in the empty lower-right corner (below the diagonal), one entry per row, the
+# area rule last; label widths are label length times the font size times legend_char_width.
+legend_padding = 8
+legend_row_gap = 4
+legend_marker_gap = 12
+legend_marker_area = 80
+legend_char_width = 0.6
+area_legend_label = "Area proportional to hill sequences"
+
+[figures.published_leaf_swarm]
+# Leaves of the Published graph in the order they appear on the tree drawing, left to right (birth fitness, then the peak
+# sequence, breaks ties), one beeswarm column of member sequences each (no notebook). Layout: the
+# ordered leaves wrap into stacked rows of leaves_per_row columns sharing the y scale,
+# each row row_width x row_height pixels, so a column is row_width / leaves_per_row
+# pixels wide. A column's swarm reaches at most swarm_half_width_fraction of the column
+# width to each side of its centre (the dot's own radius comes on top, so keep
+# swarm_half_width_fraction + member_dot_diameter / (2 * column width) at or below
+# 0.5). Dots sit on slots half a dot apart, nearest the centre first; a hill with more
+# sequences than fit within the cap stacks its excess where it is least crowded, so the
+# overlap is the density (semi-transparent dots), and the subtitle counts the
+# overlapping dots. The triangle is the leaf's birth (peak) fitness, in its
+# annotation colour; the black diamond its adjacent saddle's. No lines are drawn.
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+# Marker areas (square pixels) of the birth triangle and the saddle diamond.
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+# Key in the last row's upper right (the lowest-ranked leaves, clear of the top ranks): glyph column legend_width pixels from the right edge.
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+[figures.candidate_leaf_swarm]
+# Leaves of the Candidate graph in the order they appear on the tree drawing, left to right (birth fitness, then the peak
+# sequence, breaks ties), one beeswarm column of member sequences each (no notebook). Layout: the
+# ordered leaves wrap into stacked rows of leaves_per_row columns sharing the y scale,
+# each row row_width x row_height pixels, so a column is row_width / leaves_per_row
+# pixels wide. A column's swarm reaches at most swarm_half_width_fraction of the column
+# width to each side of its centre (the dot's own radius comes on top, so keep
+# swarm_half_width_fraction + member_dot_diameter / (2 * column width) at or below
+# 0.5). Dots sit on slots half a dot apart, nearest the centre first; a hill with more
+# sequences than fit within the cap stacks its excess where it is least crowded, so the
+# overlap is the density (semi-transparent dots), and the subtitle counts the
+# overlapping dots. The triangle is the leaf's birth (peak) fitness, in its
+# annotation colour; the black diamond its adjacent saddle's. No lines are drawn.
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+# Marker areas (square pixels) of the birth triangle and the saddle diamond.
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+# Key in the last row's upper right (the lowest-ranked leaves, clear of the top ranks): glyph column legend_width pixels from the right edge.
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+# Opt-in: the four leaf figures on the BY band-simplified trees (the D10 saved trees; same
+# appearance keys as the nominal leaf figures, whose tables they mirror).
+[figures.published_leaf_persistence_band]
+# Persistence diagram of the BY (q = 0.05, bootstrap band quantile 0.95) band-simplified tree of the Published graph, one marker per
+# leaf (no notebook). x is the paired death fitness, y the birth fitness. Marker area
+# is proportional to the hill's sequence count: max_marker_area (pixels squared) for
+# the largest hill, scaled linearly, with min_marker_area as a legibility floor applied
+# only where the proportional area falls below it. A singleton hill is filled like the others
+# (no hollow markers); the global maximum's pair is outlined and labelled.
+panel_size = 420
+max_marker_area = 400
+min_marker_area = 12
+global_pair_stroke_width = 2.0
+global_pair_label = "Global maximum pair"
+global_pair_label_dx = 12
+diagonal_width = 1.0
+grid = false
+title_offset = 10
+# Legend in the empty lower-right corner (below the diagonal), one entry per row, the
+# area rule last; label widths are label length times the font size times legend_char_width.
+legend_padding = 8
+legend_row_gap = 4
+legend_marker_gap = 12
+legend_marker_area = 80
+legend_char_width = 0.6
+area_legend_label = "Area proportional to hill sequences"
+
+[figures.candidate_leaf_persistence_band]
+# Persistence diagram of the BY (q = 0.05, bootstrap band quantile 0.95) band-simplified tree of the Candidate graph, one marker per
+# leaf (no notebook). x is the paired death fitness, y the birth fitness. Marker area
+# is proportional to the hill's sequence count: max_marker_area (pixels squared) for
+# the largest hill, scaled linearly, with min_marker_area as a legibility floor applied
+# only where the proportional area falls below it. A singleton hill is filled like the others
+# (no hollow markers); the global maximum's pair is outlined and labelled.
+panel_size = 420
+max_marker_area = 400
+min_marker_area = 12
+global_pair_stroke_width = 2.0
+global_pair_label = "Global maximum pair"
+global_pair_label_dx = 12
+diagonal_width = 1.0
+grid = false
+title_offset = 10
+# Legend in the empty lower-right corner (below the diagonal), one entry per row, the
+# area rule last; label widths are label length times the font size times legend_char_width.
+legend_padding = 8
+legend_row_gap = 4
+legend_marker_gap = 12
+legend_marker_area = 80
+legend_char_width = 0.6
+area_legend_label = "Area proportional to hill sequences"
+
+[figures.published_leaf_swarm_band]
+# Leaves of the BY band-simplified tree of the Published graph in the order they appear on the tree drawing, left to right (birth fitness, then the peak
+# sequence, breaks ties), one beeswarm column of member sequences each (no notebook). Layout: the
+# ordered leaves wrap into stacked rows of leaves_per_row columns sharing the y scale,
+# each row row_width x row_height pixels, so a column is row_width / leaves_per_row
+# pixels wide. A column's swarm reaches at most swarm_half_width_fraction of the column
+# width to each side of its centre (the dot's own radius comes on top, so keep
+# swarm_half_width_fraction + member_dot_diameter / (2 * column width) at or below
+# 0.5). Dots sit on slots half a dot apart, nearest the centre first; a hill with more
+# sequences than fit within the cap stacks its excess where it is least crowded, so the
+# overlap is the density (semi-transparent dots), and the subtitle counts the
+# overlapping dots. The triangle is the leaf's birth (peak) fitness, in its
+# annotation colour; the black diamond its adjacent saddle's. No lines are drawn.
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+# Marker areas (square pixels) of the birth triangle and the saddle diamond.
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+# Key in the last row's upper right (the lowest-ranked leaves, clear of the top ranks): glyph column legend_width pixels from the right edge.
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+# Opt-in: the Benjamini-Yekutieli panel as its own figure (the
+# Published and Candidate nominal panels are published_leaf_swarm and candidate_leaf_swarm).
+# Same layout keys as those two; the data are the saved variant's comparison checkpoint.
+# A member dot, and the adjacent saddle's diamond, take the trees' green
+# (rendering.synonymous_color) when the sequence has the leaf's peak amino-acid genotype.
+
+[figures.candidate_leaf_swarm_band]
+# Leaves of the BY band-simplified tree of the Candidate graph in the order they appear on the tree drawing, left to right (birth fitness, then the peak
+# sequence, breaks ties), one beeswarm column of member sequences each (no notebook). Layout: the
+# ordered leaves wrap into stacked rows of leaves_per_row columns sharing the y scale,
+# each row row_width x row_height pixels, so a column is row_width / leaves_per_row
+# pixels wide. A column's swarm reaches at most swarm_half_width_fraction of the column
+# width to each side of its centre (the dot's own radius comes on top, so keep
+# swarm_half_width_fraction + member_dot_diameter / (2 * column width) at or below
+# 0.5). Dots sit on slots half a dot apart, nearest the centre first; a hill with more
+# sequences than fit within the cap stacks its excess where it is least crowded, so the
+# overlap is the density (semi-transparent dots), and the subtitle counts the
+# overlapping dots. The triangle is the leaf's birth (peak) fitness, in its
+# annotation colour; the black diamond its adjacent saddle's. No lines are drawn.
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+# Marker areas (square pixels) of the birth triangle and the saddle diamond.
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+# Key in the last row's upper right (the lowest-ranked leaves, clear of the top ranks): glyph column legend_width pixels from the right edge.
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+# Opt-in: the Benjamini-Yekutieli panel as its own figure (the
+# Published and Candidate nominal panels are published_leaf_swarm and candidate_leaf_swarm).
+# Same layout keys as those two; the data are the saved variant's comparison checkpoint.
+# A member dot, and the adjacent saddle's diamond, take the trees' green
+# (rendering.synonymous_color) when the sequence has the leaf's peak amino-acid genotype.
+
+# Opt-in: the Benjamini-Yekutieli panel as its own figure (the
+# Published and Candidate nominal panels are published_leaf_swarm and candidate_leaf_swarm).
+# Same layout keys as those two; the data are the saved variant's comparison checkpoint.
+# A member dot, and the adjacent saddle's diamond, take the trees' green
+# (rendering.synonymous_color) when the sequence has the leaf's peak amino-acid genotype.
+[figures.published_fdr_leaf_swarm]
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+[figures.candidate_fdr_leaf_swarm]
+leaves_per_row = 60
+row_width = 960
+row_height = 130
+row_gap = 14
+rank_tick_step = 10
+member_dot_diameter = 3
+member_opacity = 0.5
+swarm_half_width_fraction = 0.4
+birth_marker_size = 40
+saddle_marker_size = 30
+rank_axis_title = "Leaf order on tree"
+fitness_axis_title = "Fitness (WT = 0)"
+grid = false
+title_offset = 10
+legend_padding = 8
+legend_row_gap = 4
+legend_width = 230
+
+# Opt-in: branch vertex counts of the four graphs as overlaid bars (bar_opacity, the order
+# with the fewest branches in front) by Horton-Strahler order (colours:
+# rendering.horton_strahler_colors), the legend inside the top-right panel, on top of the bars.
+[figures.branch_vertex_counts_2x2]
+title = "Branch vertex counts, four graphs"
+panel_width = 360
+panel_height = 230
+panel_gap = 30
+row_gap = 30
+vertex_count_bins = 100
+bar_opacity = 0.7
+bar_seam_width = 0.5
+heading_font_size = 16
+subtitle_font_size = 13
+grid_heading_font_size = 18
+legend_offset = 6
+legend_padding = 4
+
+[figures.graph_tree_persistence]
+# Pixel inset of the peak/valley/saddle key from the graph panel's top right corner.
+legend_inset = 8
+panel_width = 220
+panel_height = 190
+tree_horizontal_span_fraction = 0.65
+camera_elevation_degrees = 29
+camera_azimuth_degrees = -57
+vertical_box_aspect = 0.58
+presentation_surface_resolution = 45
+projection_padding_pixels = 14
+right_peak_color = "#6F7F8F"
+left_peak_color = "#8B6F8E"
+shared_region_color = "#AA9470"
+surface_color = "#E2E2E2"
+graph_surface_color = "#F4F4F4"
+inactive_color = "#B8B8B8"
+edge_color = "#A3A3A3"
+sweep_plane_color = "#777777"
+sweep_plane_opacity = 0.16
+surface_opacity = 1.0
+graph_surface_opacity = 0.6
+inactive_sample_opacity = 0.68
+active_sample_opacity = 1.0
+manifold_regular_node_size = 32
+manifold_critical_node_size = 116
+graph_regular_node_size = 46
+graph_critical_node_size = 116
+tree_regular_node_size = 70
+tree_critical_node_size = 130
+# The sweep threshold is a dashed rule on the Tree and Persistence rows.
+tree_threshold_color = "#777777"
+tree_threshold_opacity = 0.7
+tree_threshold_width = 1.2
+tree_threshold_dash = [4, 3]
+# Every marker is outlined in a darker shade of its own fill colour: the fill's
+# HLS lightness is multiplied by marker_outline_shade (smaller is darker).
+marker_outline_shade = 0.6
+marker_outline_width = 0.8
+inactive_edge_opacity = 0.28
+active_edge_opacity = 0.92
+inactive_edge_width = 0.75
+active_edge_width = 1.8
+tree_active_edge_width = 2.2
+row_titles = ["Graph", "Tree", "Persistence"]
+# Axes carry a title only: no ticks, no tick numbers. The Graph and Tree rows
+# title the fitness axis (the plotted scalar is normalised fitness); the
+# Persistence row titles birth and death in those same fitness units.
+height_axis_title = "Fitness"
+persistence_x_title = "Fitness at death"
+persistence_y_title = "Fitness at birth"
+# Stage captions; the figure numbers them "1. ", "2. " and so on.
+stage_titles = [
+  "First peak appears",
+  "Second peak appears",
+  "Peaks merge",
+  "Scan complete",
+]
+row_label_width = 24
+heading_height = 25
+persistence_dead_color = "#595959"
+persistence_marker_size = 90
+persistence_diagonal_width = 0.8
+row_gap = 16
+# Font sizes (pt): stage headings and row titles 20; every axis title and tick label
+# 16. The axes are title-only (no tick labels are drawn), so tick_label_font_size
+# only fixes the size should a tick label be switched on.
+heading_font_size = 20
+row_title_font_size = 20
+axis_title_font_size = 16
+tick_label_font_size = 16
+fitness_axis_color = "#222222"
+fitness_axis_title_offset = 14
+
+[figures.candidate_edge_evidence]
+notebook = "notebooks/papkou2023_candidate_edge_evidence.py"
+panel_size = 320
+font_size = 13
+q_bins = 50
+effect_bins = 60
+fitness_bins = 60
+
+# Appearance of the exploratory branch-decomposition notebook
+# (notebooks/papkou2023_branch_decomposition.py). It is not a registered figure, so its
+# table sits outside [figures], and `build` leaves the `exploratory` key out of
+# every figure's dependency record: editing it never re-renders a publication
+# figure. Only the notebook and figures/branch_decomposition_charts.py read it.
+# Sizes are layout pixels. The fitness and vertex-count axis titles are
+# [rendering] tree_axis_title and branch_count_title.
+[exploratory.branch_decomposition]
+# Each order gets one row of two panels of this size: fitness of its sequences
+# beside the vertex counts of its branches (tree edges).
+panel_width = 300
+panel_height = 180
+# Fitness bins are equal in width over the shared `fitness_domain`; vertex-count
+# bins are equal in log10 from 1 to the largest branch.
+fitness_bins = 40
+vertex_count_bins = 20
+histogram_color = "#bdbdbd"
+# Width of a stroke in the fill colour around every bar, in layout pixels: it hides
+# the pale seams antialiasing leaves between bars of one height (0 for none).
+bar_seam_width = 0.5
+# Count axis of the fitness histograms (per order and per branch): true draws it on a
+# symmetric-log scale, ln(1 + count / log_count_constant), with ticks at 0 and the
+# powers of ten, so a handful of functional sequences stays visible beside thousands
+# of low-fitness ones, an empty bin sits on the baseline and a count of 1 is not
+# flattened; false is linear. A constant below 1 lifts the count of 1 clear of the
+# baseline (at 1 the labels 0 and 1 collide on a panel of thousands).
+log_count_axis = true
+log_count_constant = 0.1
+sequence_axis_title = "Sequences"
+branch_axis_title = "Branches"
+# Per-branch facets: one small fitness histogram per branch, `facet_columns` to a
+# row, off until asked for (the notebook's checkbox starts at this value). Every
+# font in the facets is facet_font_size, sized for the small panels.
+show_branch_facets = false
+facet_columns = 4
+facet_panel_width = 150
+facet_panel_height = 90
+facet_font_size = 9
+# Where the notebook's "Save PNGs" button writes, relative to the repository root.
+# output/ is gitignored, so these are never committed.
+png_directory = "output/exploratory/branch_decomposition"
+
+# Exploration only: scripts/layout_exploration.py draws one comparison PNG per
+# horizontal tree layout into output/figures/layout_exploration/. It is not a
+# publication figure and has no registry entry. The path-to-the-root highlight is
+# the path from the root to the summit of the branch that holds the wild type; its
+# blue is a diagnostic colour of this script only (red stays wild type, ADR 0012).
+[layout_exploration]
+panel_width_in = 3.7
+panel_height_in = 5.6
+dpi = 200
+font_size = 8
+edge_color = "#8c8c8c"
+edge_width = 0.45
+path_to_root_color = "#1f4e9c"
+path_to_root_width = 1.3
+wild_type_size = 150
+summit_size = 55
+
+# Seven-column landscape summary table (the presentation specification 5.A, FT-REQ-03).
+# `labels` names the state (data/processed/landscape_summary/<state>) of each of the seven columns; the products are
+# the table's only scientific input, so `percent_decimals` is the one appearance key.
+# A band column shows tree-level rows only. The BY classification behind the BY columns is
+# data/processed/classification/<variant>, checked against MANIFEST.tsv.
+[tables.landscape_summary]
+percent_decimals = 2
+
+[tables.landscape_summary.labels]
+"Full (nominal)" = "full"
+"Published (point-estimate nominal)" = "published"
+"Median-reflected (point-estimate nominal)" = "reflected"
+"Published BY (nominal)" = "published_by"
+"Published BY (band-simplified)" = "published_by_band"
+"Median-reflected BY (nominal)" = "reflected_by"
+"Median-reflected BY (band-simplified)" = "reflected_by_band"
+
+# Story views (Decision 10, the presentation specification): which processed states they draw. Each name is
+# a directory of data/processed (tree/<state>, landscape/<state>); a view reads each as a saved product and
+# rebuilds nothing. tree_persistence draws every nominal tree, bootstrap_band every band tree,
+# tree_comparison_views the [comparisons.*] below from both lists. Ridge sweeps are every
+# data/processed/ridge_entropy_sweeps/<state> that exists.
+[story_views]
+nominal_trees = ["full", "published", "reflected", "published_by", "reflected_by"]
+band_trees = ["published_by_band", "reflected_by_band"]
+
+# Supplementary S7 reads the Full and Published landscapes' vertices.
+[story_views.graph_codon_entropy]
+full = "full"
+published = "published"
+
+# Registry tables of the story-view figure ids (no settings of their own; appearance is [d10.*]).
+[figures.tree_persistence]
+registered = true
+
+[figures.bootstrap_band]
+registered = true
+
+[figures.tree_comparison_views]
+registered = true
+
+# D10 views (opt-in build, the presentation specification Section 6): appearance only, merged over [rendering].
+[d10.tree_persistence]
+histogram_bins = 200
+histogram_height = 70
+histogram_color = "#bdbdbd"
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+panel_gap = 10
+annotation_legend_spacing = 190
+
+# The one-row tree_persistence_combined file names its histogram axis like full_tree_persistence.
+encoded_histogram_y_title = "Count"
+
+[d10.tree_persistence.tree]
+
+[d10.tree_persistence.persistence]
+point_size = 70
+
+# D10 comparison views (shared by tree_comparison_thresholds, _fdr and _band): appearance only, merged over [rendering].
+[d10.tree_comparison]
+# The peak genotype labels (amino acids and DNA written at each surviving peak) are not drawn.
+peak_identity_labels = false
+colorbar_x_fraction = 0.9
+# The one branch-count colour bar sits inside the top-right panel of the first row, in the free
+# space above its tree, centred colorbar_x_fraction of the way across that panel.
+# Every panel's fitness axis has this fixed width (px), so plot areas align across panels.
+tree_y_axis_extent = 60
+count_legend_ticks = [1, 100, 10000]
+panel_gap = 10
+comparison_panel_gap = 16
+legend_length = 110
+threshold_color = "#555555"
+threshold_width = 1.2
+threshold_dash = [5, 4]
+threshold_label_font_size = 14
+threshold_label_padding = 8
+
+peak_label_font_size = 8
+peak_label_offset = 6
+# Rotated identity labels whose strips would meet are raised until they clear
+# (place_identity_labels). Every peak keeps its name; a moved label gets a leader.
+peak_label_char_width_em = 1.0
+peak_label_line_height_em = 1.35
+peak_label_gap_px = 2
+# Headroom above the tallest peak so its rotated identity label is not clipped.
+fitness_padding_fraction = 0.2
+
+[d10.tree_comparison.tree]
+
+# D10 view bootstrap_band: appearance only, merged over [rendering]. Absorbed peaks are black, surviving grey.
+[d10.bootstrap_band]
+panel_gap = 10
+# Fixed fitness-axis width (px) so the Nominal and Band-simplified rows align.
+tree_y_axis_extent = 60
+row_gap = 16
+histogram_bins = 40
+histogram_height = 70
+histogram_color = "#bdbdbd"
+colorbar_x_fraction = 0.9
+count_legend_ticks = [1, 100, 10000]
+annotation_legend_spacing = 190
+absorbed_color = "#111111"
+band_label = "bootstrap band (2c)"
+
+[d10.bootstrap_band.tree]
+
+[d10.bootstrap_band.persistence]
+point_size = 70
+
+# Opt-in registered peak-rank figures (Reference peak set, no titles, no synonymous annotation): appearance only,
+# merged over [rendering]. The fitness axis uses the shared fitness_domain and the tree panel's height, so it lines up
+# with the tree figures; stop-codon peaks reuse the stop_codon_* marker keys.
+[figures.peak_rank]
+peak_size = 24
+rank_tick_step = 100
+
+[figures.peak_rank_annotated]
+peak_size = 24
+rank_tick_step = 100
+
+[figures.peak_rank_histogram]
+peak_size = 24
+rank_tick_step = 100
+histogram_bins = 200
+histogram_width = 140
+histogram_color = "#bdbdbd"
+
+# Opt-in functional_counts_vs_q (Supplementary S2): appearance only, merged over [rendering].
+# Counts come from the saved FDR scan; these keys do not change them.
+# Opt-in papkou_agreement (Supplementary S1): appearance only.
+# hexbin_min is the genotype count at which a panel switches from scatter to bins.
+[figures.papkou_agreement]
+panel_width = 360
+panel_height = 360
+panel_gap = 36
+point_size = 36
+point_color = "#252525"
+hexbin_min = 2500
+# Hexagons across the panel: a fine bin (70 across a 360 px panel).
+hexbin_bins = 70
+title = "Agreement with Papkou et al. 2023"
+
+# Opt-in: fitness against its pooled standard error per genotype, a fine hexbin
+# with the Spearman rho on the panel.
+# Panel size, fonts and axis styling are those of [figures.peak_uncertainty]
+# (read at render time); keys set here override them. Sparsest bins: small filled
+# light-grey dots (palette LIGHT_GREY unless point_color is set).
+[figures.fitness_se_correlation]
+point_size = 12
+colorbar_orient = "top-right"
+hexbin_min = 2500
+hexbin_bins = 70
+title = "Fitness against standard error"
+
+# Opt-in: Papkou published (left) beside our estimate (right) in the style of
+# peak_uncertainty; the wild type is the red star (rendering.wild_type_*) on ours only.
+# Axis ranges default to those of peak_uncertainty (set fitness_domain and
+# standard_error_domain here to override).
+[figures.fitness_vs_pooled_se]
+panel_size = 300
+panel_gap = 30
+font_size = 15
+fitness_tick_step = 0.1
+standard_error_title = "Pooled fitness SE"
+fitness_axis_title = "Fitness (WT = 0)"
+sequence_point_size = 12
+sequence_color = "#bdbdbd"
+sequence_opacity = 0.65
+heading_font_size = 18
+subtitle_font_size = 14
+title_offset = 10
+axis_label_padding = 4
+axis_title_padding = 8
+grid = false
+
+# Opt-in peak_pair_matrices: appearance only. The values come from the
+# peak-pair-distances stage. label_mode picks the tick text: "amino_acid" (default),
+# "dna" or "both"; stop codons print as %, ^, & and colliding labels stay as they are.
+# Schemes are Vega colour schemes; Hamming panels are discrete (one colour per integer),
+# fitness panels continuous from 0 to the maximum. The diagonal of the third panel is
+# neutral grey.
+[figures.peak_pair_matrices]
+label_mode = "amino_acid"
+cell_size = 14
+tick_label_font_size = 9
+panel_gap = 40
+hamming_scheme = "viridis"
+fitness_scheme = "magma"
+hamming_difference_scheme = "oranges"
+fitness_difference_scheme = "teals"
+diagonal_color = "#bdbdbd"
+legend_columns = 7
+colorbar_length = 160
+title = "Peak-pair distances"
+subtitle = "Peaks in tree leaf order; nucleotide distances; raw fitness"
+
+# Opt-in peak_pair_hamming_fitness_scatter: appearance only. jitter is the half-width on
+# the integer Hamming axis (display only, drawn from jitter_seed). Row 1 is nucleotide,
+# row 2 amino-acid Hamming distance; all markers are filled. row_gap is the vertical gap.
+[figures.peak_pair_hamming_fitness_scatter]
+panel_width = 300
+panel_height = 300
+panel_gap = 40
+point_size = 36
+point_opacity = 0.8
+point_color = "#252525"
+row_gap = 40
+jitter = 0.15
+jitter_seed = 20261121
+title = "Hamming distance against fitness distance"
+subtitle = "One point per peak pair; raw fitness"
+
+# Opt-in peak_pair_direct_via_saddle_scatter: appearance only. Square panels
+# (panel_size px); Hamming markers are a fixed size (marker_size, px^2), coloured by pair
+# count on a log grey scale (count_grey_low = 1 pair to count_grey_high = most); a thin
+# grey outline keeps light cells visible on white; fitness points are filled circles
+# at fitness_opacity; dash is the diagonal's dash pattern.
+[figures.peak_pair_direct_via_saddle_scatter]
+panel_size = 300
+panel_gap = 40
+marker_size = 90
+count_grey_low = "#d9d9d9"
+count_grey_high = "#1a1a1a"
+circle_stroke = "#737373"
+circle_stroke_width = 0.5
+point_size = 40
+fitness_opacity = 0.5
+point_color = "#252525"
+diagonal_color = "#737373"
+dash = [6, 4]
+title = "Direct against via-saddle distance"
+subtitle = "Dashed line: via saddle equals direct; raw fitness"
+
+[figures.functional_counts_vs_q]
+panel_width = 420
+panel_height = 280
+panel_gap = 24
+bar_size = 2
+stroke_width = 2
+functional_color = "#1b9e77"
+uncertain_color = "#d95f02"
+non_functional_color = "#7570b3"
+title = "Class proportions against the FDR target"
+subtitle = "Benjamini-Yekutieli, q from 0 to 1 in steps of 0.01"
+
+# Supplementary S8: the same stacked chart against the Benjamini-Hochberg q and,
+# separately, the Bonferroni q. y_max clips the proportion-of-all-genotypes axis.
+[figures.functional_counts_vs_q_bh]
+panel_width = 420
+panel_height = 280
+panel_gap = 24
+bar_size = 2
+y_max = 0.1
+functional_color = "#1b9e77"
+uncertain_color = "#d95f02"
+non_functional_color = "#7570b3"
+title = "Class proportions against the Benjamini-Hochberg q"
+subtitle = "q from 0 to 1 in steps of 0.01, proportion axis clipped at 0.1"
+
+[figures.functional_counts_vs_q_bonferroni]
+panel_width = 420
+panel_height = 280
+panel_gap = 24
+bar_size = 2
+y_max = 0.1
+functional_color = "#1b9e77"
+uncertain_color = "#d95f02"
+non_functional_color = "#7570b3"
+title = "Class proportions against the Bonferroni q"
+subtitle = "q from 0 to 1 in steps of 0.01, proportion axis clipped at 0.1"
+
+# Opt-in: Functional calls at nominal q = 0.05 under Bonferroni, BH and BY,
+# for the Published and Candidate thresholds. Counts come from the reviewed
+# BY classification snapshot (BH and Bonferroni from its gated p-values).
+[figures.multiple_testing_comparison]
+width = 420
+height = 250
+published_color = "#000000"
+candidate_color = "#737373"
+
+# Historical ridge-entropy view. Supplementary S7 is graph_codon_entropy.
+[figures.ridge_entropy]
+registered = true
+
+# Registry table for figure id graph_codon_entropy (Supplementary S7). Drawing reads [d10.graph_codon_entropy].
+[figures.graph_codon_entropy]
+registered = true
+
+# Supplementary S7: appearance only, merged over [rendering]. Cells outside a graph's fitness span use the palette's OUTSIDE_GREY.
+[d10.graph_codon_entropy]
+heatmap_width = 220
+heatmap_height = 320
+panel_gap = 12
+panel_title_font_size = 14
+legend_length = 110
+fitness_padding_fraction = 0.02
+entropy_scheme = "viridis"
+position_axis_title = "Amino-acid position"
+fitness_axis_title = "Raw fitness"
+fitness_tick_format = ".1f"
+entropy_title = ["Entropy", "(bits)"]
+
+# Historical ridge-entropy view (not Supplementary S7). Same appearance keys.
+[d10.ridge_entropy]
+heatmap_width = 220
+heatmap_height = 320
+panel_gap = 12
+panel_title_font_size = 14
+legend_length = 110
+fitness_padding_fraction = 0.02
+entropy_scheme = "viridis"
+position_axis_title = "Amino-acid position"
+fitness_axis_title = "Raw fitness"
+fitness_tick_format = ".1f"
+entropy_title = ["Entropy", "(bits)"]
+
+# Comparison declarations: [comparisons.<view>_<name>] (the presentation specification Section 3). `tree_state` is
+# nominal or band; `panels` is the ordered list of states, each the landscape keys of its tree label (a band
+# state adds `bandq`). A panel resolves to the one saved tree whose label carries exactly these keys; the
+# comparison hash covers this table and the panels' tree digests, never appearance.
+[comparisons.tree_comparison_thresholds_main]
+tree_state = "nominal"
+panels = [
+  { graph = "full" },
+  { thr = "published", fdr = "none" },
+  { thr = "reflected", fdr = "none" },
+]
+
+[comparisons.tree_comparison_fdr_main]
+tree_state = "nominal"
+panels = [
+  { thr = "published", fdr = "none" },
+  { thr = "published", fdr = "by", q = 0.05 },
+  { thr = "reflected", fdr = "none" },
+  { thr = "reflected", fdr = "by", q = 0.05 },
+]
+
+[comparisons.tree_comparison_band_main]
+tree_state = "band"
+panels = [
+  { thr = "published", fdr = "by", q = 0.05, bandq = 0.95 },
+  { thr = "reflected", fdr = "by", q = 0.05, bandq = 0.95 },
+]
+
+# Frameless slide renders (build/slide_trees.py, build/registry_slides.py). The Full graph has tens of
+# thousands of stop-codon sequences even among its peaks, so its annotated slides draw smaller crosses;
+# every other flavour keeps the shared stop_codon_* style.
+[slides]
+full_graph_stop_codon_tree_size = 4
+full_graph_stop_codon_stroke_width = 0.6

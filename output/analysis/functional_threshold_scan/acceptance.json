@@ -1,0 +1,146 @@
+{
+  "a": {
+    "frac_2stop_below": 0.9951426836672739,
+    "minimum": 0.99,
+    "passed": true
+  },
+  "b": {
+    "family": "gaussian",
+    "k": 5,
+    "limit": 0.13952271248895284,
+    "median_se_pooled": 0.03559252869616144,
+    "n_converged": 200,
+    "n_resamples": 200,
+    "passed": true,
+    "threshold_high": -0.48026195000000005,
+    "threshold_low": -0.5031258750000001,
+    "width": 0.022863925000000007
+  },
+  "c": {
+    "axes": {
+      "component_rule": {
+        "max_flip_fraction": 0.027158098933074686,
+        "neighbours": [
+          {
+            "component_rule": "lowest_mean",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "gaussian",
+            "flip_fraction": 0.027158098933074686,
+            "functional_flips": 448,
+            "k": 5,
+            "quantile": 0.999
+          }
+        ],
+        "passed": true,
+        "reason": null
+      },
+      "confidence": {
+        "max_flip_fraction": 0.021459747817652763,
+        "neighbours": [
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.99,
+            "converged": true,
+            "family": "gaussian",
+            "flip_fraction": 0.021459747817652763,
+            "functional_flips": 354,
+            "k": 5,
+            "quantile": 0.999
+          }
+        ],
+        "passed": true,
+        "reason": null
+      },
+      "family": {
+        "max_flip_fraction": 0.025824442289039767,
+        "neighbours": [
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "skew_normal",
+            "flip_fraction": 0.00212172647914646,
+            "functional_flips": 35,
+            "k": 5,
+            "quantile": 0.999
+          },
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "student_t",
+            "flip_fraction": 0.025824442289039767,
+            "functional_flips": 426,
+            "k": 5,
+            "quantile": 0.999
+          }
+        ],
+        "passed": true,
+        "reason": null
+      },
+      "k": {
+        "max_flip_fraction": 0.04049466537342386,
+        "neighbours": [
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "gaussian",
+            "flip_fraction": 0.04049466537342386,
+            "functional_flips": 668,
+            "k": 4,
+            "quantile": 0.999
+          }
+        ],
+        "passed": true,
+        "reason": null
+      },
+      "quantile": {
+        "max_flip_fraction": 0.09523520853540252,
+        "neighbours": [
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "gaussian",
+            "flip_fraction": 0.09523520853540252,
+            "functional_flips": 1571,
+            "k": 5,
+            "quantile": 0.99
+          },
+          {
+            "component_rule": "stop_anchored",
+            "confidence": 0.95,
+            "converged": true,
+            "family": "gaussian",
+            "flip_fraction": 0.06062075654704171,
+            "functional_flips": 1000,
+            "k": 5,
+            "quantile": 0.9999
+          }
+        ],
+        "passed": false,
+        "reason": null
+      }
+    },
+    "canonical_functional_count": 16496,
+    "flip_fraction_limit": 0.05,
+    "passed": false,
+    "reason": null
+  },
+  "canonical": {
+    "component_rule": "stop_anchored",
+    "confidence": 0.95,
+    "family": "gaussian",
+    "k": 5,
+    "quantile": 0.999,
+    "threshold": -0.497395
+  },
+  "passed": {
+    "a": true,
+    "all": false,
+    "b": true,
+    "c": false
+  }
+}

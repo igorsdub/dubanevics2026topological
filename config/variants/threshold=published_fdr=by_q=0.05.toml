@@ -1,0 +1,6 @@
+# Variant overlay (FITNESSTREE_ANALYSIS_VARIANT=fdr_by_q0.05_papkou_original): Papkou fixed cutoff,
+# Benjamini-Yekutieli, nominal q = 0.05. Fixed-graph 10,000-draw plug-in parametric bootstrap on the cluster (job 51784585).
+# Run with FITNESSTREE_OUTPUT_ROOT=output/variants/fdr_by_q0.05_papkou_original.
+# The applied T (-0.5077739708744209, exact formula) is read from the snapshot's provenance, not rounded again.
+[clamped]
+candidate_functional_threshold = { rule = "fdr_fixed_cutoff", decimals = 16, cutoff = "papkou_original", method = "by", q = 0.05, input_dir = "data/processed/classification/published" }

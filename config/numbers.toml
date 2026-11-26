@@ -1,0 +1,43 @@
+# Reported manuscript numbers (committed constants). Exact pipeline values live in
+# the manuscript quantity registry and landscape_summary products; this file holds
+# the numbers prose and Quarto cite, with provenance. Do not invent values here.
+
+[thresholds]
+# Papkou et al. (2023) supplement pp. 14–15: qnorm(0.999, -0.721, 0.069).
+# Six-decimal Published point-estimate path (config/analysis.toml).
+published_functional_threshold = -0.507774
+# Exact formula value retained by the papkou_original BY snapshot.
+published_functional_threshold_formula = -0.5077739708744209
+# Median-reflected Candidate cutoff T = m + (m - g), six decimals
+# (docs/component-persistence-threshold.md; ADR 2026-10-23).
+reflected_functional_threshold = -0.253159
+reflected_functional_threshold_unrounded = -0.2531594561
+
+[full_graph_landmarks]
+# Full-graph raw-fitness population (docs/component-persistence-threshold.md).
+median = -0.7139811714
+global_minimum = -1.1748028867
+median_gap = 0.4608217153
+join_tree_trailing_saddle = -0.7293606220
+global_maximum = 1.395791684395264
+
+[fdr]
+method = "by"
+q = 0.05
+# Active publication Candidate cutoff name under fdr_fixed_cutoff.
+cutoff = "median_reflected"
+snapshot_dir = "data/processed/classification/reflected"
+
+[bootstrap]
+n_replicates = 10000
+seed = 20261019
+band_quantile = 0.95
+# Authorised production bootstrap under median-reflected BY (the report is in git history under docs/reports).
+# Band radius c and survivor counts are dataset-specific; cite the registry /
+# bootstrap summary for the draw set in use.
+
+[dataset]
+name = "Papkou2023"
+full_library_sequences = 261333
+# 262144 = 4^9 codon library size quoted in some prose; measured Full graph is 261333.
+codon_library_size = 262144

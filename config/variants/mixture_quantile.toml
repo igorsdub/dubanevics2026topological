@@ -1,0 +1,6 @@
+# Variant overlay (FITNESSTREE_ANALYSIS_VARIANT=mixture_quantile): former default
+# Candidate Selection rule (ADR 2026-10-24). Run with
+# FITNESSTREE_OUTPUT_ROOT=output/variants/mixture_quantile so no default output is touched.
+# Requires `just functional-classification` before Candidate stages.
+[clamped]
+candidate_functional_threshold = { rule = "mixture_quantile", decimals = 6 }

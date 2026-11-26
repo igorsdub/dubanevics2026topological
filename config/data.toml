@@ -1,0 +1,93 @@
+# Data acquisition settings: `just fetch-papkou2023`, `just fetch-data`, `just make-raw`.
+# Scientific settings live in analysis.toml; nothing here changes a result.
+
+# Papkou et al. 2023, Science, doi:10.1126/science.adh3860. Data: Zenodo record 13837982
+# (doi:10.5281/zenodo.13837982), CC-BY-4.0.
+[papkou2023]
+record = 13837982
+doi = "10.5281/zenodo.13837982"
+licence = "CC-BY-4.0"
+zip_name = "code_analyses_figures.zip"
+zip_size = 2873676924
+zip_md5 = "9ea6b30f7c8aac740ccc2d90b15fc51b"
+# Store layout (the one barseqfit reads through PAPKOU2023RUGGED_DATA): the zip is extracted
+# under zenodo/, so a member "in_data/x" lands at <store>/zenodo/in_data/x. The in-zip paths
+# were read from the zip's central directory (HTTP range request) and agree with the store.
+zip_root_in_store = "zenodo"
+# Environment variable naming the store; the same one barseqfit uses.
+store_env = "PAPKOU2023RUGGED_DATA"
+
+# Members extracted from the zip (only these). in_zip is the path inside the zip.
+[[papkou2023.members]]
+in_zip = "in_data/sequence_reads_counts.RDS"
+md5 = "821a5866d34c540eb528de805624a9e6"
+
+[[papkou2023.members]]
+in_zip = "in_data/fitness_data_wt.rds"
+md5 = "e636390a6681aeda8ed90dc54fdc17d2"
+
+[[papkou2023.members]]
+in_zip = "in_data/fitness_diff_wald_test_data.RDS"
+md5 = "20bfb173c6f0ea8815b08d140b617f7a"
+
+[[papkou2023.members]]
+in_zip = "in_data/graph_largest_component.rds"
+# The record gives no md5 for members; this is the entry in the local store's MANIFEST.md5.
+md5 = "a37f835b35126401d464e9f9b0bada30"
+
+# The authors' ampseq-nextflow scripts are NOT in the record above. They come from the authors'
+# pipeline repository, archived on Zenodo as record 8229097 (doi:10.5281/zenodo.8229097,
+# CC-BY-4.0; Papkou et al.). Only the 13 scripts in md5_file are extracted from the zip, each
+# verified. A local checkout (--authors-scripts-from DIR or env PAPKOU2023_AMPSEQ_DIR) overrides
+# the download. An existing store file with a different md5 is moved to <name>.orig first.
+[papkou2023.authors_scripts]
+record = 8229097
+doi = "10.5281/zenodo.8229097"
+licence = "CC-BY-4.0"
+zip_name = "ampseq_nextflow-master.zip"
+zip_size = 72704
+zip_md5 = "03a58638e14dcd6d845e2073a5f26b18"
+zip_prefix = "ampseq_nextflow-master/"
+md5_file = "config/papkou2023_authors_scripts.md5"
+store_dir = "ampseq-nextflow"
+source_env = "PAPKOU2023_AMPSEQ_DIR"
+
+# Our own Zenodo record: the processed-data folder (data/processed, MANIFEST.tsv at its root). Empty until the DOI is minted.
+[ours]
+zenodo_record = ""
+# Files are routed by the first matching glob; {store} is the Papkou store, paths are relative
+# to the repository root. An archive (.zip) is unpacked into its destination; any other
+# file is copied there. Files that match nothing go to data/processed/.
+# The four raw files of data/raw are deposited under data/processed/raw (they match "papkou2023*" too).
+[[ours.destinations]]
+match = "papkou2023_fitness_*.parquet"
+dest = "data/processed/raw"
+[[ours.destinations]]
+match = "papkou2023_graph.graphml"
+dest = "data/processed/raw"
+[[ours.destinations]]
+match = "papkou2023_peaks.csv"
+dest = "data/processed/raw"
+[[ours.destinations]]
+match = "papkou2023*"
+dest = "{store}"
+[[ours.destinations]]
+match = "*"
+dest = "data/processed"
+
+# Byte hashes of the tables the manuscript numbers were first made from. Reference values only: a
+# recompute that differs warns and writes a delta report (threshold/reference_drift.py); it never
+# fails. A copy of the reference tables, searched by file name under $FITNESSTREE_REFERENCE_DIR,
+# lets the report give class-count and value differences.
+[reference_hashes]
+growth_rates_sha256 = "9556393f4b97f7b8f4ec6ceb454391405a07e0f8b5a96531e1fc23b11d9e1877"
+classification_median_reflected_sha256 = "3c16ddf2f1ab6276ac086b554bfc1b200f4998d3b236cf5ae8109276d7029457"
+classification_papkou_original_sha256 = "d8509b632a8d47611ee51b0dd200328df7533d5949e768fef607d3b4131ff229"
+
+# Standing shape check run by `just make-raw` (counts are also recorded in data/raw/README.md).
+[raw_shape]
+graph_nodes = 135178
+graph_edges = 324044
+peaks = 514
+wt_rows = 261332
+diff_rows = 3518696

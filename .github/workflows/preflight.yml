@@ -1,0 +1,33 @@
+name: preflight
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  preflight-a:
+    name: preflight A (figures chain)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install public dependencies
+        run: |
+          uv venv
+          uv pip install polars altair numpy matplotlib
+      - name: Preflight A
+        run: PYTHONPATH=src .venv/bin/python scripts/preflight.py --only a
+
+  preflight-b:
+    name: preflight B (render budget)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install public dependencies
+        run: |
+          uv venv
+          uv pip install polars altair numpy matplotlib
+      - name: Preflight B
+        run: PYTHONPATH=src .venv/bin/python scripts/preflight.py --only b

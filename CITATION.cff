@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: >-
+  If you use this code, please cite it using the metadata below, and cite
+  the manuscript "Topological characterization of combinatorial fitness
+  landscapes using merge trees" once published.
+title: "dubanevics2026topological"
+abstract: >-
+  Code and data pipeline for the manuscript "Topological characterization of
+  combinatorial fitness landscapes using merge trees": the topology of the
+  Papkou et al. 2023 fitness landscape.
+type: software
+version: 1.0.0
+date-released: 2026-11-26
+license: MIT
+repository-code: "https://github.com/igorsdub/dubanevics2026topological"
+authors:
+  - family-names: Dubanevics
+    given-names: Igors
+    affiliation: "Okinawa Institute of Science and Technology Graduate University"
+    # orcid: can be added here as "https://orcid.org/0000-0000-0000-0000"
+references:
+  - type: article
+    title: "A rugged yet easily navigable fitness landscape"
+    authors:
+      - family-names: Papkou
+        given-names: Andrei
+      - family-names: García-Pastor
+        given-names: Lucía
+      - family-names: Escudero
+        given-names: José Antonio
+      - family-names: Wagner
+        given-names: Andreas
+    journal: "Science"
+    year: 2023
+    doi: "10.1126/science.adh3860"
+  - type: software
+    title: "BarSeqFit"
+    authors:
+      - family-names: Dubanevics
+        given-names: Igors
+    repository-code: "https://github.com/oist/barseqfit"
+  - type: software
+    title: "topographer"
+    authors:
+      - family-names: Dubanevics
+        given-names: Igors
+    repository-code: "https://github.com/oist/topographer"

@@ -1,0 +1,83 @@
+{
+  "artifacts": {
+    "acceptance.json": "a5ef2315d2ea8f3e042647e198e13a0cecf6a7d973a0817ebf85aa8ebe7e0803",
+    "cells.parquet": "e4bff9a003f9e9db41016ad203f7be81eba053e5e2a19f8dd1df4b1bfeea6bcc",
+    "comparator.parquet": "32349034a84b57fc56ecac4d5328bfa1caa65c11559571647a9e456adc3efc5e",
+    "intervals.parquet": "3e39a89af6a8e2d4755c5823235d59710f8c09a894d889fd212be024d658ded4",
+    "resamples.parquet": "f8051653826ed37048bbabc8238546707dfc5a4b92380645477559f8f9639428"
+  },
+  "classification_config": {
+    "bic_k_range": [
+      1,
+      5
+    ],
+    "decimals": 6,
+    "functional_confidence": 0.95,
+    "max_iter": 1000,
+    "n_init": 5,
+    "quantile": 0.999,
+    "random_seed": 20261024,
+    "stop_anchor_min_responsibility": 0.1,
+    "stop_codon_count_for_anchor": 2,
+    "tol": 1e-06
+  },
+  "classification_source": {
+    "artefacts": {
+      "classification.parquet": "243e5db066ce7b49199b2da7c15203340ac8b7452a621ffaa0bdcaddeb500246",
+      "components.parquet": "baf4aeaa59c75f95aebca41288ae434d3f29e445298404d78e97047baebdb01e",
+      "summary.json": "5eea07c531e6efc3053d2d6ac8b292aca574574735e63857464b69f2c33e2add",
+      "uncertain_sequences.parquet": "a7f4b46ecbee8dfb0e1d443f519ced035b2f4967df98582a5ead083b9caecbb2"
+    },
+    "fingerprint": "a0256ea92e5175ab6a99a68fb891e1b8c046d0ba048a5f81065605df5ce62e26",
+    "stage": "functional-classification"
+  },
+  "code": {
+    "functional_threshold_scan": "46ddecc3797b6bcc83b560c2d83d6ec55c7a5d6f56c3d3618904d336af2b5105",
+    "mixture_families": "8fd9ddc02739678001e50e18ff1b64d7c0fda3527176d19771a3c30c6cbb0ffe"
+  },
+  "git": {
+    "commit": "f9d802cfe2319498987f2067cdfc982192253315",
+    "dirty": true
+  },
+  "growth_rates_sha256": "9556393f4b97f7b8f4ec6ceb454391405a07e0f8b5a96531e1fc23b11d9e1877",
+  "libraries": {
+    "numpy": "2.5.3",
+    "polars": "1.44.2",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1"
+  },
+  "scan_config": {
+    "component_rules": [
+      "stop_anchored",
+      "lowest_mean"
+    ],
+    "confidences": [
+      0.95,
+      0.99,
+      0.999
+    ],
+    "double_stop_below_min": 0.99,
+    "families": [
+      "gaussian",
+      "skew_normal",
+      "student_t"
+    ],
+    "flip_fraction_limit": 0.05,
+    "k_range": [
+      1,
+      5
+    ],
+    "max_iter": 1000,
+    "n_init": 5,
+    "n_resamples": 200,
+    "quantiles": [
+      0.95,
+      0.99,
+      0.999,
+      0.9999
+    ],
+    "random_seed": 20261025,
+    "tol": 1e-06
+  },
+  "schema": 2
+}

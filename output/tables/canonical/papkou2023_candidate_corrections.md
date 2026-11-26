@@ -1,0 +1,17 @@
+# Candidate landscape: Nominal, FDR and Bootstrap
+
+| Metric | Nominal | FDR | Bootstrap |
+| --- | --- | --- | --- |
+| Functional threshold | -0.253159 | -0.253159 | — |
+| Number of nodes | 102575 | 98131 | — |
+| Number of edges | 243507 | 233444 | — |
+| Number of functional sequences | 13615 | 12952 | — |
+| Number of non-functional sequences | 88960 | 84539 | — |
+| Number of uncertain sequences | not applicable | 640 | — |
+| Peak count | 158 | 135 | 29 |
+| Minimum fitness | -1.1206310580725365 | -1.1206310580725365 | — |
+| Maximum fitness | 1.395791684395264 | 1.395791684395264 | — |
+| Mean fitness | -0.5460043567939297 | -0.5384973949474283 | — |
+| Median fitness | -0.6974224716378387 | -0.6963739799937592 | — |
+
+Table 2. Median-reflected Candidate at three stages: point-estimate Nominal, Benjamini–Yekutieli FDR (nominal q = 0.05), and the band-simplified Bootstrap tree on the FDR-selected graph. Bootstrap reports tree-level rows only (peak count and synonymous-leaf metrics); its graph-level cells are an em dash because that graph is the FDR column's (checked equal before blanking).
