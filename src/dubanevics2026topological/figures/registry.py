@@ -88,6 +88,9 @@ from .papkou_agreement import (
     FIGURE_ID as PAPKOU_AGREEMENT_ID,
 )
 from .papkou_agreement import (
+    STEM as PAPKOU_AGREEMENT_STEM,
+)
+from .papkou_agreement import (
     build_papkou_agreement_figure,
 )
 from .peak_pair_figures import (
@@ -284,7 +287,11 @@ def _compose_peak_pair_distances(inputs: dict[str, Any], settings: dict[str, Any
 
 
 def _papkou_agreement_builder(payload, settings, variant):
-    return build_papkou_agreement_figure(payload, settings)
+    """One output whose file stem differs from the figure id."""
+    yield FigureOutput(
+        PAPKOU_AGREEMENT_STEM,
+        lambda: build_papkou_agreement_figure(payload, settings),
+    )
 
 
 def _fitness_se_correlation_builder(payload, settings, variant):
@@ -759,9 +766,10 @@ LEAF_SWARM_IDS = tuple(f"{graph}_leaf_swarm" for graph in GRAPHS)
 # The same diagrams for each graph's BY band-simplified tree (opt-in; D10 saved trees).
 LEAF_PERSISTENCE_BAND_IDS = tuple(f"{graph}_leaf_persistence_band" for graph in GRAPHS)
 LEAF_SWARM_BAND_IDS = tuple(f"{graph}_leaf_swarm_band" for graph in GRAPHS)
-# The band leaf figures of the manuscript (the Candidate graph's, S24 and S25) are built by default.
+# The band leaf figures of the manuscript (the swarms of the Papkou + FDR and Topographer + FDR
+# graphs, S11 and S13) are built by default.
 MANUSCRIPT_BAND_LEAF_IDS = frozenset(
-    {"candidate_leaf_persistence_band", "candidate_leaf_swarm_band"}
+    {"published_leaf_swarm_band", "candidate_leaf_swarm_band"}
 )
 
 # Renderer module under figures/ that defines each figure's builder. Every
@@ -867,7 +875,7 @@ _RENDERER_FILES: dict[str, str | tuple[str, ...]] = {
 
 # Message raised when a figure is requested with no variant it allows.
 _VARIANT_MESSAGES: dict[str, str] = {
-    "candidate_edge_evidence": "Candidate evidence has one vanilla export.",
+    "candidate_edge_evidence": "Topographer + FDR graph evidence has one vanilla export.",
     "peak_uncertainty": (
         "The peak uncertainty figure has one canonical vanilla export."
     ),
@@ -1008,7 +1016,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         _ANNOTATED,
         None,
         _reflected_fdr_builder,
-        default=True,
+        default=False,
         config_table="tree_comparison",
     ),
     _spec(
@@ -1041,6 +1049,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         "notebooks/papkou2023_full_tree_histogram.py",
         _histogram_builder("full_tree_histogram"),
         _compose_saved_comparison,
+        default=False,
     ),
     _spec(
         "published_tree_histogram",
@@ -1049,6 +1058,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         "notebooks/papkou2023_published_tree_histogram.py",
         _histogram_builder("published_tree_histogram"),
         _compose_saved_comparison,
+        default=False,
     ),
     _spec(
         "candidate_tree_histogram",
@@ -1057,6 +1067,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         "notebooks/papkou2023_candidate_tree_histogram.py",
         _histogram_builder("candidate_tree_histogram"),
         _compose_saved_comparison,
+        default=False,
     ),
     _spec(
         "linked_tree_persistence",
@@ -1079,6 +1090,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         "notebooks/papkou2023_full_tree_persistence.py",
         _full_tree_persistence_builder,
         _compose_full_tree_persistence,
+        default=False,
     ),
     _spec(
         "full_tree_persistence_vertical_histogram",
@@ -1145,7 +1157,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         None,
         _bootstrap_tree_histogram_builder,
         _compose_bootstrap_tree_histogram,
-        default=True,
+        default=False,
     ),
     _spec(
         "bootstrap_codon_entropy",
@@ -1221,6 +1233,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
             None,
             _leaf_persistence_builder(figure_id),
             _compose_comparison_with_annotations,
+            default=False,
         )
         for figure_id in LEAF_PERSISTENCE_IDS
     ),
@@ -1293,7 +1306,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         )
         for figure_id in PEAK_RANK_IDS
     ),
-    # Historical ridge view. Supplementary S7 is graph_codon_entropy.
+    # Historical ridge view (KEM and TCL). Supplementary S14 is graph_codon_entropy.
     _spec(
         RIDGE_ENTROPY_ID,
         {"ridge_entropy"},
@@ -1303,16 +1316,16 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         default=False,
         multi=True,
     ),
-    # Opt-in. `just figures` names it with `--figure graph_codon_entropy`.
-    # Supplementary S7: positional amino-acid entropy of the Full graph and the
-    # Published graph against raw-fitness threshold. No tree panel.
+    # Supplementary S14: positional amino-acid entropy of the Full graph and the
+    # Papkou graph against raw-fitness threshold. No tree panel. A manuscript
+    # source, so `just figures` renders it with the other defaults.
     _spec(
         GRAPH_CODON_ENTROPY_ID,
         {"graph_codon_entropy"},
-        _BOTH,
+        _ANNOTATED,
         None,
         _graph_codon_entropy_builder,
-        default=False,
+        default=True,
         multi=True,
     ),
     _spec(
@@ -1349,7 +1362,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         _bonferroni_builder,
         default=False,
     ),
-    # Opt-in: Supplementary S1. Name it with --figure. It reads the growth-rate
+    # Supplementary S1. It reads the growth-rate
     # checkpoint and the published fitness_wt table and refits nothing.
     _spec(
         PAPKOU_AGREEMENT_ID,
@@ -1358,7 +1371,8 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         None,
         _papkou_agreement_builder,
         _compose_papkou_agreement,
-        default=False,
+        default=True,
+        multi=True,
     ),
     # Opt-in: fitness against its SE per genotype with Spearman rho, and Papkou
     # published beside our estimate (wild type a red star on ours). Same inputs.
@@ -1369,7 +1383,7 @@ FIGURE_SPECS: tuple[FigureSpec, ...] = (
         None,
         _fitness_se_correlation_builder,
         _compose_papkou_agreement,
-        default=True,
+        default=False,
     ),
     _spec(
         FITNESS_VS_POOLED_SE_ID,

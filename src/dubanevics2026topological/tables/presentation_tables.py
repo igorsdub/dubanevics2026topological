@@ -1,10 +1,12 @@
-"""Manuscript presentation tables sliced from the seven-column landscape summary.
+"""Landscape-summary slices kept as supplementary manuscript tables.
 
-Table 1 (main): Full, Published and median-reflected BY Candidate.
-Table 2 (main): Candidate corrections — Nominal | FDR | Bootstrap (median-reflected
+Supplementary S1: Full, Published and median-reflected BY Candidate.
+Supplementary S2: Candidate corrections — Nominal | FDR | Bootstrap (median-reflected
 point-estimate, median-reflected BY nominal, median-reflected BY band).
-Supplementary: Published simplification — Nominal | FDR | Bootstrap on the
+Supplementary (unnumbered): Published simplification — Nominal | FDR | Bootstrap on the
 Published graph (point-estimate, Published BY nominal, Published BY band).
+
+Main Tables 1 and 2 are the graph and tree descriptive tables, not these slices.
 
 Column sources are the pinned ``landscape_summary`` products already used by
 ``landscape_summary_table``; this module renames columns for the manuscript and
@@ -24,16 +26,18 @@ from pathlib import Path
 from typing import Any
 
 from ..analysis.describe import SUMMARY_COLUMNS, TREE_LEVEL_METRICS
+from ..figures.labels import FULL, PAPKOU, TOPOGRAPHER_FDR
 from ..results import RunContext
 from .landscape_summary_table import load_summary_columns, tree_level_only
 
 Loader = Callable[[str, str], Any]
 
-# Manuscript display names → landscape-summary source column.
+# Manuscript display names → landscape-summary source column. The source strings are the
+# saved products' identity names and do not change; only the display names are new.
 TABLE1_COLUMNS: tuple[tuple[str, str], ...] = (
-    ("Full", "Full (nominal)"),
-    ("Published", "Published (point-estimate nominal)"),
-    ("Candidate", "Median-reflected BY (nominal)"),
+    (FULL, "Full (nominal)"),
+    (PAPKOU, "Published (point-estimate nominal)"),
+    (TOPOGRAPHER_FDR, "Median-reflected BY (nominal)"),
 )
 TABLE2_COLUMNS: tuple[tuple[str, str], ...] = (
     ("Nominal", "Median-reflected (point-estimate nominal)"),
@@ -78,25 +82,26 @@ class PresentationTable:
 PRESENTATION_TABLES: tuple[PresentationTable, ...] = (
     PresentationTable(
         stem="full_vs_published",
-        title="Full, Published and Candidate landscapes",
-        section="main",
+        title=f"Full, {PAPKOU} and {TOPOGRAPHER_FDR} landscapes",
+        section="supplementary",
         columns=TABLE1_COLUMNS,
         note=(
-            "Table 1. Full, Published point-estimate and median-reflected BY "
-            "Candidate graphs. Threshold, counts and fitness summaries come from "
-            "the pinned landscape_summary products. Full valley count comes from "
-            "the manuscript quantity registry. Published and Candidate valley "
-            "counts are unavailable: no authenticated per-selection valley "
-            "product exists. A blank Full valley count means its registry is absent."
+            "Supplementary table S1. Full, Papkou and "
+            "Topographer + FDR graphs. Threshold, counts and fitness "
+            "summaries come from the pinned landscape_summary products. Full "
+            "valley count comes from the manuscript quantity registry. Papkou "
+            "and Topographer + FDR valley counts are unavailable: no authenticated "
+            "per-selection valley product exists. A blank Full valley count means "
+            "its registry is absent."
         ),
     ),
     PresentationTable(
         stem="candidate_corrections",
-        title="Candidate landscape: Nominal, FDR and Bootstrap",
-        section="main",
+        title="Topographer landscape: Nominal, FDR and Bootstrap",
+        section="supplementary",
         columns=TABLE2_COLUMNS,
         note=(
-            "Table 2. Median-reflected Candidate at three stages: point-estimate "
+            "Supplementary table S2. Topographer graph at three stages: point-estimate "
             "Nominal, Benjamini–Yekutieli FDR (nominal q = 0.05), and the "
             "band-simplified Bootstrap tree on the FDR-selected graph. Bootstrap "
             "reports tree-level rows only (peak count and synonymous-leaf metrics); "
@@ -106,12 +111,12 @@ PRESENTATION_TABLES: tuple[PresentationTable, ...] = (
     ),
     PresentationTable(
         stem="published_simplification",
-        title="Published landscape simplification",
+        title="Papkou landscape simplification",
         section="supplementary",
         columns=PUBLISHED_SIMPLIFICATION_COLUMNS,
         note=(
-            "Supplementary. Published graph at three stages: point-estimate "
-            "Nominal, Published BY FDR (nominal q = 0.05), and the band-simplified "
+            "Supplementary. Papkou graph at three stages: point-estimate "
+            "Nominal, Papkou + FDR (nominal q = 0.05), and the band-simplified "
             "Bootstrap tree. Bootstrap reports tree-level rows only; its graph-level "
             "cells are an em dash because that graph is the FDR column's (checked "
             "equal before blanking)."
@@ -306,15 +311,27 @@ def export_presentation_tables(
                     ],
                     "tree_level_metrics": sorted(TREE_LEVEL_METRICS),
                     "metrics": list(next(iter(view.values()))),
-                    **({"valley_source": {
-                        "key": "full_graph.persistence.valley_count",
-                        "registry_fingerprint": valley_source[1] if valley_source else None,
-                        "gaps": {
-                            **({"Full": "Current manuscript registry absent."} if valley_source is None else {}),
-                            "Published": "No authenticated per-selection valley product.",
-                            "Candidate": "No authenticated per-selection valley product.",
-                        },
-                    }} if table.columns == TABLE1_COLUMNS else {}),
+                    **(
+                        {
+                            "valley_source": {
+                                "key": "full_graph.persistence.valley_count",
+                                "registry_fingerprint": valley_source[1]
+                                if valley_source
+                                else None,
+                                "gaps": {
+                                    **(
+                                        {"Full": "Current manuscript registry absent."}
+                                        if valley_source is None
+                                        else {}
+                                    ),
+                                    PAPKOU: "No authenticated per-selection valley product.",
+                                    TOPOGRAPHER_FDR: "No authenticated per-selection valley product.",
+                                },
+                            }
+                        }
+                        if table.columns == TABLE1_COLUMNS
+                        else {}
+                    ),
                 },
                 indent=2,
             )

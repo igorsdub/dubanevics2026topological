@@ -120,18 +120,18 @@ def test_full_published_candidate_columns(tmp_path: Path) -> None:
         newline="", encoding="utf-8"
     ) as handle:
         reader = csv.DictReader(handle)
-        assert reader.fieldnames == ["Metric", "Full", "Published", "Candidate"]
+        assert reader.fieldnames == ["Metric", "Full", "Papkou", "Topographer + FDR"]
         rows = {row["Metric"]: row for row in reader}
-    assert rows["Number of nodes"]["Candidate"] == "103"
+    assert rows["Number of nodes"]["Topographer + FDR"] == "103"
     sidecar = json.loads(
         (tmp_path / "out" / "papkou2023_full_vs_published.json").read_text()
     )
     assert sidecar["columns"][2]["source"] == "Median-reflected BY (nominal)"
     assert rows["Valley count"] == {
-        "Metric": "Valley count", "Full": "", "Published": "", "Candidate": ""
+        "Metric": "Valley count", "Full": "", "Papkou": "", "Topographer + FDR": ""
     }
-    assert "Published" in sidecar["valley_source"]["gaps"]
-    assert "Candidate" in sidecar["valley_source"]["gaps"]
+    assert "Papkou" in sidecar["valley_source"]["gaps"]
+    assert "Topographer + FDR" in sidecar["valley_source"]["gaps"]
 
 
 def test_full_valley_source_and_lineage(tmp_path: Path) -> None:
@@ -149,8 +149,8 @@ def test_full_valley_source_and_lineage(tmp_path: Path) -> None:
     ) as handle:
         rows = {row["Metric"]: row for row in csv.DictReader(handle)}
     assert rows["Valley count"]["Full"] == "17"
-    assert rows["Valley count"]["Published"] == ""
-    assert rows["Valley count"]["Candidate"] == ""
+    assert rows["Valley count"]["Papkou"] == ""
+    assert rows["Valley count"]["Topographer + FDR"] == ""
     sidecar = json.loads(
         (tmp_path / "out" / "papkou2023_full_vs_published.json").read_text()
     )

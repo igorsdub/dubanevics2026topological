@@ -98,11 +98,14 @@ def test_public_figure_route_builds_2x2_with_shared_scales_and_dashed_threshold(
     assert len(spec["hconcat"]) == 2
     col0, col1 = spec["hconcat"]
     assert len(col0["vconcat"]) == len(col1["vconcat"]) == 2
-    # Columns are the graph (Published | Candidate), rows the selection (no FDR above BY FDR).
-    assert col0["title"]["text"] == "Published graph"
-    assert col1["title"]["text"] == "Candidate graph"
-    assert [cell["title"]["text"] for cell in col0["vconcat"]] == ["Nominal", "BY q = 0.05"]
-    assert [cell["title"]["text"] for cell in col1["vconcat"]] == ["Nominal", "BY q = 0.05"]
+    # Columns are the graph (Papkou | Topographer), rows the selection (no FDR above BY FDR).
+    # Each panel is titled by its strict state label; columns carry no heading of their own.
+    assert "title" not in col0 and "title" not in col1
+    assert [cell["title"]["text"] for cell in col0["vconcat"]] == ["Papkou", "Papkou + FDR"]
+    assert [cell["title"]["text"] for cell in col1["vconcat"]] == [
+        "Topographer",
+        "Topographer + FDR",
+    ]
     left_scatter = col0["vconcat"][0]
     right_scatter = col1["vconcat"][0]
     assert left_scatter["width"] == right_scatter["width"] == 300
@@ -220,14 +223,14 @@ def test_titles_and_subtitles_state_threshold_fdr_setting_peaks_and_sequence_cou
     }
     threshold_line = "Papkou et al. (2023) · Functional threshold = {}"
     assert panels["threshold=published_fdr=none"]["title"]["subtitle"] == [
-        "Nominal · 11 peaks",
+        "11 peaks",
         threshold_line.format("-0.500"),
         "1,111 functional sequences",
         "2,222 non-functional sequences",
         "Largest component: 3,333 sequences",
     ]
     assert panels["threshold=reflected_fdr=none"]["title"]["subtitle"] == [
-        "Nominal · 22 peaks",
+        "22 peaks",
         threshold_line.format("-0.250"),
         "4,444 functional sequences",
         "5,555 non-functional sequences",
@@ -235,7 +238,7 @@ def test_titles_and_subtitles_state_threshold_fdr_setting_peaks_and_sequence_cou
     ]
     # The Uncertain class exists only where the variant has it (the BY selections).
     assert panels["threshold=published_fdr=by_q=0.05"]["title"]["subtitle"] == [
-        "BY q = 0.05 · 33 peaks",
+        "33 peaks",
         threshold_line.format("-0.400"),
         "7,777 functional sequences",
         "99 uncertain sequences",
@@ -243,7 +246,7 @@ def test_titles_and_subtitles_state_threshold_fdr_setting_peaks_and_sequence_cou
         "Largest component: 12,345 sequences",
     ]
     assert panels["threshold=reflected_fdr=by_q=0.05"]["title"]["subtitle"] == [
-        "BY q = 0.05 · 44 peaks",
+        "44 peaks",
         threshold_line.format("-0.300"),
         "100 functional sequences",
         "300 uncertain sequences",
@@ -251,9 +254,7 @@ def test_titles_and_subtitles_state_threshold_fdr_setting_peaks_and_sequence_cou
         "Largest component: 400 sequences",
     ]
     assert not any("uncertain" in line for line in panels["threshold=published_fdr=none"]["title"]["subtitle"])
-    # One-sentence note under each column title, naming the graph.
-    notes = [column["title"]["subtitle"] for column in spec["hconcat"]]
-    assert "Published graph" in notes[0] and "Candidate graph" in notes[1]
+    assert all("title" not in column for column in spec["hconcat"])
     assert "Same selection" not in str(spec)
 
 
@@ -355,15 +356,15 @@ def test_one_legend_sits_in_the_top_right_panel() -> None:
     # Top row (no FDR), right column (Candidate graph).
     left_col, right_col = spec["hconcat"]
     right = right_col["vconcat"][0]
-    assert right["title"]["text"] == "Nominal"
-    # Row titles name the selection in both columns; the graph is the column title.
-    for column in (left_col, right_col):
-        assert [cell["title"]["text"] for cell in column["vconcat"]] == [
-            "Nominal",
-            "BY q = 0.05",
-        ]
-        assert column["vconcat"][1]["title"]["subtitle"][0].startswith("BY q = 0.05")
-        assert column["vconcat"][0]["title"]["subtitle"][0].startswith("Nominal")
+    assert right["title"]["text"] == "Topographer"
+    # Panel titles are the strict state labels; the first subtitle line is the peak count.
+    for column, titles in (
+        (left_col, ["Papkou", "Papkou + FDR"]),
+        (right_col, ["Topographer", "Topographer + FDR"]),
+    ):
+        assert [cell["title"]["text"] for cell in column["vconcat"]] == titles
+        for cell in column["vconcat"]:
+            assert cell["title"]["subtitle"][0].endswith(" peaks")
 
     assert _legend_marks(left_col["vconcat"][0]) == []
     assert _legend_marks(left_col["vconcat"][1]) == []
@@ -634,8 +635,8 @@ def test_points_outside_the_configured_domains_are_counted(caplog) -> None:
         "[-1.2, 1.4], 1 point outside the configured SE domain [0.0, 0.28]"
     )
     assert warnings == [
-        f"Published graph / Nominal: {counts}",
-        f"Published graph / BY q = 0.05: {counts}",
+        f"Papkou graph / Nominal: {counts}",
+        f"Papkou graph / BY q = 0.05: {counts}",
     ]
 
 
@@ -657,10 +658,9 @@ def test_exported_spec_keeps_titles_and_axis_labels() -> None:
     ).to_dict()
     font = spec["config"]["font"]
     assert isinstance(font, str) and "," in font
-    assert spec["hconcat"][0]["title"]["text"] == "Published graph"
-    assert spec["hconcat"][1]["title"]["text"] == "Candidate graph"
+    assert all("title" not in column for column in spec["hconcat"])
     top_left = spec["hconcat"][0]["vconcat"][0]
-    assert top_left["title"]["text"] == "Nominal"
+    assert top_left["title"]["text"] == "Papkou"
     assert top_left["title"]["subtitle"]
     bottom_left = _scatter(spec["hconcat"][0]["vconcat"][1])
     axes = {
@@ -809,7 +809,7 @@ def test_the_candidate_by_subtitle_reaches_the_rendered_svg() -> None:
     svg = ElementTree.fromstring(vlc.vegalite_to_svg(_render(payload).to_dict()))
     text = _svg_lines(svg)
     assert any("Functional threshold = -0.253" in item for item in text)
-    assert any(item == "BY q = 0.05 · 0 peaks" for item in text)
+    assert any(item == "0 peaks" for item in text)
 
 
 def test_the_payload_is_required_and_the_error_names_the_stage() -> None:

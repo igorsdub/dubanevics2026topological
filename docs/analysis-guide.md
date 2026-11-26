@@ -15,47 +15,49 @@ Scientific settings live in [config/analysis.toml](../config/analysis.toml), pre
 | Identity of the result | the directory name (`<kind>/<state>/`) and each product's `manifest.json` | the same files; `just check-manifest` fails on a missing, extra, resized or modified file |
 | Tolerance | point estimates and graphs bit-identical; cross-platform bootstrap quantiles within 1e-6 with identical peak counts and absorption topology | identical artefact checksums and topology; zero draws |
 
-The two BY bootstraps are `data/processed/bootstrap/published_by` (Published BY) and `data/processed/bootstrap/reflected_by` (Median-reflected BY), both 10,000 draws with seed 20261019 and band quantile 0.95. `just bootstrap-smoothed-tree` runs the default (median-reflected BY) selection and `just bootstrap-smoothed-tree-by <variant>` a named variant; a run that matches a processed checkpoint draws nothing. The reference hashes of the original run's growth-rate and classification tables are in `config/data.toml` (`[reference_hashes]`): a recompute that differs from them warns and writes a delta report; it never fails.
+The two BY bootstraps are `data/processed/bootstrap/published_by` (Papkou + FDR) and `data/processed/bootstrap/reflected_by` (Topographer + FDR), both 10,000 draws with seed 20261019 and band quantile 0.95. `just bootstrap-smoothed-tree` runs the default (Topographer + FDR) selection and `just bootstrap-smoothed-tree-by <variant>` a named variant; a run that matches a processed checkpoint draws nothing. The reference hashes of the original run's growth-rate and classification tables are in `config/data.toml` (`[reference_hashes]`): a recompute that differs from them warns and writes a delta report; it never fails.
 
 
 ## Layer 1: nominal baselines (Full and Published point-estimate graphs)
 
-What the layer shows: the uncorrected topology, with the Full graph (every library sequence) and the Published graph (point-estimate threshold -0.507774, declared in `config/analysis.toml`) as split trees with ordinary H0 persistence and the raw fitness distribution. Ordinary H0 persistence closes the global maximum's pair at the global minimum; extended persistence is not computed, and branch span is a separate quantity.
+What the layer shows: the uncorrected topology, with the Full graph (every library sequence) and the Papkou graph (point-estimate threshold -0.507774, declared in `config/analysis.toml`) as split trees with ordinary H0 persistence and the raw fitness distribution. Ordinary H0 persistence closes the global maximum's pair at the global minimum; extended persistence is not computed, and branch span is a separate quantity.
 
 | Product, table or figure | Inputs | Configuration | Command |
 | --- | --- | --- | --- |
 | Growth rates and Functional classification checkpoints | `data/raw/`, BarSeq export (compute) or `data/processed/growth_rates` (fetch) | `config/analysis.toml` | `just sequence-growth-rates`, `just functional-classification` |
 | Full-graph analysis and component persistence | the growth-rate checkpoint, `data/raw/` | `config/analysis.toml` | `just analysis`, `just component-analysis` |
-| The five landscape and nominal-tree products (`landscape-products` publishes five labelled landscape/tree pairs, ADR 0016; Full, Published and Median-reflected are the nominal states of Layers 1 and 2) | the analysis above | `config/analysis.toml` | `just landscape-products` |
+| The five landscape and nominal-tree products (`landscape-products` publishes five labelled landscape/tree pairs, ADR 0016; Full, Papkou and Topographer are the nominal states of Layers 1 and 2) | the analysis above | `config/analysis.toml` | `just landscape-products` |
 | `leaves` product per state (leaf table and sequence membership) | the saved tree and landscape products | `config/analysis.toml` | `just leaves-product` (collected into `data/processed/leaves/<state>`) |
 | `landscape_summary` product per state (seven) | the saved leaves, tree and landscape products | `config/analysis.toml` | `just landscape-summary-product` |
-| Manuscript Tables 1 and 2 (`papkou2023_full_vs_published.*`, `papkou2023_candidate_corrections.*`, sliced from the seven pinned products by `presentation-tables`, a step of the figures chain; numbered by `[[table]]` entries of `config/manuscript.toml`) | the seven pinned `landscape_summary` products, the registry | `[tables.landscape_summary]` in `config/figures.toml` | `just presentation-tables` (a step of `just tables`) |
+| Manuscript Table 1 (`graph_descriptive_statistics`: Full, Papkou, Topographer no FDR, Topographer-BY q = 0.05; rows nodes, edges, % functional, mean degree, mean in/out degree) | the four graphs | `config/analysis.toml` | `just graph-descriptive-statistics` |
+| Manuscript Table 2 (`candidate_band_comparison`: BY q = 0.05 Topographer split tree and its bootstrap-band tree) | the BY bootstrap checkpoint, read and not drawn | `[bootstrap_smoothed_tree]` | `just candidate-band-comparison-table` |
+| Supplementary tables S1 and S2 (`papkou2023_full_vs_published.*`, `papkou2023_candidate_corrections.*`, sliced from the seven pinned products by `presentation-tables`; numbered by `[[table]]` entries of `config/manuscript.toml`) | the seven pinned `landscape_summary` products, the registry | `[tables.landscape_summary]` in `config/figures.toml` | `just presentation-tables` (a step of `just tables`) |
 | Landscape summary table (`output/tables/papkou2023_landscape_summary.{csv,html,md}` and `.json` sidecar) | the seven pinned `landscape_summary` products | `[tables.landscape_summary]` in `config/figures.toml` | `just landscape-summary-table` (a step of `just tables`) |
 | Manuscript quantity registry and the leading saddle band tables | the above and the component analysis | `config/analysis.toml` | `just leading-saddle-band`, `just manuscript-quantities` |
 | `full_tree_persistence` (Full tree and persistence) | component analysis, registry | `[figures.full_tree_persistence]` | `just full-tree-figure` |
 | `full_tree_histogram`, `published_tree_histogram` | comparison analysis | `config/figures.toml` | `just full-histogram-figure`, `just published-histogram-figure` |
 | `full_tree_fitness_landmarks` | `leading-saddle-band` tables | `config/figures.toml` | `just leading-saddle-band`, then `build figures --figure full_tree_fitness_landmarks` (no `just` recipe exists for this figure; the form is `PYTHONPATH=src python -m dubanevics2026topological.build figures --figure <id>`) |
 
-## Layer 2: median-reflected threshold
+## Layer 2: Topographer threshold
 
-What the layer shows: the structural effect of an objective point-estimate threshold, the median-reflected value -0.253159 (the `applied_threshold` in `provenance.json` of the BY classification snapshot, rounded from -0.2531594561094983; ADR 2026-10-23, median-reflected Candidate functional threshold), beside the Published baseline, without any uncertainty adjustment. The Candidate graph of the older figures is the separate `mixture_quantile` selection and is not one of the seven summary states.
+What the layer shows: the structural effect of an objective point-estimate threshold, the Topographer value -0.253159 (the `applied_threshold` in `provenance.json` of the BY classification snapshot, rounded from -0.2531594561094983; ADR 2026-10-23, the Topographer threshold), beside the Published baseline, without any uncertainty adjustment. The Candidate graph of the older figures is the separate `mixture_quantile` selection and is not one of the seven summary states.
 
 | Product, table or figure | Inputs | Configuration | Command |
 | --- | --- | --- | --- |
-| Median-reflected point-estimate landscape and nominal tree | the Layer 1 analysis | `config/analysis.toml` (`median_reflected` rule) | `just landscape-products` |
-| Its `leaves`, `landscape_summary` and the "Median-reflected (point-estimate nominal)" column | as Layer 1 | as Layer 1 | as Layer 1 |
+| Topographer landscape and nominal tree | the Layer 1 analysis | `config/analysis.toml` (`median_reflected` rule) | `just landscape-products` |
+| Its `leaves`, `landscape_summary` and the "Topographer (nominal)" column | as Layer 1 | as Layer 1 | as Layer 1 |
 | Threshold comparison figure `tree_comparison` (Full, Published, Candidate) | comparison analysis, registry | `[figures.tree_comparison]` | `just comparison-figure` |
 | Threshold diagnostics product | growth rates, classification, components | `config/analysis.toml` | `just threshold-diagnostics-product` |
 | Functional threshold sensitivity scan (supporting) | growth rates, classification | `config/analysis.toml` | `just functional-threshold-scan` |
 
 ## Layer 3: Benjamini-Yekutieli uncertainty (nominal q = 0.05)
 
-What the layer shows: how pooled standard errors and the Benjamini-Yekutieli (BY) correction change the Published and Median-reflected selections. Classes are functional (s >= T, q <= 0.05), uncertain (s >= T, q > 0.05) and non-functional (s < T).
+What the layer shows: how pooled standard errors and the Benjamini-Yekutieli (BY) correction change the Papkou and Topographer selections. Classes are functional (s >= T, q <= 0.05), uncertain (s >= T, q > 0.05) and non-functional (s < T).
 
 | Product, table or figure | Inputs | Configuration | Command |
 | --- | --- | --- | --- |
 | BY classification (both cutoffs) | the growth rates of `data/processed/growth_rates` | `config/analysis.toml` | `just classification-probability-scans` (writes `data/processed/classification/<published or reflected>/`; the original run's table hashes are the `[reference_hashes]` of `config/data.toml`) |
-| BY analysis variants (Published BY, Median-reflected BY) | the classification above | `config/variants/threshold=published_fdr=by_q=0.05.toml`, `config/variants/threshold=reflected_fdr=by_q=0.05.toml` | `just variant-comparison-analysis "threshold=published_fdr=by_q=0.05"`, `just variant-comparison-analysis "threshold=reflected_fdr=by_q=0.05"` (output under `output/variants/<name>/`) |
+| BY analysis variants (Papkou + FDR, Topographer + FDR) | the classification above | `config/variants/threshold=published_fdr=by_q=0.05.toml`, `config/variants/threshold=reflected_fdr=by_q=0.05.toml` | `just variant-comparison-analysis "threshold=published_fdr=by_q=0.05"`, `just variant-comparison-analysis "threshold=reflected_fdr=by_q=0.05"` (output under `output/variants/<name>/`) |
 | Three-variant graph comparison | the variants and the point-estimate graphs | `config/analysis.toml` | `just fdr-graph-comparison` |
 | BY nominal `leaves`, `landscape_summary` and table columns | the variants' saved tree and landscape products | `[tables.landscape_summary.labels]` | as Layer 1 |
 | Fitness versus pooled standard error | growth rates, peak analysis | `[figures.peak_uncertainty]` | `just peak-analysis`, `just pooled-scatter-product`, `just fdr-pooled-scatter-product`, `just peak-panels-product`, `just peak-figure` |
@@ -107,8 +109,8 @@ Use the exact file name from the product's manifest or the figure inventory (the
 
 Check each of these before relying on a layer; counts are the ones recorded in the repository.
 
-- **Inputs:** every file of the roster in Specification 1, section 5A matches its SHA-256; `uv.lock` matches section 5B. The BY classification snapshot has 261,333 rows and 261,333 unique `dna_sequence` per table; counts (functional, uncertain, non-functional): Papkou cutoff 15,851, 2,179, 243,303; median-reflected cutoff 12,960, 666, 247,707. Their original SHA-256 are the `[reference_hashes]` of `config/data.toml`.
-- **Leaf counts and members (the BY states rebuilt clean have identical counts):** Full nominal 4,055 leaves (261,333 sequences in total); Published nominal 514 (135,178); Median-reflected nominal 158 (102,575); Published BY nominal 242 and band 51 (118,125); Median-reflected BY nominal 135 and band 29 (98,131). Each state has one root member, and a band tree has the same graph as its nominal tree. The saved tree's leaf count equals the registry's split-tree peak count.
+- **Inputs:** every file of the roster in Specification 1, section 5A matches its SHA-256; `uv.lock` matches section 5B. The BY classification snapshot has 261,333 rows and 261,333 unique `dna_sequence` per table; counts (functional, uncertain, non-functional): Papkou cutoff 15,851, 2,179, 243,303; Topographer cutoff 12,960, 666, 247,707. Their original SHA-256 are the `[reference_hashes]` of `config/data.toml`.
+- **Leaf counts and members (the BY states rebuilt clean have identical counts):** Full nominal 4,055 leaves (261,333 sequences in total); Papkou nominal 514 (135,178); Topographer nominal 158 (102,575); Papkou + FDR nominal 242 and band 51 (118,125); Topographer + FDR nominal 135 and band 29 (98,131). Each state has one root member, and a band tree has the same graph as its nominal tree. The saved tree's leaf count equals the registry's split-tree peak count.
 - **Landscape summary table:** seven columns in the order of `[tables.landscape_summary.labels]`; a band column carries tree-level rows only and the build refuses one whose graph-level value differs from its nominal column; the sidecar's `table_identity_sha256` covers the seven scientific ids only, so it is unchanged by an appearance edit.
 - **Registry:** `just manuscript-quantities` turns an absent upstream into named gap rows; a `missing:` or `stale:` row means a product above is absent or out of date.
 - **Tests:** `PYTHONPATH=src:. uv run pytest -q` runs the full suite; narrow it with pytest node IDs.

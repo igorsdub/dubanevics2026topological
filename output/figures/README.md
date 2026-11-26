@@ -14,7 +14,7 @@ Every figure of the manuscript and every exploratory render, by stable identifie
 | `slides/` | Slide layouts written by the build |
 | `manifest.csv` | Every numbered and exploratory copy: number, section, desc, source, variant, path, sha256 |
 
-Git tracks only the canonical PNGs the manuscript uses (see `canonical/README.md`) and the READMEs; the other directories and `canonical/titled/` are local.
+Git tracks only the canonical PNGs the manuscript uses (Figures 1, 3–6, 9 and S1–S14; see `canonical/README.md`) and the READMEs; Figures 2, 7 and 8 are external and supplied separately; the other directories and `canonical/titled/` are local.
 
 The manuscript numbering lives only in `config/manuscript.toml`.
 
@@ -38,4 +38,4 @@ PNG only for now. File names use underscores; directory names are single words.
 Render records (fingerprint of every input checkpoint) sit beside the canonical renders; `manifest.csv` holds the SHA-256 of every copy.
 
 ## Caveats
-Figures 2, 7 and 8 come from Google Slides and are only as current as their last export. Every built manuscript figure is a default registry figure, so `just figures` renders all of them; Figure 6 is `peak_uncertainty` and `reflected_fdr_trees` is Supplementary S9. Supplementary figures S1–S25 are numbered in `config/manuscript.toml`; renders it does not number are opt-in (`just figures-exploratory`) and stay in `exploratory/`.
+Figures 2, 7 and 8 come from Google Slides and are only as current as their last export. Every built manuscript figure is a default registry figure, so `just figures` renders all of them; Figure 6 is `peak_uncertainty`. Supplementary figures S1–S14 are numbered in `config/manuscript.toml`; S14 is `graph_codon_entropy`; renders it does not number are opt-in (`just figures-exploratory`) and stay in `exploratory/`.

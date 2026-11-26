@@ -222,7 +222,7 @@ def test_metric_figure_composes_three_shared_scale_tree_pair_rows(
     assert len(spec["vconcat"]) == 3
     assert all(len(row["hconcat"]) == 2 for row in spec["vconcat"])
     assert all(row["resolve"]["scale"]["y"] == "shared" for row in spec["vconcat"])
-    assert spec["title"]["text"] == "Published graph"
+    assert spec["title"]["text"] == "Papkou graph"
     # Registry provenance: the sentinels differ from the two peaks this synthetic
     # tree has, and no recomputed three-decimal threshold is printed.
     assert spec["title"]["subtitle"] == [
@@ -301,7 +301,7 @@ def test_metric_figure_composes_three_shared_scale_tree_pair_rows(
             == "Fitness at death"
         )
         assert tree_y["scale"]["domain"] == persistence_base["y"]["scale"]["domain"]
-    assert spec["title"]["text"] == "Published graph"
+    assert spec["title"]["text"] == "Papkou graph"
     assert spec["config"]["axis"]["labelFontSize"] == 19
     assert spec["config"]["legend"]["labelFontSize"] == 19
 

@@ -1,7 +1,7 @@
 """Functional calls under three corrections at the two fixed thresholds.
 
 Supplementary comparison of how many sequences the pipeline calls Functional
-at nominal q = 0.05. The Published and Candidate panels are the Papkou
+at nominal q = 0.05. The Papkou and Topographer panels are the Papkou
 original and median-reflected cutoffs. Benjamini-Yekutieli is the class
 already stored on the reviewed classification snapshot. Benjamini-Hochberg
 and Bonferroni are applied here to that snapshot's gated p-values, the same
@@ -20,6 +20,7 @@ import numpy as np
 import polars as pl
 
 from ._title_flag import figure_heading
+from .labels import PAPKOU, TOPOGRAPHER
 from .palette import COUNT_BLACK, MID_GREY
 
 FIGURE_ID = "multiple_testing_comparison"
@@ -28,8 +29,8 @@ INPUT_NAME = "multiple_testing_comparison"
 SNAPSHOT_METHOD = "by"
 CUTOFFS = ("papkou_original", "median_reflected")
 THRESHOLD_LABELS = {
-    "papkou_original": "Published",
-    "median_reflected": "Candidate",
+    "papkou_original": PAPKOU,
+    "median_reflected": TOPOGRAPHER,
 }
 METHODS = (
     ("bonferroni", "Bonferroni"),

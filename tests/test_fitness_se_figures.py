@@ -170,9 +170,9 @@ def test_the_correlation_panel_is_square_and_takes_its_style_from_peak_uncertain
         assert dot["mark"].get("filled", True) is not False
 
 
-def test_the_correlation_figure_is_a_default_vanilla_figure_with_the_same_inputs() -> None:
+def test_the_correlation_figure_is_an_opt_in_vanilla_figure_with_the_same_inputs() -> None:
     spec = registry.get_spec(CORRELATION_ID)
-    assert spec.default is True  # manuscript source
+    assert spec.default is False  # no longer a manuscript source
     assert spec.inputs == frozenset({"growth_rates", "published_fitness"})
     assert spec.variants == frozenset({"vanilla"})
     assert spec.config_table == CORRELATION_ID

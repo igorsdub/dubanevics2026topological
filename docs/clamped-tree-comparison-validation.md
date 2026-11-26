@@ -1,5 +1,7 @@
 # Raw-fitness threshold comparison validation
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 This note records the full-data rebuild for issue #16. The threshold selects the
 network; every prepared split tree, persistence result, peak call, wild-type
 marker, and plotted vertical axis uses raw fitness. A sequence is functional

@@ -119,7 +119,8 @@ def _cached(
 
 def _settings(stability=None):
     figures = tomllib.loads((ROOT / "config/figures.toml").read_text("utf-8"))
-    figures["figures"][STABILITY_ID].update(stability or {})
+    # The tests below draw the opt-in two-panel version unless they say otherwise.
+    figures["figures"][STABILITY_ID].update({"show_diagram": True, **(stability or {})})
     return {"figures": figures, "analysis": {"bootstrap_smoothed_tree": dict(CONFIG)}}
 
 
@@ -291,6 +292,27 @@ def _stability_chart(monkeypatch):
     )
 
 
+def test_the_default_figure_is_the_histogram_panel_alone(monkeypatch):
+    n = CONFIG["n_replicates"]
+    cached, _ = _cached(
+        monkeypatch,
+        real_w=[0.1] * n,
+        flat_w=[0.9] * n,
+        real_bottleneck=[BOTTLENECK] * n,
+        flat_bottleneck=FLAT_BOTTLENECK,
+    )
+    settings = _settings({"show_diagram": False})
+    default = tomllib.loads((ROOT / "config/figures.toml").read_text("utf-8"))
+    assert default["figures"][STABILITY_ID]["show_diagram"] is False
+    payload = with_labels({"bootstrap_smoothed": cached})
+    spec = registry.render_payload(
+        registry.get_spec(STABILITY_ID), payload, settings, "annotated"
+    ).to_dict()
+    assert len(spec["vconcat"]) == 1
+    assert (spec["vconcat"][0]["width"], spec["vconcat"][0]["height"]) == (385, 100)
+    assert "diagram" not in " ".join(spec["title"]["subtitle"]).lower()
+
+
 def _panels(spec):
     """Return the overlaid histogram and the diagram of the one stacked figure."""
     histogram, diagram = spec["vconcat"]
@@ -340,7 +362,7 @@ def test_stability_figure_stacks_one_histogram_over_the_diagram(monkeypatch):
     assert bars["encoding"]["y2"] == {"datum": 0}
     # x axes are not shared between the histogram and the diagram.
     assert spec["resolve"]["scale"]["x"] == "independent"
-    assert (histogram["width"], histogram["height"]) == (250, 100)
+    assert (histogram["width"], histogram["height"]) == (385, 100)
     assert (diagram["width"], diagram["height"]) == (250, 250)
     assert [layer["mark"]["type"] for layer in diagram["layer"]] == [
         "area",

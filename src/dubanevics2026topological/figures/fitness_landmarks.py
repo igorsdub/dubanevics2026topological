@@ -26,6 +26,7 @@ import polars as pl
 
 from ._leaf_data import fitness_axis
 from ._quantities import ManuscriptQuantities
+from .labels import PAPKOU_THRESHOLD, TOPOGRAPHER_THRESHOLD
 from .palette import BAND_GREY, INK_GREY, MID_GREY
 
 FIGURE_ID = "full_tree_fitness_landmarks"
@@ -40,8 +41,8 @@ DEFAULT_LABELS = {
     "median": "Median",
     "split_leading_saddle": "Split-tree leading saddle",
     "join_leading_saddle": "Join-tree leading saddle",
-    "published_functional_threshold": "Published functional threshold",
-    "candidate_functional_threshold": "Candidate functional threshold",
+    "published_functional_threshold": PAPKOU_THRESHOLD,
+    "candidate_functional_threshold": TOPOGRAPHER_THRESHOLD,
 }
 
 

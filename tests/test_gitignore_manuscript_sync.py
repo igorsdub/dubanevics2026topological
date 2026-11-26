@@ -35,6 +35,8 @@ def test_stems_skip_external_and_planned() -> None:
 
 def test_tables_block_tracks_built_tables_only() -> None:
     assert sync.referenced_table_stems() == [
+        "candidate_band_comparison",
+        "graph_descriptive_statistics",
         "papkou2023_candidate_corrections",
         "papkou2023_full_vs_published",
     ]

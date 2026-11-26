@@ -32,6 +32,7 @@ from ._charts import (
 )
 from ._count_labels import count_label_text
 from ._leaf_data import (
+    band_heading,
     figure_graph,
     fitness_axis,
     leaf_tables,
@@ -96,10 +97,10 @@ def band_subtitle(panel: dict[str, Any], leaves: pl.DataFrame) -> list[str]:
 
 def band_footer(figure_id: str, payload: dict[str, Any]) -> list[str]:
     """The footer lines of a band-tree leaf figure: its graph, BY band tree, band settings."""
-    slug, _, heading = figure_graph(figure_id, BAND_SUFFIX)
+    slug, _, _heading = figure_graph(figure_id, BAND_SUFFIX)
     panel = payload["panels"][slug]
     return [
-        f"{heading}: BY band-simplified tree",
+        band_heading(slug),
         (
             f"Bootstrap band quantile {panel['band_quantile']} · "
             f"{count_label_text(panel['draws'])} draws"
@@ -116,7 +117,7 @@ def build_leaf_persistence_band_figure(
     tree's leaf tables. The counts are those of the tables, not the manuscript
     registry (it has no entry for the D10 band tree).
     """
-    slug, _, heading = figure_graph(figure_id, BAND_SUFFIX)
+    slug, _, _heading = figure_graph(figure_id, BAND_SUFFIX)
     panel = payload["panels"][slug]
     appearance = {
         **settings["figures"].get("rendering", {}),
@@ -143,7 +144,7 @@ def build_leaf_persistence_band_figure(
     )
     return build_from_leaves(
         leaves,
-        f"{heading}, BY band-simplified tree",
+        band_heading(slug),
         appearance,
         band_subtitle(panel, leaves),
     )

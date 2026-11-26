@@ -1,25 +1,25 @@
 {
   "schema": 1,
   "stem": "candidate_corrections",
-  "section": "main",
-  "title": "Candidate landscape: Nominal, FDR and Bootstrap",
-  "table_identity_sha256": "93e16eef86151edab6d5f2963981e39c2e49002e25046ea423f2958fa06bf997",
+  "section": "supplementary",
+  "title": "Topographer landscape: Nominal, FDR and Bootstrap",
+  "table_identity_sha256": "b33afaa0a181d8e5200054975c2ece85a37eba64e031e72a1730b254ef824c48",
   "columns": [
     {
       "display": "Nominal",
-      "source": "Median-reflected (point-estimate nominal)",
+      "source": "Topographer",
       "label": "landscape_summary__thr=reflected_fdr=none_tree=nominal_hash=12f3ca61",
       "scientific_id_sha256": "12f3ca61de83c474d3475054334ab9ea19b2f13d1e71c6c0733f9433e2cb535d"
     },
     {
       "display": "FDR",
-      "source": "Median-reflected BY (nominal)",
+      "source": "Topographer + FDR",
       "label": "landscape_summary__thr=reflected_fdr=by_q=0.05_tree=nominal_hash=eb37f454",
       "scientific_id_sha256": "eb37f454c8bb2a14cba6cbaf763288a340e5ceac7ca64e46cebdb975aa4b6d2c"
     },
     {
       "display": "Bootstrap",
-      "source": "Median-reflected BY (band-simplified)",
+      "source": "Topographer + FDR, bootstrapped",
       "label": "landscape_summary__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_hash=6ea7a535",
       "scientific_id_sha256": "6ea7a5357c5d4d8b6bae99244251bb30102c2cd7f29f1affc46aef3489fff17e"
     }

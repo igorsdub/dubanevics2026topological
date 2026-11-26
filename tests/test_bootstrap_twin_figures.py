@@ -39,7 +39,8 @@ def _tables():
 @pytest.mark.parametrize("figure_id", TWINS)
 def test_twins_are_default_annotated_and_configured(figure_id):
     spec = registry.get_spec(figure_id)
-    assert spec.default is True  # manuscript source
+    # The codon entropy figure is a manuscript source (Figure 9); the tree histogram is opt-in.
+    assert spec.default is (figure_id == ENTROPY_ID)
     assert spec.variants == {"annotated"}
     expected = {"comparison", "bootstrap_smoothed"}
     if figure_id == ENTROPY_ID:
@@ -64,7 +65,7 @@ def test_the_histogram_twin_table_repeats_its_source_figure_table():
 
 
 def test_the_codon_entropy_table_names_the_band_smoothed_graph():
-    assert _tables()[ENTROPY_ID]["candidate_title"] == "Band-smoothed candidate graph"
+    assert _tables()[ENTROPY_ID]["candidate_title"] == "Topographer + FDR, bootstrapped"
 
 
 def test_the_entropy_figure_dims_every_branch_but_the_focused_ridge():

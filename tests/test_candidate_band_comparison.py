@@ -194,6 +194,24 @@ def test_write_round_trip_records_the_band_settings(tmp_path):
     assert (directory / "candidate_band_comparison.png").stat().st_size > 0
     record = json.loads(sidecar.read_text(encoding="utf-8"))
     assert record["draws_executed"] == 0
-    assert "numbered S6" in readme_text(
+    assert "manuscript Table 2" in readme_text(
         n_replicates=10000, seed=20261019, band_quantile=0.95
     )
+
+
+def test_flat_copy_lands_beside_the_bundle_under_the_given_root(tmp_path):
+    from dubanevics2026topological.tables.candidate_band_comparison import (
+        copy_flat_tables,
+    )
+
+    table_dir = tmp_path / "root" / "tables" / "canonical" / "candidate_band_comparison"
+    table_dir.mkdir(parents=True)
+    names = ["t.csv", "t.html", "t.md", "t.json", "t.png", "README.md"]
+    for name in names:
+        (table_dir / name).write_text(name, encoding="utf-8")
+    copied = copy_flat_tables([table_dir / name for name in names], table_dir)
+    shelf = table_dir.parent
+    assert sorted(path.name for path in copied) == ["t.csv", "t.html", "t.json", "t.md"]
+    assert all(path.parent == shelf for path in copied)
+    assert (shelf / "t.csv").read_text(encoding="utf-8") == "t.csv"
+    assert not (shelf / "README.md").exists()

@@ -23,11 +23,13 @@ SPECS = {spec.figure_id: spec for spec in FIGURE_SPECS}
 
 
 def test_the_default_selection_has_every_manuscript_bootstrap_figure() -> None:
-    # The manuscript figures that read the bootstrap are default; the biology figure and the unnumbered scan are not.
+    # The manuscript figures that read the bootstrap are default; the biology figure, the unnumbered
+    # scan and the unnumbered bootstrap tree histogram are not.
     defaults = set(default_selection(SPECS))
     assert BOOTSTRAP_FIGURE_IDS - defaults == {
         "candidate_tree_bootstrap_biology",
         "bootstrap_band_quantile_scan",
+        "bootstrap_tree_histogram",
     }
 
 
@@ -36,7 +38,11 @@ def test_with_bootstrap_adds_every_bootstrap_figure_the_band_scans_included() ->
     extended = default_selection(SPECS, with_bootstrap=True)
     added = set(extended) - set(defaults)
     assert added == BOOTSTRAP_FIGURE_IDS - set(defaults)
-    assert added == {"candidate_tree_bootstrap_biology", "bootstrap_band_quantile_scan"}
+    assert added == {
+        "candidate_tree_bootstrap_biology",
+        "bootstrap_band_quantile_scan",
+        "bootstrap_tree_histogram",
+    }
     assert BAND_SCAN_FIGURE_IDS <= set(extended)
     assert build_module.WITH_BOOTSTRAP_FIGURE_IDS == BOOTSTRAP_FIGURE_IDS
     assert [f for f in extended if f in defaults] == list(defaults)  # registry order
@@ -222,7 +228,7 @@ def test_exclusions_drop_only_the_named_figures_in_order_and_log_reasons(capsys)
     assert selection == tuple(f for f in full if f not in GUARDED)
     err = capsys.readouterr().err
     assert "Skipping candidate_tree_bootstrap_biology from --with-bootstrap: guard reason a" in err
-    assert "Skipping bootstrap_tree_histogram from the default figures: guard reason b" in err
+    assert "Skipping bootstrap_tree_histogram from --with-bootstrap: guard reason b" in err
     assert default_selection(SPECS, excluded=GUARDED) == tuple(
         f for f in default_selection(SPECS) if f not in GUARDED
     )

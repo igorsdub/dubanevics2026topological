@@ -62,6 +62,7 @@ from ._charts import (
 )
 from ._top_histogram import count_axis_limit, top_histogram_settings
 from .component_persistence import descending_component_pairs
+from .labels import TOPOGRAPHER_THRESHOLD
 from .palette import (
     BAND_GREY,
     COUNT_BLACK,
@@ -474,7 +475,7 @@ def _threshold_rule_layers(
     at the diagram's right edge.
     """
     upper = float(noise_band_upper)
-    label = str(appearance.get("threshold_apex_label", "Median-reflected\nthreshold"))
+    label = str(appearance.get("threshold_apex_label", TOPOGRAPHER_THRESHOLD.replace(" ", "\n", 1)))
     # Vega draws a list of strings as lines; a "\n" inside one string stays on one line.
     lines = label.split("\n")
     frame = pl.DataFrame({"functional_threshold": [upper]})

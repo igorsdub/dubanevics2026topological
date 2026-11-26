@@ -211,7 +211,7 @@ def test_global_stability_has_no_band_edge_keys_and_a_grey_peak_colour(figures):
     table = figures["figures"]["bootstrap_global_stability"]
     assert not [key for key in table if key.startswith("band_edge")]
     assert table["peak_color"] == palette.PEAK_GREY
-    assert table["histogram_width"] == 250
+    assert table["histogram_width"] == 385
 
 
 def test_codon_entropy_figures_dim_every_branch_but_the_focused_ridge(figures):
@@ -269,7 +269,7 @@ def test_palette_greys_match_the_configured_values(figures):
     assert entropy
     for table in entropy:
         assert not {"ridge_color", "inactive_ridge_color", "context_color"} & set(table)
-        assert table["entropy_outside_color"] == palette.OUTSIDE_GREY
+        assert "entropy_outside_color" not in table
     assert not hasattr(palette, "RIDGE_GREY")
     assert not hasattr(palette, "INACTIVE_RIDGE_GREY")
     metrics = tables["study_tree_persistence_metrics"]

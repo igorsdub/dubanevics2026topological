@@ -1,4 +1,4 @@
-"""Full, Published and Candidate tree-histogram comparison figure."""
+"""Full, Papkou and Topographer tree-histogram comparison figure."""
 
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ from ._charts import (
     tree_population,
 )
 from ._top_histogram import count_axis_limit
+from .labels import graph_label
 from .palette import THRESHOLD_GREY
 from .slide_tree import (
     slide_stop_overrides,
@@ -36,7 +37,7 @@ def build_tree_comparison_figure(
     *,
     slide: dict[str, Any] | None = None,
 ):
-    """Build Full, Published, and Candidate tree–histogram rows.
+    """Build Full, Papkou, and Topographer tree–histogram rows.
 
     ``slide`` (``{"style", "coloring"}``) is the frameless slide render: no row titles,
     the style's markers and, with ``coloring="none"``, plain-edge trees with no colour bar.
@@ -51,9 +52,9 @@ def build_tree_comparison_figure(
     )
     landscapes = analysis["landscapes"]
     panel_specs = (
-        ("full", "Full graph", "full"),
-        ("study_clamped", "Published graph", "article"),
-        ("candidate_clamped", "Candidate graph", "candidate"),
+        ("full", graph_label("full"), "full"),
+        ("study_clamped", graph_label("published"), "article"),
+        ("candidate_clamped", graph_label("reflected_by"), "candidate"),
     )
     products = {}
     max_branch_count = 1

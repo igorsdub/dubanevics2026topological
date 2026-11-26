@@ -9,7 +9,7 @@ abstract: >-
   combinatorial fitness landscapes using merge trees": the topology of the
   Papkou et al. 2023 fitness landscape.
 type: software
-version: 1.0.0
+version: 1.0.1
 date-released: 2026-11-26
 license: MIT
 repository-code: "https://github.com/igorsdub/dubanevics2026topological"

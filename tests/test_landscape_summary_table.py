@@ -17,6 +17,7 @@ from dubanevics2026topological.results import processed
 from dubanevics2026topological.analysis.describe import SUMMARY_COLUMNS
 from dubanevics2026topological.build import CONTEXT_AWARE_COMMANDS
 from dubanevics2026topological.tables import landscape_summary_table as table
+from dubanevics2026topological.tables.graph_summary import SUMMARY_DISPLAY
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 GRAPH_ROWS = {
@@ -85,7 +86,8 @@ def test_nominal_columns_keep_saved_values_and_band_keeps_tree_rows_only(tmp_pat
     for index, name in enumerate(SUMMARY_COLUMNS):
         expected = _values(index, name)
         for metric, value in expected.items():
-            cell = rows[metric][name]
+            # The CSV header carries the display label; the sidecar keeps the identity name.
+            cell = rows[metric][SUMMARY_DISPLAY[name]]
             if index in (4, 6) and metric not in table.TREE_LEVEL_METRICS:
                 assert cell == ""
             else:

@@ -98,9 +98,9 @@ def test_nominal_state_never_picks_a_band_tree() -> None:
 def test_panel_titles_name_the_band_state() -> None:
     assert (
         panel_title({"thr": "published", "fdr": "by", "q": 0.05, "tree": "band"})
-        == "Published threshold, BY q = 0.05, band-simplified"
+        == "Papkou + FDR, bootstrapped"
     )
-    assert panel_title({"graph": "full", "tree": "nominal"}) == "Full graph"
+    assert panel_title({"graph": "full", "tree": "nominal"}) == "Full"
 
 
 def test_grid_layout_per_view() -> None:

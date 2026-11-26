@@ -120,7 +120,7 @@ def test_builder_draws_both_thresholds_and_three_corrections() -> None:
         "vanilla",
     )
     plotted = pl.DataFrame(chart.data)
-    assert set(plotted["threshold"]) == {"Published", "Candidate"}
+    assert set(plotted["threshold"]) == {"Papkou", "Topographer"}
     assert set(plotted["method"]) == {
         "Bonferroni",
         "Benjamini-Hochberg",

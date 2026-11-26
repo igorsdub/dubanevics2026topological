@@ -1,4 +1,4 @@
-"""Supplementary S7: Full-graph and Published-graph entropy versus fitness."""
+"""Supplementary S14: Full-graph and Papkou-graph entropy versus fitness."""
 
 from __future__ import annotations
 
@@ -80,10 +80,32 @@ def test_figure_is_two_graphs_and_no_tree(style) -> None:
     )
     text = json.dumps(chart.to_dict())
     assert "Full graph" in text
-    assert "Published graph" in text
+    assert "Papkou graph" in text
     assert "KEM" not in text
     assert "TCL" not in text
     assert "tree" not in text.lower()
+
+
+def test_every_panel_declares_the_one_shared_entropy_bar() -> None:
+    full, published = _graphs()
+    spec = build_graph_codon_entropy_figure(
+        build_graph_codon_entropy(full, published, sweep_points=5),
+        load_settings(),
+        "vanilla",
+        title="Entropy against fitness threshold",
+        subtitle="fixture",
+    ).to_dict()
+    assert spec["resolve"]["scale"]["color"] == "shared"
+    legends = []
+    for panel in spec["hconcat"]:
+        layers = panel.get("layer", [panel])
+        for layer in layers:
+            color = layer.get("encoding", {}).get("color", {})
+            if "legend" in color:
+                legends.append(color["legend"])
+    assert len(legends) == len(spec["hconcat"])
+    assert all(legend is not None for legend in legends)
+    assert all(legend["orient"] == "right" for legend in legends)
 
 
 def test_figure_renders_to_png(tmp_path) -> None:

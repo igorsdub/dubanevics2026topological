@@ -23,7 +23,7 @@ from dubanevics2026topological.figures._count_labels import (
     fixed_label_text,
 )
 from dubanevics2026topological.figures.palette import LIGHT_GREY
-from dubanevics2026topological.figures.papkou_agreement import density_panel
+from dubanevics2026topological.figures.papkou_agreement import apply_density_style, density_panel
 
 FIGURE_ID = "fitness_se_correlation"
 _HEXBIN_MIN = 2500
@@ -95,22 +95,4 @@ def build_fitness_se_correlation_figure(
         identity_line=False,
         legend_orient=str(appearance.get("colorbar_orient", "top-right")),
     )
-    return (
-        panel.configure(font=appearance.get("font_family", "Arial, Liberation Sans, Helvetica, sans-serif"))
-        .configure_axis(
-            labelFontSize=font_size,
-            titleFontSize=font_size,
-            labelPadding=int(appearance.get("axis_label_padding", 4)),
-            titlePadding=int(appearance.get("axis_title_padding", 8)),
-            grid=bool(appearance.get("grid", False)),
-            domain=False,
-            ticks=True,
-        )
-        .configure_legend(labelFontSize=font_size, titleFontSize=font_size)
-        .configure_title(
-            fontSize=int(appearance.get("heading_font_size", 18)),
-            subtitleFontSize=int(appearance.get("subtitle_font_size", 14)),
-            anchor="start",
-        )
-        .configure_view(strokeWidth=0)
-    )
+    return apply_density_style(panel, appearance)

@@ -361,7 +361,7 @@ def build_bootstrap_band_quantile_scan_seeds_figure(
         )
         .encode(x=x_axis)
     )
-    dataset = str(rendering.get("dataset_label", "Papkou 2023 Candidate landscape"))
+    dataset = str(rendering.get("dataset_label", "Papkou 2023 Topographer + FDR landscape"))
     fields = {
         "dataset": dataset,
         "band_quantile": quantities.display("bootstrap.band_quantile"),

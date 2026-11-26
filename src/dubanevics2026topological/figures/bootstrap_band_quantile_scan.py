@@ -31,6 +31,7 @@ import polars as pl
 from ..analysis.manuscript_quantities import BOOTSTRAP, agree, value_text
 from ._count_labels import fixed_label_text, general_label_text
 from .candidate_tree_biology import biology_renderings, wrap_phrases
+from .labels import fdr_level_text, settings_fdr_q, state_label
 from .palette import BAND_GREY, EMPHASIS_BLACK, TREE_HEIGHT, TREE_WIDTH
 
 FIGURE_ID = "bootstrap_band_quantile_scan"
@@ -390,7 +391,7 @@ def build_bootstrap_band_quantile_scan_figure(
         .mark_text(baseline="bottom", dy=title_lift, color=ink, fontSize=font_size)
         .encode(x=x_axis, y=alt.value(0), text="title:N")
     )
-    dataset = str(rendering.get("dataset_label", "Papkou 2023 Candidate landscape"))
+    dataset = str(rendering.get("dataset_label", "Papkou 2023 Topographer + FDR landscape"))
     subtitle = scan_subtitle(
         rendering,
         [
@@ -464,7 +465,7 @@ def _panel_chart(
     layers = scan_run_layers(run, rendering, x_axis, y_axis, marker_text)
     size = int(rendering.get("panel_size", 300))
     title = alt.TitleParams(
-        f"{spec.row_title} · {spec.column_title}",
+        state_label(spec.state),
         anchor="start",
         fontSize=int(rendering.get("heading_font_size", 16)),
     )
@@ -474,25 +475,40 @@ def _panel_chart(
 def build_bootstrap_band_quantile_scan_grid(
     panels: list[dict[str, Any]], settings: dict[str, Any]
 ) -> Any:
-    """Draw the two BY scans in one row: the Published graph left, the Candidate graph right.
+    """Draw the scans as a grid: the Papkou column left, the Topographer column right.
 
-    ``panels`` stays in ``PANELS`` order (Published BY, Candidate BY). Every cell is
-    square (``panel_size``), shares the x scale ``[0, tau_axis_max]`` (no gridlines) and
-    keeps its own y scale. One x title sits under the row and one y title to its left.
-    Each cell uses the same layers as the single-panel figure. Marker text is taken from
-    that cell's scan table: the manuscript registry holds one graph, and a shared
-    registry string would mislabel the other.
+    ``panels`` stays in ``PANELS`` order (Papkou, Papkou + FDR, Topographer,
+    Topographer + FDR). The BY panels are required; the no-FDR panels are drawn as the top
+    row when their scans exist (the 2x2) and left out otherwise (one row of the two BY
+    panels). Each cell is titled with its strict state label and the FDR level is printed
+    once, as the subtitle (``FDR: BY, q = 0.05``, from the analysis settings). Every cell is
+    square (``panel_size``), shares the x scale ``[0, tau_axis_max]`` (tick labels on the
+    bottom row only, no gridlines) and keeps its own y scale. One x title sits under the
+    grid and one y title to its left. Each cell uses the same layers as the single-panel
+    figure. Marker text is taken from that cell's scan table: the manuscript registry holds
+    one graph, and a shared registry string would mislabel the others.
     """
-    if len(panels) != 2:
-        raise ValueError("The band-quantile scan grid needs two panels.")
+    by_panels = [panel for panel in panels if panel["panel"].fdr == "by"]
+    no_fdr_panels = [panel for panel in panels if panel["panel"].fdr != "by"]
+    if len(by_panels) != 2 or len(no_fdr_panels) not in (0, 2):
+        raise ValueError(
+            "The band-quantile scan grid needs the two BY panels and either both or "
+            "neither of the no-FDR panels."
+        )
     rendering = _grid_rendering(settings)
     font_size = int(rendering.get("font_size", 15))
-    row = alt.hconcat(
-        _panel_chart(panels[0], rendering), _panel_chart(panels[1], rendering)
-    )
+    rows = []
+    if no_fdr_panels:
+        rows.append(
+            alt.hconcat(
+                *(_panel_chart(panel, rendering, show_x_labels=False) for panel in no_fdr_panels)
+            )
+        )
+    rows.append(alt.hconcat(*(_panel_chart(panel, rendering) for panel in by_panels)))
     # Scales: x shared by every cell, y independent per cell.
     core = (
-        row.resolve_scale(x="shared", y="independent")
+        alt.vconcat(*rows)
+        .resolve_scale(x="shared", y="independent")
         .properties(
             title=alt.TitleParams(
                 str(rendering.get("x_axis_title", "Persistence threshold")),
@@ -513,14 +529,22 @@ def build_bootstrap_band_quantile_scan_grid(
         )
     )
     heading = rendering.get("title")
-    if heading:
-        chart = alt.vconcat(chart).properties(
-            title=alt.TitleParams(
-                str(heading),
-                anchor="start",
-                fontSize=int(rendering.get("heading_font_size", 18)),
-            )
+    level = fdr_level_text(settings_fdr_q(settings))
+    if heading or level:
+        title = alt.TitleParams(
+            str(heading or ""),
+            anchor="start",
+            fontSize=int(rendering.get("heading_font_size", 18)),
+            **(
+                {
+                    "subtitle": level,
+                    "subtitleFontSize": int(rendering.get("subtitle_font_size", 12)),
+                }
+                if level
+                else {}
+            ),
         )
+        chart = alt.vconcat(chart).properties(title=title)
     return (
         chart.configure(font=rendering.get("font_family", "Arial, Liberation Sans, Helvetica, sans-serif"))
         .configure_axis(labelFontSize=font_size, titleFontSize=font_size)

@@ -1,4 +1,4 @@
-"""Three-variant graph comparison: published point estimates, Papkou BY 5%, median-reflected BY 5%.
+"""Three-variant graph comparison: Papkou point estimates, Papkou + FDR 5%, Topographer + FDR 5%.
 
 Builds each prepared graph through ``prepare_clamped_landscape`` /
 ``prepare_candidate_landscape`` (the established construction), then records the
@@ -29,9 +29,9 @@ from dubanevics2026topological.landscape.selection import (
 
 PAPKOU_T = -0.5077739708744209
 VARIANTS = (
-    ("published_point_estimates", "Published baseline: point estimates (no uncertainty screening)", None),
+    ("published_point_estimates", "Papkou baseline: point estimates (no uncertainty screening)", None),
     ("fdr_by_q0.05_papkou_original", "Papkou threshold: BY, nominal 5% FDR", "papkou_original"),
-    ("fdr_by_q0.05_median_reflected", "Median-reflected threshold: BY, nominal 5% FDR", "median_reflected"),
+    ("fdr_by_q0.05_median_reflected", "Topographer threshold: BY, nominal 5% FDR", "median_reflected"),
 )
 
 

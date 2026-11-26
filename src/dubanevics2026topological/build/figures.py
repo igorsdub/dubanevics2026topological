@@ -31,6 +31,7 @@ from ..figure_exclusions import (
 )
 from ..figures._quantities import QuantityError, QuantityGapError
 from ..figures._title_flag import without_headings
+from ..figures.labels import PAPKOU_THRESHOLD, TOPOGRAPHER_THRESHOLD, graph_label
 from ..figures.peak_rank import PEAK_RANK_IDS
 from ..figures.registry import (
     FIGURE_SPECS,
@@ -251,8 +252,8 @@ def variant_figure_footer(
 
     Constructs a short, consistent footer line from the variant declaration and authenticated
     provenance, without hardcoded values:
-    - Prefix: "Candidate graph: "
-    - Cutoff text: e.g. "Candidate graph: Candidate threshold (T = −0.253159)" or "Candidate graph: Papkou threshold (T = −0.5077739708744209)"
+    - Prefix: the graph label, "Topographer + FDR graph: " or "Papkou + FDR graph: "
+    - Cutoff text: e.g. "Topographer + FDR graph: Topographer threshold (T = −0.253159)" or "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209)"
     - Method and nominal q: e.g. "BY, nominal q = 0.05"
     - Retained graph rule: "≥1 retained Functional endpoint, largest component"
     - Bootstrap draw count: "10,000 bootstrap draws" included only on figures using bootstrap output.
@@ -284,13 +285,18 @@ def variant_figure_footer(
     applied_str = f"{applied}".replace("-", "−")
     cutoff = summary["cutoff"]
     if cutoff == "median_reflected":
-        cutoff_label = "Candidate threshold"
+        cutoff_label = TOPOGRAPHER_THRESHOLD
+        graph_state = "reflected_by"
     elif cutoff == "papkou_original":
-        cutoff_label = "Papkou threshold"
+        cutoff_label = PAPKOU_THRESHOLD
+        graph_state = "published_by"
     else:
+        # Another cutoff keeps the footer's earlier prefix, which always named the
+        # Topographer-side graph; only its cutoff text is the declared name.
         cutoff_label = f"{cutoff.replace('_', ' ').capitalize()} threshold"
+        graph_state = "reflected_by"
 
-    cutoff_part = f"Candidate graph: {cutoff_label} (T = {applied_str})"
+    cutoff_part = f"{graph_label(graph_state)}: {cutoff_label} (T = {applied_str})"
     method = str(summary["method"]).upper()
     q = summary["q"]
     q_part = (

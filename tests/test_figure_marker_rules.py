@@ -1,4 +1,4 @@
-"""Figure marker rules (GLOSSARY): valleys only on the full graph, no hollow markers, purple order."""
+"""Figure marker rules (GLOSSARY): valleys only on the full graph, no hollow markers, orange order."""
 
 from __future__ import annotations
 
@@ -110,11 +110,11 @@ def _hue_degrees(color: str) -> float:
     return colorsys.rgb_to_hsv(red, green, blue)[0] * 360
 
 
-def test_horton_strahler_order_is_one_purple_ramp_everywhere() -> None:
+def test_horton_strahler_order_is_one_orange_ramp_everywhere() -> None:
     colors = palette.HORTON_STRAHLER_COLORS
     assert len(colors) == 4
     for color in colors:
-        assert 235 <= _hue_degrees(color) <= 280  # purple
+        assert 10 <= _hue_degrees(color) <= 30  # orange
     lightness = [
         colorsys.rgb_to_hls(*(int(c[i : i + 2], 16) / 255 for i in (1, 3, 5)))[1]
         for c in colors

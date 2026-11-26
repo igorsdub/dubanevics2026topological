@@ -30,23 +30,30 @@ EXISTING_OPT_IN = frozenset(
         "full_tree_fitness_landmarks",
         "candidate_tree_bootstrap_biology",
         "bootstrap_band_quantile_scan",
+        # Opt-in since the supplementary set was cut to S1 to S14.
+        "full_tree_histogram",
+        "published_tree_histogram",
+        "candidate_tree_histogram",
+        "full_tree_persistence",
+        "bootstrap_tree_histogram",
+        "published_leaf_persistence",
+        "candidate_leaf_persistence",
     }
 )
 # Opt-in then, default since PR 320 (manuscript sources).
 MANUSCRIPT_DEFAULTS = frozenset(
     {
-        "bootstrap_tree_histogram",
         "bootstrap_codon_entropy",
         "bootstrap_global_stability",
         "bootstrap_band_quantile_scan_seeds",
         "functional_counts_vs_q",
-        "fitness_se_correlation",
         "branch_vertex_counts_2x2",
         "bootstrap_band_quantile_scan_grid",
-        "reflected_fdr_trees",
         "full_tree_persistence_vertical_histogram",
-        "candidate_leaf_persistence_band",
         "candidate_leaf_swarm_band",
+        "published_leaf_swarm_band",
+        "papkou_agreement",
+        "graph_codon_entropy",
     }
 )
 # The registered figures before this change, in order; new ones are appended after them.
@@ -92,15 +99,15 @@ def test_default_selection_is_unchanged() -> None:
         "full_join_tree",
         "functional_counts_vs_q_bh",
         "functional_counts_vs_q_bonferroni",
-        "graph_codon_entropy",
         "ridge_entropy",
         "multiple_testing_comparison",
-        "papkou_agreement",
+        "reflected_fdr_trees",
+        "fitness_se_correlation",
+        "candidate_leaf_persistence_band",
         "fitness_vs_pooled_se",
         "published_fdr_leaf_swarm",
         "candidate_fdr_leaf_swarm",
         "published_leaf_persistence_band",
-        "published_leaf_swarm_band",
         "peak_pair_matrices",
         "peak_pair_hamming_fitness_scatter",
         "peak_pair_direct_via_saddle_scatter",

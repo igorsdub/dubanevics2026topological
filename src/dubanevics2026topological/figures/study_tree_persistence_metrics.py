@@ -34,6 +34,7 @@ from ._charts import (
     persistence_panel_size,
     wild_type_layers,
 )
+from .labels import graph_label
 from .palette import (
     COUNT_BLACK,
     HORTON_STRAHLER_COLORS,
@@ -181,7 +182,7 @@ def build_study_tree_persistence_metrics_figure(
     )
     chart = chart.properties(
         title=alt.TitleParams(
-            text="Published graph",
+            text=graph_label("published"),
             subtitle=study_subtitle,
         )
     )

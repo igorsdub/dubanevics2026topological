@@ -21,8 +21,8 @@ def test_the_four_variants_are_the_peak_uncertainty_variants() -> None:
 
 def test_the_grid_is_published_left_candidate_right_nominal_above() -> None:
     assert GRID_ORDER == (("published", "candidate"), ("published_fdr", "candidate_fdr"))
-    assert PANELS["published"][1:] == ("Published graph", "Nominal")
-    assert PANELS["candidate_fdr"][1:] == ("Candidate graph", "BY q = 0.05")
+    assert PANELS["published"][1:] == ("Papkou graph", "Nominal")
+    assert PANELS["candidate_fdr"][1:] == ("Topographer graph", "BY q = 0.05")
 
 
 def test_a_variant_context_moves_only_the_output_root(tmp_path: Path) -> None:

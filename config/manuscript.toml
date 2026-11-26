@@ -31,13 +31,13 @@ external = true
 [[figure]]
 number = "3"
 section = "main"
-desc = "published_tree_metrics"
+desc = "papkou_tree_metrics"
 source = "study_tree_persistence_metrics"
 
 [[figure]]
 number = "4"
 section = "main"
-desc = "published_tree_biology"
+desc = "papkou_tree_biology"
 source = "study_tree_persistence_biology"
 
 [[figure]]
@@ -61,7 +61,7 @@ external = true
 [[figure]]
 number = "8"
 section = "main"
-desc = "candidate_fdr_tree_band_simplification"
+desc = "topographer_fdr_tree_band_simplification"
 external = true
 
 [[figure]]
@@ -70,158 +70,92 @@ section = "main"
 desc = "bootstrap_codon_entropy"
 source = "bootstrap_codon_entropy"
 
-# Supplementary: numbered S1, S2, ... in file order. Unnumbered entries are
-# written to exploratory/ until they get a number.
+# Supplementary: exactly S1 to S14, in file order. Every other canonical render is
+# written to exploratory/ under its canonical stem.
 
 [[figure]]
 section = "supplementary"
 number = "S1"
-desc = "full_tree_persistence_top_histogram"
-source = "full_tree_persistence"
+desc = "fitness_and_se_barseqfit_agreement"
+source = "papkou2023_fitness_and_se_barseqfit_agreement"
 
 [[figure]]
 section = "supplementary"
 number = "S2"
+desc = "fdr_scan"
+source = "functional_counts_vs_q"
+
+[[figure]]
+section = "supplementary"
+number = "S3"
 desc = "tree_comparison"
 source = "tree_comparison"
 
 [[figure]]
 section = "supplementary"
-number = "S3"
-desc = "published_tree_histogram"
-source = "published_tree_histogram"
-
-[[figure]]
-section = "supplementary"
 number = "S4"
-desc = "full_tree_histogram"
-source = "full_tree_histogram"
-
-[[figure]]
-section = "supplementary"
-number = "S5"
-desc = "candidate_tree_histogram"
-source = "candidate_tree_histogram"
-
-[[figure]]
-section = "supplementary"
-number = "S6"
-desc = "branch_vertex_counts_2x2"
+desc = "branch_vertex_counts"
 source = "branch_vertex_counts_2x2"
 
 [[figure]]
 section = "supplementary"
-number = "S7"
-desc = "fitness_se_correlation"
-source = "fitness_se_correlation"
+number = "S5"
+desc = "papkou_fdr_tree_combined"
+source = "tree_persistence_combined__thr=published_fdr=by_q=0.05_tree=nominal_style=annotated"
 
 [[figure]]
 section = "supplementary"
-number = "S8"
-desc = "functional_counts_vs_q"
-source = "functional_counts_vs_q"
-
-[[figure]]
-section = "supplementary"
-number = "S9"
-desc = "reflected_fdr_trees"
-source = "reflected_fdr_trees"
-
-[[figure]]
-section = "supplementary"
-number = "S10"
-desc = "published_fdr_tree"
-source = "tree_persistence__thr=published_fdr=by_q=0.05_tree=nominal_style=annotated"
-
-[[figure]]
-section = "supplementary"
-number = "S11"
-desc = "bootstrap_tree_histogram"
-source = "bootstrap_tree_histogram"
-
-[[figure]]
-section = "supplementary"
-number = "S12"
-desc = "global_stability"
+number = "S6"
+desc = "bootstrap_global_stability"
 source = "bootstrap_global_stability"
 
 [[figure]]
 section = "supplementary"
-number = "S13"
-desc = "band_quantile_scan"
+number = "S7"
+desc = "peaks_surviving_threshold"
 source = "bootstrap_band_quantile_scan_grid"
 
 [[figure]]
 section = "supplementary"
-number = "S14"
-desc = "band_quantile_scan_seeds"
+number = "S8"
+desc = "band_quantile_scan"
 source = "bootstrap_band_quantile_scan_seeds"
 
 [[figure]]
 section = "supplementary"
-number = "S15"
-desc = "candidate_bootstrap_simplification_stops"
-source = "bootstrap_stops__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
+number = "S9"
+desc = "papkou_fdr_bootstrapped_combined"
+source = "bootstrap_combined__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
 
 [[figure]]
 section = "supplementary"
-number = "S16"
-desc = "candidate_bootstrap_simplification_synonymous"
-source = "bootstrap_synonymous__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
-
-[[figure]]
-section = "supplementary"
-number = "S17"
-desc = "candidate_bootstrap_simplification_combined"
-source = "bootstrap_combined__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
-
-[[figure]]
-section = "supplementary"
-number = "S18"
-desc = "published_bootstrap_simplification_stops"
-source = "bootstrap_stops__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
-
-[[figure]]
-section = "supplementary"
-number = "S19"
-desc = "published_bootstrap_simplification_synonymous"
-source = "bootstrap_synonymous__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated"
-
-[[figure]]
-section = "supplementary"
-number = "S20"
-desc = "published_leaf_persistence"
-source = "published_leaf_persistence"
-
-[[figure]]
-section = "supplementary"
-number = "S21"
-desc = "published_leaf_swarm"
+number = "S10"
+desc = "papkou_leaf_swarm"
 source = "published_leaf_swarm"
 
 [[figure]]
 section = "supplementary"
-number = "S22"
-desc = "candidate_leaf_persistence"
-source = "candidate_leaf_persistence"
+number = "S11"
+desc = "papkou_fdr_bootstrapped_leaf_swarm"
+source = "published_leaf_swarm_band"
 
 [[figure]]
 section = "supplementary"
-number = "S23"
-desc = "candidate_leaf_swarm"
+number = "S12"
+desc = "topographer_fdr_leaf_swarm"
 source = "candidate_leaf_swarm"
 
 [[figure]]
 section = "supplementary"
-number = "S24"
-desc = "candidate_leaf_persistence_band"
-source = "candidate_leaf_persistence_band"
+number = "S13"
+desc = "topographer_fdr_bootstrapped_leaf_swarm"
+source = "candidate_leaf_swarm_band"
 
 [[figure]]
 section = "supplementary"
-number = "S25"
-desc = "candidate_leaf_swarm_band"
-source = "candidate_leaf_swarm_band"
+number = "S14"
+desc = "graph_codon_entropy_full_papkou"
+source = "graph_codon_entropy_fullpublished"
 
 # Exploratory renders (kept, not in the manuscript) need no entry: the namer
 # copies every canonical render that no numbered entry claims into
@@ -230,11 +164,25 @@ source = "candidate_leaf_swarm_band"
 [[table]]
 number = "1"
 section = "main"
-desc = "graph_summary"
-source = "papkou2023_full_vs_published"
+desc = "graph_descriptive"
+source = "graph_descriptive_statistics"
 
 [[table]]
 number = "2"
 section = "main"
-desc = "candidate_corrections"
+desc = "tree_descriptive"
+source = "candidate_band_comparison"
+
+# Landscape-summary slices kept as supplementary tables. The builders stay;
+# numbering is the only change from the former main Tables 1 and 2.
+[[table]]
+number = "S1"
+section = "supplementary"
+desc = "graph_summary"
+source = "papkou2023_full_vs_published"
+
+[[table]]
+number = "S2"
+section = "supplementary"
+desc = "topographer_corrections"
 source = "papkou2023_candidate_corrections"

@@ -64,12 +64,11 @@ TREE_GREY = "#b3b3b3"  # tree edges (``biology_tree_color``)
 INK_GREY = "#222222"  # text and strokes
 MID_GREY = "#777777"  # filled histogram bars
 INTERVAL_GREY = "#555555"  # interval segments
-OUTSIDE_GREY = "#f5f5f5"  # entropy cells outside the population span
-# Horton–Strahler order: one purple ramp, order 1 light lavender to order 4
-# near-black purple (lightness falls at every step). Order is a different quantity from the grey
+# Horton–Strahler order: one orange ramp, order 1 light orange to order 4 dark
+# brown-orange (lightness falls at every step). Order is a different quantity from the grey
 # vertex count, so it has a hue. Every figure that colours by order reads this
 # tuple (or the same values under ``horton_strahler_colors``).
-HORTON_STRAHLER_COLORS = ("#bcbddc", "#807dba", "#54278f", "#2a0a4a")  # orders 1 to 4
+HORTON_STRAHLER_COLORS = ("#f87f2c", "#e25508", "#b03903", "#7f2704")  # orders 1 to 4
 # Black-and-white vertex count: ``COUNT_BLACK`` whose opacity carries the count (see
 # ``_branch_count_style``), and the light grey of the sequence-count histogram above
 # a persistence diagram. These are the only count colours; no hue.

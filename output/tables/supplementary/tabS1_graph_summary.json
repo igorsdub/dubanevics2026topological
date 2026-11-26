@@ -1,25 +1,25 @@
 {
   "schema": 1,
   "stem": "full_vs_published",
-  "section": "main",
-  "title": "Full, Published and Candidate landscapes",
-  "table_identity_sha256": "d3d3325b101a797991d9edc3869d998f0ed0dc1b6b1b555fb5122eb129611ae4",
+  "section": "supplementary",
+  "title": "Full, Papkou and Topographer + FDR landscapes",
+  "table_identity_sha256": "19dbde489df69a2b544dd106c3fac516e8275319d988b92b162cbb5c038d6809",
   "columns": [
     {
       "display": "Full",
-      "source": "Full (nominal)",
+      "source": "Full",
       "label": "landscape_summary__graph=full_tree=nominal_hash=f951fa94",
       "scientific_id_sha256": "f951fa9407f213fba118dd0253b89d475ee349697b12d86fd7d681544da638d9"
     },
     {
-      "display": "Published",
-      "source": "Published (point-estimate nominal)",
+      "display": "Papkou",
+      "source": "Papkou",
       "label": "landscape_summary__thr=published_fdr=none_tree=nominal_hash=64743e15",
       "scientific_id_sha256": "64743e15d27259b2f3903b988563ec6b158c4419b98ea682ec13914b9d455c82"
     },
     {
-      "display": "Candidate",
-      "source": "Median-reflected BY (nominal)",
+      "display": "Topographer + FDR",
+      "source": "Topographer + FDR",
       "label": "landscape_summary__thr=reflected_fdr=by_q=0.05_tree=nominal_hash=eb37f454",
       "scientific_id_sha256": "eb37f454c8bb2a14cba6cbaf763288a340e5ceac7ca64e46cebdb975aa4b6d2c"
     }
@@ -47,10 +47,10 @@
   ],
   "valley_source": {
     "key": "full_graph.persistence.valley_count",
-    "registry_fingerprint": "0c370b0402152863ef848358cc0a168f1bb243e820fe5f68b4c65838076fc919",
+    "registry_fingerprint": "2f795994d2b6fa55956af48e51aa7ce5c39da249dffc5966bc1e0a67a986b0dd",
     "gaps": {
-      "Published": "No authenticated per-selection valley product.",
-      "Candidate": "No authenticated per-selection valley product."
+      "Papkou": "No authenticated per-selection valley product.",
+      "Topographer + FDR": "No authenticated per-selection valley product."
     }
   }
 }

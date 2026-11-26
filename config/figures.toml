@@ -238,8 +238,8 @@ join_trailing_saddle = "Join-tree trailing saddle"
 median = "Median"
 split_leading_saddle = "Split-tree leading saddle"
 join_leading_saddle = "Join-tree leading saddle"
-published_functional_threshold = "Published functional threshold"
-candidate_functional_threshold = "Candidate functional threshold"
+published_functional_threshold = "Papkou threshold"
+candidate_functional_threshold = "Topographer threshold"
 
 [figures.full_tree_histogram.tree]
 
@@ -298,7 +298,7 @@ line_value_dy = -3
 # valley just above it, synonymous and stop codon just below it, persistence_legend_rule_gap
 # px clear of it, right-aligned persistence_legend_inset_x px from the right edge (far
 # enough to clear the global-minimum point in the bottom-right corner), no backing box.
-# Its font size is median_label_font_size, the "Median-reflected threshold" caption's.
+# Its font size is median_label_font_size, the "Topographer threshold" caption's.
 persistence_legend_inset_x = 26
 persistence_legend_rule_gap = 6
 persistence_legend_line_gap = 2
@@ -326,7 +326,7 @@ point_opacity = 1.0
 # rule across the diagram, styled by [figures.graph_tree_persistence]
 # tree_threshold_*, with its one y label and this caption just above the rule at the
 # diagram's right edge. The vanilla export draws none of it.
-threshold_apex_label = "Median-reflected\nthreshold"
+threshold_apex_label = "Topographer\nthreshold"
 threshold_apex_label_dy = -4
 # The grey noise square (data minimum to the median-reflected threshold on both axes)
 # sits at the very back of the diagram, filled like the bootstrap band (band_color at
@@ -364,8 +364,8 @@ branch_count_title = "Branch\nvertex\ncount"
 # Altair/Vega scheme for the discrete amino-acid Hamming bins (tree edges, persistence
 # points and colour bar): sampled by the figure the way Vega samples it.
 aa_hamming_color_scheme = "bluepurple"
-# Same four steps as figures.palette.HORTON_STRAHLER_COLORS (Oranges, light to dark).
-horton_strahler_colors = ["#bcbddc", "#807dba", "#54278f", "#2a0a4a"]
+# Same four steps as figures.palette.HORTON_STRAHLER_COLORS (one orange ramp, light to dark).
+horton_strahler_colors = ["#f87f2c", "#e25508", "#b03903", "#7f2704"]
 
 [figures.study_tree_persistence_metrics.tree]
 
@@ -416,7 +416,7 @@ band_opacity = 0.3
 band_label_color = "#595959"
 band_label = "band: persistence ≤ threshold"
 band_label_font_size = 12
-dataset_label = "Papkou et al. (2023) · candidate graph"
+dataset_label = "Papkou et al. (2023) · Topographer + FDR, bootstrapped"
 legend_title = "Peak"
 # Outcome key inside the nominal tree, at the corner that holds the least of the
 # tree (top-right on a tie; filled mid-grey survives, filled black absorbed); the
@@ -440,7 +440,7 @@ nominal_row_subtitle = [
   "Bootstrapped persistence threshold {threshold} at band quantile {band_quantile} · {percent}% simultaneous confidence band (parametric bootstrap)",
   "Stop-codon containing peaks: crimson × on the tree, crimson triangle on the diagram",
 ]
-band_row_title = "Band-simplified tree · {peaks} peaks, all with persistence > threshold · {absorbed} of {input_peaks} nominal peaks absorbed"
+band_row_title = "Bootstrapped tree · {peaks} peaks, all with persistence > threshold · {absorbed} of {input_peaks} nominal peaks absorbed"
 band_row_subtitle = [
   "{dataset} · {draws} bootstrap draws · seed {seed} · bootstrapped persistence threshold {threshold} at band quantile {band_quantile}",
   "{retained} sequences retained · {saddles} saddles removed · raw fitness unchanged",
@@ -460,7 +460,11 @@ point_size = 70
 # diagram (death on x, birth on y; the shared
 # 250 x 250 persistence size). No grid, no spines; peaks are mid-grey triangles,
 # filled above 2c (mid-grey) and filled black below it (absorbed); no hollow markers.
+# show_diagram = false is the numbered figure: the histogram panel alone, titled
+# histogram_title. Set it to true for the opt-in two-panel version (histogram over diagram).
 [figures.bootstrap_global_stability]
+show_diagram = false
+histogram_title = "Bottleneck distance of the nominal and flat landscapes"
 font_size = 10
 heading_font_size = 11
 subtitle_font_size = 9
@@ -488,7 +492,7 @@ diagonal_width = 1.0
 point_stroke_width = 1.2
 point_opacity = 1.0
 axis_padding_fraction = 0.04
-histogram_width = 250
+histogram_width = 385
 histogram_height = 100
 panel_gap = 40
 
@@ -499,7 +503,7 @@ panel_gap = 40
 # characters, so it fits the panel and its axis.
 [figures.bootstrap_band_quantile_scan]
 title = "Nominal peaks surviving a persistence threshold"
-dataset_label = "Papkou 2023 Candidate landscape"
+dataset_label = "Papkou 2023 Topographer + FDR landscape"
 x_axis_title = "Persistence threshold (fitness units)"
 y_axis_title = "Peaks with persistence > threshold"
 top_axis_title = "Band quantile at its bootstrapped threshold"
@@ -530,8 +534,8 @@ top_tick_length = 5
 top_tick_width = 1
 title_offset = 10
 
-# Supplementary S13: the same survival chart in each cell. One row of two BY q = 0.05 panels:
-# the Published graph (left) and the Candidate graph (right). Panel size and fonts fall
+# Supplementary S7: the same survival chart in each cell. A 2x2: the Papkou graph (left) and the
+# Topographer graph (right), without FDR on the top row and with BY q = 0.05 below. Panel size and fonts fall
 # through to [rendering] unless set here.
 # Square panels (panel_size, as peak_uncertainty), the x scale shared at
 # [0, tau_axis_max] with one x title and no gridlines, one y title, y scales per panel.
@@ -547,7 +551,7 @@ marker_label_template = "{band_quantile} quantile: {threshold}, {count} peaks"
 [figures.bootstrap_band_quantile_scan_seeds]
 # Panel size and font sizes are those of linked_tree_persistence ([rendering]).
 title = "Band-quantile scan of the bootstrap run"
-dataset_label = "Papkou 2023 Candidate landscape"
+dataset_label = "Papkou 2023 Topographer + FDR landscape"
 x_axis_title = "Band quantile"
 y_axis_title = "Peaks with persistence > threshold"
 # The run's legend and marker templates fill the manuscript quantity registry's
@@ -622,7 +626,7 @@ sequence_opacity = 0.65
 peak_point_size = 112
 peak_color = "#111111"
 peak_opacity = 1.0
-# One legend, inside the top-right panel (Candidate graph, no FDR), upper right.
+# One legend, inside the top-right panel (Topographer graph, no FDR), upper right.
 # Peak above Not peak above Wild type. Each glyph repeats its plotted mark.
 # Right-aligned legend_padding pixels from the panel's top and right edges. Its font
 # size is the panel title's (heading_font_size). Label widths are label length times
@@ -641,9 +645,9 @@ axis_label_padding = 4
 axis_title_padding = 8
 grid = false
 row_gap = 18
-# Row titles of the 2×2: Published graph above Candidate graph. Columns are Nominal
+# Row titles of the 2×2: Papkou graph above Topographer graph. Columns are Nominal
 # and BY q = 0.05, taken from each panel's saved diagnostics (not from this list).
-row_labels = ["Published graph", "Candidate graph"]
+row_labels = ["Papkou graph", "Topographer graph"]
 
 [figures.bootstrap_codon_entropy]
 # Band-smoothed tree from the bootstrap checkpoint (ADR 0008, step 2); no notebook.
@@ -676,7 +680,7 @@ entropy_legend_width = 56
 entropy_legend_bar_width = 12
 # The vertical bar is this fraction of the heat-map height, top-aligned under its title.
 entropy_legend_bar_fraction = 0.5
-candidate_title = "Band-smoothed candidate graph"
+candidate_title = "Topographer + FDR, bootstrapped"
 fitness_tick_format = ".1f"
 tree_edge_width = 1.2
 ridge_context_padding_fraction = 0.08
@@ -692,7 +696,7 @@ position_axis_title = "Amino-acid position"
 panel_gap = 8
 row_gap = 8
 font_size = 15
-ridge_labels = ["KEM ridge", "TCL ridge"]
+ridge_labels = ["KEM branch", "TCL branch"]
 
 # Branches are coloured by branch vertex count (the top tree carries the colour bar;
 # the ridge excerpts use its colours on its scale). In an excerpt the focused ridge is
@@ -701,7 +705,6 @@ ridge_labels = ["KEM ridge", "TCL ridge"]
 dimmed_branch_opacity = 0.25
 colorbar_x_fraction = 0.9
 count_legend_ticks = [1, 100, 10000]
-entropy_outside_color = "#f5f5f5"
 
 [figures.published_leaf_persistence]
 # Persistence diagram of the unsimplified split tree of the Published graph, one marker per
@@ -1023,8 +1026,8 @@ camera_azimuth_degrees = -57
 vertical_box_aspect = 0.58
 presentation_surface_resolution = 45
 projection_padding_pixels = 14
-right_peak_color = "#6F7F8F"
-left_peak_color = "#8B6F8E"
+right_peak_color = "#8B6F8E"
+left_peak_color = "#6F7F8F"
 shared_region_color = "#AA9470"
 surface_color = "#E2E2E2"
 graph_surface_color = "#F4F4F4"
@@ -1179,7 +1182,7 @@ percent_decimals = 2
 nominal_trees = ["full", "published", "reflected", "published_by", "reflected_by"]
 band_trees = ["published_by_band", "reflected_by_band"]
 
-# Supplementary S7 reads the Full and Published landscapes' vertices.
+# Supplementary S14 reads the Full and Papkou landscapes' vertices.
 [story_views.graph_codon_entropy]
 full = "full"
 published = "published"
@@ -1281,20 +1284,19 @@ histogram_bins = 200
 histogram_width = 140
 histogram_color = "#bdbdbd"
 
-# Opt-in functional_counts_vs_q (Supplementary S2): appearance only, merged over [rendering].
+# functional_counts_vs_q (Supplementary S2): appearance only, merged over [rendering].
 # Counts come from the saved FDR scan; these keys do not change them.
-# Opt-in papkou_agreement (Supplementary S1): appearance only.
+# papkou_agreement (Supplementary S1): 2 x 2, one genotype-count colour bar.
+# Panel size, fonts and axis styling are those of [figures.peak_uncertainty]
+# (as for fitness_se_correlation); keys set here override them.
 # hexbin_min is the genotype count at which a panel switches from scatter to bins.
 [figures.papkou_agreement]
-panel_width = 360
-panel_height = 360
 panel_gap = 36
-point_size = 36
-point_color = "#252525"
+point_size = 12
 hexbin_min = 2500
-# Hexagons across the panel: a fine bin (70 across a 360 px panel).
+# Hexagons across the panel: a fine bin (70 across a 300 px panel).
 hexbin_bins = 70
-title = "Agreement with Papkou et al. 2023"
+title = "Agreement of BarSeqFit with Papkou et al. (2023)"
 
 # Opt-in: fitness against its pooled standard error per genotype, a fine hexbin
 # with the Spearman rho on the panel.
@@ -1393,13 +1395,14 @@ panel_height = 280
 panel_gap = 24
 bar_size = 2
 stroke_width = 2
+y_max = 0.1
 functional_color = "#1b9e77"
 uncertain_color = "#d95f02"
 non_functional_color = "#7570b3"
 title = "Class proportions against the FDR target"
-subtitle = "Benjamini-Yekutieli, q from 0 to 1 in steps of 0.01"
+subtitle = "Benjamini-Yekutieli, q from 0 to 1 in steps of 0.01, proportion axis clipped at 0.1"
 
-# Supplementary S8: the same stacked chart against the Benjamini-Hochberg q and,
+# Opt-in: the same stacked chart against the Benjamini-Hochberg q and,
 # separately, the Bonferroni q. y_max clips the proportion-of-all-genotypes axis.
 [figures.functional_counts_vs_q_bh]
 panel_width = 420
@@ -1434,15 +1437,15 @@ height = 250
 published_color = "#000000"
 candidate_color = "#737373"
 
-# Historical ridge-entropy view. Supplementary S7 is graph_codon_entropy.
+# Historical ridge-entropy view. Supplementary S14 is graph_codon_entropy.
 [figures.ridge_entropy]
 registered = true
 
-# Registry table for figure id graph_codon_entropy (Supplementary S7). Drawing reads [d10.graph_codon_entropy].
+# Registry table for figure id graph_codon_entropy (Supplementary S14). Drawing reads [d10.graph_codon_entropy].
 [figures.graph_codon_entropy]
 registered = true
 
-# Supplementary S7: appearance only, merged over [rendering]. Cells outside a graph's fitness span use the palette's OUTSIDE_GREY.
+# Supplementary S14: appearance only, merged over [rendering]. Cells outside a graph's fitness span are left blank.
 [d10.graph_codon_entropy]
 heatmap_width = 220
 heatmap_height = 320
@@ -1456,7 +1459,7 @@ fitness_axis_title = "Raw fitness"
 fitness_tick_format = ".1f"
 entropy_title = ["Entropy", "(bits)"]
 
-# Historical ridge-entropy view (not Supplementary S7). Same appearance keys.
+# Historical ridge-entropy view (not Supplementary S14). Same appearance keys.
 [d10.ridge_entropy]
 heatmap_width = 220
 heatmap_height = 320

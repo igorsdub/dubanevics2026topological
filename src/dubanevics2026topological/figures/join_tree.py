@@ -39,6 +39,7 @@ from ._charts import (
     publication_scalar_scales,
     tree_chart,
 )
+from .labels import graph_label
 from .palette import BAND_GREY
 
 FIGURE_ID = "full_join_tree"
@@ -46,17 +47,17 @@ FIGURE_ID = "full_join_tree"
 GRAPH_KEYS = ("full", "published", "candidate")
 _COPY = {
     "full": {
-        "title": "Full graph",
+        "title": graph_label("full"),
         "vertex_key": "full_graph.vertex_count",
         "valley_key": "full_graph.persistence.valley_count",
     },
     "published": {
-        "title": "Published graph",
+        "title": graph_label("published"),
         "vertex_key": "published_graph.vertex_count",
         "valley_key": None,
     },
     "candidate": {
-        "title": "Candidate graph",
+        "title": graph_label("reflected_by"),
         "vertex_key": "candidate_graph.vertex_count",
         "valley_key": None,
     },

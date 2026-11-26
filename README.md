@@ -43,9 +43,9 @@ Notebook controls change appearance and, where a figure has both, select vanilla
 
 Scientific settings live in `config/analysis.toml`. The publication build supports the full landscape, the split-tree products, and full-network component persistence. Appearance changes reuse saved scientific outputs. Analysis source, raw input, configuration, and effective Topographer source hashes detect scientific changes. Unchanged outputs are reused; failed renders are retried.
 
-The separate component analysis computes ordinary H0 minima, relative H1 maxima (superlevel component connectivity, not independent graph cycles), and extended-positive H0 for the global range. It exports a death-value frequency and threshold diagnostic report. The candidate reflected threshold is exploratory; a scalar gap is not a calibrated measurement-error estimate. Run `just component-analysis` to refresh this product or `just full-tree-figure` to render the full-graph tree, persistence and histogram figure from the cache.
+The separate component analysis computes ordinary H0 minima, relative H1 maxima (superlevel component connectivity, not independent graph cycles), and extended-positive H0 for the global range. It exports a death-value frequency and threshold diagnostic report. The Topographer threshold is exploratory; a scalar gap is not a calibrated measurement-error estimate. Run `just component-analysis` to refresh this product or `just full-tree-figure` to render the full-graph tree, persistence and histogram figure from the cache.
 
-Run `just peak-figure` for the four-graph comparison (rows Published graph and Candidate graph,
+Run `just peak-figure` for the four-graph comparison (rows Papkou graph and Topographer + FDR graph,
 columns Nominal and `BY q = 0.05`; each graph is read from its own analysis variant,
 saved by `just peak-panels-product` under `output/variants/<variant>/`, ADR
 2026-11-19-peak-analysis-per-variant): the pooled standard error of the growth rate on x and
@@ -93,20 +93,20 @@ annotation decision and
 [validation evidence](docs/study-biological-figure-validation.md).
 
 `just codon-entropy-analysis` refreshes the codon-entropy tables from the cached
-comparison: the sequence populations of the full study-selected Published graph, including
+comparison: the sequence populations of the full study-selected Papkou graph, including
 its retained below-threshold fringe, with site-frequency, site-entropy, claim-summary, and
-threshold-sweep tables for the full population and the KEM and TCL ridges. Ridge membership
+threshold-sweep tables for the full population and the KEM and TCL branches. Branch membership
 follows the branches above their highest shared saddle, excluding that saddle from both
-ridges. No default figure reads these tables. `bootstrap_codon_entropy` (see below)
+branches. No default figure reads these tables. `bootstrap_codon_entropy` (see below)
 runs the same population and sweep functions in memory on the band-simplified tree and
 renders the paired trees and entropy panels: 520 × 250 px trees, a shared raw-fitness axis,
-branches coloured by vertex count (the focused ridge solid, every other branch dimmed, a count label on every branch of the top tree and beside the ridges), and one shared 0–log2(23) entropy scale.
+branches coloured by vertex count (the focused branch solid, every other branch dimmed, a count label on every branch of the top tree and beside the branches), and one shared 0–log2(23) entropy scale.
 See the [codon-entropy validation note](docs/codon-entropy-validation.md) for sequence
-identities, ridge ownership, and comparison with the reported `>90%` claim.
+identities, branch ownership, and comparison with the reported `>90%` claim.
 
-The separate threshold-selected landscape comparison validates the study selection against locally copied Topographer GraphML and peak references, then prepares the full/raw graph, published functional threshold at -0.507774, and the candidate functional threshold, computed by the `functional-classification` stage as a quantile of the stop-anchored non-functional mixture (the config holds only the rule `mixture_quantile` and digits; run `just functional-classification` first; see the ADR). A vertex is functional when its Functional probability reaches the declared confidence level (the Functional class); the earlier median-reflected value `m + (m - g)` (-0.253159, raw fitness at or above it) stays as the `median_reflected` comparison rule. Original edges are retained when at least one endpoint is functional, so functional ties and the below-threshold fringe remain; fringe-to-fringe edges are excluded. Each selection retains its largest weakly connected component. Every tree, persistence result, peak, wild-type position, and plotted fitness domain uses raw fitness. Stable-sequence support tables and provenance record selection and component accounting. The median-reflected comparison threshold rests on a symmetry assumption, not a calibrated uncertainty estimate. Run `just comparison-analysis` to refresh the science or `just comparison-figure` to render the single WT-only comparison from cached results. The [validation note](docs/clamped-tree-comparison-validation.md) records the completed full-data raw-fitness rebuild, reference equivalence, observed tree metrics, and figure inspection.
+The separate threshold-selected landscape comparison validates the study selection against locally copied Topographer GraphML and peak references, then prepares the full/raw graph, published functional threshold at -0.507774, and the candidate functional threshold, computed by the `functional-classification` stage as a quantile of the stop-anchored non-functional mixture (the config holds only the rule `mixture_quantile` and digits; run `just functional-classification` first; see the ADR). A vertex is functional when its Functional probability reaches the declared confidence level (the Functional class); the earlier Topographer value `m + (m - g)` (-0.253159, raw fitness at or above it) stays as the `median_reflected` comparison rule. Original edges are retained when at least one endpoint is functional, so functional ties and the below-threshold fringe remain; fringe-to-fringe edges are excluded. Each selection retains its largest weakly connected component. Every tree, persistence result, peak, wild-type position, and plotted fitness domain uses raw fitness. Stable-sequence support tables and provenance record selection and component accounting. The Topographer comparison threshold rests on a symmetry assumption, not a calibrated uncertainty estimate. Run `just comparison-analysis` to refresh the science or `just comparison-figure` to render the single WT-only comparison from cached results. The [validation note](docs/clamped-tree-comparison-validation.md) records the completed full-data raw-fitness rebuild, reference equivalence, observed tree metrics, and figure inspection.
 
-Run `just landscape-summary-table` (a step of `just tables`) to export the seven-column landscape summary, `output/tables/papkou2023_landscape_summary.csv`, `.html`, `.md` and a JSON sidecar, from the seven `landscape_summary` states of `data/processed/` named in `config/figures.toml`; see `docs/figure-inventory.md`. It replaces the three-column Table 1 (`just graph-summary`, retired in Ticket 15 S4). Manuscript Tables 1 and 2 (`papkou2023_full_vs_published.*`, `papkou2023_candidate_corrections.*`) are sliced from the same pinned products by `just presentation-tables`, a step of `just tables` and of `just figures`; `naming.py` numbers them from the `[[table]]` entries of `config/manuscript.toml`, as it numbers the figures (S1–S20 are the supplementary ones). Open the standalone HTML in a browser, select and copy the table, then paste it into Google Docs. This provides a plain table workflow without manuscript numbering; Google Docs paste rendering has not been verified.
+Run `just landscape-summary-table` (a step of `just tables`) to export the seven-column landscape summary, `output/tables/papkou2023_landscape_summary.csv`, `.html`, `.md` and a JSON sidecar, from the seven `landscape_summary` states of `data/processed/` named in `config/figures.toml`; see `docs/figure-inventory.md`. It replaces the three-column Table 1 (`just graph-summary`, retired in Ticket 15 S4). Manuscript Tables 1 and 2 are the graph and tree descriptive tables (`graph_descriptive_statistics`, `candidate_band_comparison`), numbered from the `[[table]]` entries of `config/manuscript.toml`. The landscape-summary slices (`papkou2023_full_vs_published.*`, `papkou2023_candidate_corrections.*`) are supplementary tables S1 and S2, built by `just presentation-tables`. Open the standalone HTML in a browser, select and copy the table, then paste it into Google Docs. This provides a plain table workflow without manuscript numbering; Google Docs paste rendering has not been verified.
 
 ## Outputs
 
@@ -151,7 +151,7 @@ Full and Published equivalents are `full_tree_histogram` and `published_tree_his
 
 ## Software
 
-This is version 1.0.0 of the code (tag `v1.0.0`).
+This is version 1.0.1 of the code (tag `v1.0.1`).
 
 The analysis uses two packages:
 

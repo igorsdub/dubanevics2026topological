@@ -1,8 +1,8 @@
 """Fitness against pooled standard error for the four graphs of the peak analysis, 2×2.
 
-Columns are the graph, rows the selection: Published graph left of Candidate graph,
+Columns are the graph, rows the selection: Papkou graph left of Topographer graph,
 nominal (point estimate, no FDR) on top and FDR-corrected (Benjamini-Yekutieli, q from
-the saved product, 0.05) below. Each panel is the Candidate-selected graph of
+the saved product, 0.05) below. Each panel is the selected graph of
 its own analysis variant (``point_papkou_original``, ``fdr_by_q0.05_papkou_original``,
 ``point_median_reflected``, ``fdr_by_q0.05_median_reflected``; the variants of
 ``bootstrap_four_graphs``), read from that variant's saved ``pooled_scatter`` and
@@ -18,7 +18,7 @@ The wild type is the repository's red star, drawn last on top; peaks are black t
 The non-peak cloud is a matplotlib raster placed as a Vega-Lite image on the same scales,
 so the inline row budget stays on the vector marks. Y axis titles only on the left column,
 x axis titles only on the bottom row; each column is titled with its graph and each panel with its selection. One legend,
-in the top-right panel (Candidate graph, no FDR). Scales are shared across all four panels.
+in the top-right panel (Topographer graph, no FDR). Scales are shared across all four panels.
 """
 
 from __future__ import annotations
@@ -39,6 +39,7 @@ from ._charts import (
     marker_config,
 )
 from ._count_labels import count_label_text, fixed_label_text, general_label_text
+from .labels import PAPKOU, TOPOGRAPHER, state_label
 from .palette import EMPHASIS_BLACK, LIGHT_GREY, MEDIAN_GREY
 
 logger = logging.getLogger(__name__)
@@ -53,25 +54,26 @@ PANEL_VARIANTS = (
     "threshold=published_fdr=by_q=0.05",
     "threshold=reflected_fdr=by_q=0.05",
 )
-# Columns are the graph (Published | Candidate), rows the selection (no FDR above BY FDR).
+# Columns are the graph (Papkou | Topographer), rows the selection (no FDR above BY FDR).
 PANEL_GRID = (
     ("threshold=published_fdr=none", "threshold=reflected_fdr=none"),
     ("threshold=published_fdr=by_q=0.05", "threshold=reflected_fdr=by_q=0.05"),
 )
 # The scatter table of the panel's own graph inside the variant's pooled_scatter product.
 SCATTER_TABLE = "candidate_clamped_scatter"
-# One line under each column title, naming which graph that row is.
-_ROW_NOTES = {
-    "Published": "Published graph: the Papkou et al. (2023) functional threshold.",
-    "Candidate": "Candidate graph: the median-reflected functional threshold.",
-}
+
+
+def panel_state(variant: str) -> str:
+    """The graph state of a panel variant, for its strict display label."""
+    base = "published" if "threshold=published" in variant else "reflected"
+    return f"{base}_by" if "fdr=by" in variant else base
 
 
 def threshold_name(variant: str) -> str:
-    """``Published`` for a Papkou-cutoff variant, ``Candidate`` for the median-reflected one."""
+    """``Papkou`` for a Papkou-cutoff variant, ``Topographer`` for the median-reflected one."""
     if variant not in PANEL_VARIANTS:
         raise ValueError(f"Unknown peak uncertainty panel variant {variant!r}.")
-    return "Published" if "threshold=published" in variant else "Candidate"
+    return PAPKOU if "threshold=published" in variant else TOPOGRAPHER
 
 
 def row_label(diagnostics: dict[str, Any]) -> str:
@@ -90,7 +92,7 @@ def _panel_subtitle(diagnostics: dict[str, Any]) -> list[str]:
     largest component. The counts are printed through ``count_label_text``.
     """
     lines = [
-        f"{row_label(diagnostics)} · {count_label_text(diagnostics['peak_count'])} peaks",
+        f"{count_label_text(diagnostics['peak_count'])} peaks",
         (
             "Papkou et al. (2023) · Functional threshold = "
             f"{fixed_label_text(diagnostics['threshold'], 3)}"
@@ -117,7 +119,7 @@ def build_peak_uncertainty_figure(
 
     ``result["panels"]`` maps each of ``PANEL_VARIANTS`` to a payload with a
     ``scatter`` DataFrame and a ``diagnostics`` dict (the variant's saved products). A missing variant is an
-    error: no panel stands in for another. Columns are the Published and Candidate graphs
+    error: no panel stands in for another. Columns are the Papkou and Topographer graphs
     (``PANEL_GRID``); rows are nominal and FDR-corrected. Shared scales, Y axis only
     on the left column, one legend in the top-right panel, a dashed unlabelled rule per panel.
     """
@@ -143,7 +145,7 @@ def build_peak_uncertainty_figure(
     datasets: dict[str, Any] = {}
     rows = len(PANEL_GRID)
     legend_row_idx = 0  # top row (no FDR)
-    legend_col_idx = 1  # right column (Candidate graph)
+    legend_col_idx = 1  # right column (Topographer graph)
     row_labels: list[str] = []
     columns_graph: list[set[str]] = [set() for _ in PANEL_GRID[0]]
     cells: list[list[Any]] = []
@@ -151,6 +153,7 @@ def build_peak_uncertainty_figure(
     for row_idx, row_variants in enumerate(PANEL_GRID):
         row_diagnostics = [panels[variant]["diagnostics"] for variant in row_variants]
         labels = [row_label(diagnostics) for diagnostics in row_diagnostics]
+        titles = [state_label(panel_state(variant)) for variant in row_variants]
         if len(set(labels)) != 1:
             raise ValueError(f"Panels of one row disagree on the selection: {labels}.")
         row_labels.append(labels[0])
@@ -191,7 +194,7 @@ def build_peak_uncertainty_figure(
                     fitness_ticks=fitness_ticks,
                     se_domain=se_domain,
                     appearance=appearance,
-                    label=labels[col_idx],
+                    label=titles[col_idx],
                     subtitle=subtitles[col_idx],
                     heading_font_size=int(appearance.get("heading_font_size", 18)),
                     subtitle_font_size=int(appearance.get("subtitle_font_size", 14)),
@@ -207,22 +210,10 @@ def build_peak_uncertainty_figure(
     for col_idx, graphs in enumerate(columns_graph):
         if len(graphs) != 1:
             raise ValueError(f"Panels of one column are not the same graph: {sorted(graphs)}.")
-        (graph_name,) = graphs
+        (_graph,) = graphs  # one graph per column
         column_chart = alt.vconcat(
             *[row_cells[col_idx] for row_cells in cells], spacing=row_gap
         ).resolve_scale(x="shared", y="shared")
-        # The column title above the column (left aligned), with one line on which graph it is.
-        column_chart = column_chart.properties(
-            title=alt.TitleParams(
-                text=f"{graph_name} graph",
-                subtitle=_ROW_NOTES[graph_name],
-                subtitleFontSize=int(appearance.get("subtitle_font_size", 14)),
-                fontSize=int(appearance.get("heading_font_size", 18)),
-                fontWeight="bold",
-                anchor="start",
-                offset=4,
-            )
-        )
         column_charts.append(column_chart)
 
     # Each panel draws its own y axis (the right column's carries its threshold tick).

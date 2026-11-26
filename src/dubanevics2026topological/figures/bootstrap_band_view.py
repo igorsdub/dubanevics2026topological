@@ -335,7 +335,7 @@ def build_bootstrap_band_figure(
             band,
             False,
             (
-                "Band-simplified tree: "
+                "Bootstrapped tree: "
                 f"{count_label_text(len(survival.surviving))} surviving peaks"
             ),
             (

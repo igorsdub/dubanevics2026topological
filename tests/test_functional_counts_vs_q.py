@@ -129,7 +129,7 @@ def test_a_different_saved_candidate_threshold_is_refused() -> None:
         .otherwise(pl.col("applied_threshold"))
         .alias("applied_threshold")
     )
-    with pytest.raises(ValueError, match="Candidate threshold"):
+    with pytest.raises(ValueError, match="Topographer threshold"):
         by_scan(table)
 
 
@@ -141,8 +141,8 @@ def test_stacked_chart_encodes_both_thresholds_and_the_three_proportions() -> No
     assert spec["title"]["text"].startswith("Class proportions")
     panels = spec["hconcat"]
     assert [panel["title"]["text"] for panel in panels] == [
-        "Published threshold",
-        "Candidate threshold",
+        "Papkou threshold",
+        "Topographer threshold",
     ]
     published = spec["datasets"][panels[0]["data"]["name"]]
     assert {row["class"] for row in published} == {
@@ -160,6 +160,10 @@ def test_stacked_chart_encodes_both_thresholds_and_the_three_proportions() -> No
     }
     assert long_proportions(_scan()).height == 101 * 2 * 3
     assert panels[0]["mark"]["type"] == "bar"
+    # The Benjamini-Yekutieli scan is clipped at a tenth like the BH and Bonferroni ones.
+    assert panels[0]["mark"]["clip"] is True
+    assert panels[0]["encoding"]["y"]["scale"]["domain"] == [0.0, 0.1]
+    assert panels[0]["encoding"]["x"]["title"] == "Benjamini-Yekutieli FDR target q"
 
 
 def test_loader_reads_the_combined_scan(tmp_path: Path) -> None:
@@ -197,8 +201,8 @@ def test_bh_and_bonferroni_are_stacked_like_by_with_y_clipped_at_a_tenth(
     ).to_dict()
     panels = spec["hconcat"]
     assert [panel["title"]["text"] for panel in panels] == [
-        "Published threshold",
-        "Candidate threshold",
+        "Papkou threshold",
+        "Topographer threshold",
     ]
     for panel in panels:
         assert panel["mark"]["type"] == "bar"

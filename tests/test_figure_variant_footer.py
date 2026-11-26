@@ -37,7 +37,7 @@ def test_variant_footer_median_reflected_without_bootstrap() -> None:
     settings = _variant_settings("threshold=reflected_fdr=by_q=0.05")
     footer = variant_figure_footer(settings, has_bootstrap=False)
     expected = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
@@ -47,7 +47,7 @@ def test_variant_footer_median_reflected_without_bootstrap() -> None:
 
     lines = variant_figure_footer(settings, has_bootstrap=False, as_lines=True)
     assert lines == [
-        "Candidate graph: Candidate threshold (T = −0.253159) · BY, nominal q = 0.05",
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component",
     ]
 
@@ -56,7 +56,7 @@ def test_variant_footer_median_reflected_with_bootstrap() -> None:
     settings = _variant_settings("threshold=reflected_fdr=by_q=0.05")
     footer = variant_figure_footer(settings, has_bootstrap=True, bootstrap_draws=10000)
     expected = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component · "
         "10,000 bootstrap draws"
@@ -68,7 +68,7 @@ def test_variant_footer_median_reflected_with_bootstrap() -> None:
         settings, has_bootstrap=True, bootstrap_draws=10000, as_lines=True
     )
     assert lines == [
-        "Candidate graph: Candidate threshold (T = −0.253159) · BY, nominal q = 0.05",
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component · 10,000 bootstrap draws",
     ]
 
@@ -80,7 +80,7 @@ def test_variant_footer_papkou_original_without_bootstrap() -> None:
     settings = _variant_settings("threshold=published_fdr=by_q=0.05")
     footer = variant_figure_footer(settings, has_bootstrap=False)
     expected = (
-        "Candidate graph: Papkou threshold (T = −0.5077739708744209) · "
+        "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
@@ -90,7 +90,7 @@ def test_variant_footer_papkou_original_without_bootstrap() -> None:
 
     lines = variant_figure_footer(settings, has_bootstrap=False, as_lines=True)
     assert lines == [
-        "Candidate graph: Papkou threshold (T = −0.5077739708744209) · BY, nominal q = 0.05",
+        "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component",
     ]
 
@@ -99,7 +99,7 @@ def test_variant_footer_papkou_original_with_bootstrap() -> None:
     settings = _variant_settings("threshold=published_fdr=by_q=0.05")
     footer = variant_figure_footer(settings, has_bootstrap=True, bootstrap_draws=10000)
     expected = (
-        "Candidate graph: Papkou threshold (T = −0.5077739708744209) · "
+        "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component · "
         "10,000 bootstrap draws"
@@ -111,7 +111,7 @@ def test_variant_footer_papkou_original_with_bootstrap() -> None:
         settings, has_bootstrap=True, bootstrap_draws=10000, as_lines=True
     )
     assert lines == [
-        "Candidate graph: Papkou threshold (T = −0.5077739708744209) · BY, nominal q = 0.05",
+        "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component · 10,000 bootstrap draws",
     ]
 
@@ -122,24 +122,24 @@ def test_variant_footer_papkou_original_with_bootstrap() -> None:
 def test_split_footer_lines_balanced() -> None:
     # 3 segments
     three = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
     assert split_footer_lines(three) == [
-        "Candidate graph: Candidate threshold (T = −0.253159) · BY, nominal q = 0.05",
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component",
     ]
 
     # 4 segments
     four = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component · "
         "10,000 bootstrap draws"
     )
     assert split_footer_lines(four) == [
-        "Candidate graph: Candidate threshold (T = −0.253159) · BY, nominal q = 0.05",
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component · 10,000 bootstrap draws",
     ]
 
@@ -238,7 +238,7 @@ def test_variant_footer_attaches_only_to_candidate_figures() -> None:
             bootstrap_draws=10000 if fig_id in BOOTSTRAP_FIGURE_IDS else None,
         )
         assert footer is not None, f"Expected footer for candidate figure {fig_id}"
-        assert footer.startswith("Candidate graph: ")
+        assert footer.startswith("Topographer + FDR graph: ")
         if fig_id in BOOTSTRAP_FIGURE_IDS:
             assert "10,000 bootstrap draws" in footer
         else:
@@ -304,7 +304,7 @@ def test_apply_figure_footer_attaches_bottom_title() -> None:
         .encode(x="x:Q", y="y:Q")
     )
     footer_text = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
@@ -313,7 +313,7 @@ def test_apply_figure_footer_attaches_bottom_title() -> None:
     spec = result.to_dict()
     # Expect text wrapped into 2 balanced lines
     expected_lines = [
-        "Candidate graph: Candidate threshold (T = −0.253159) · BY, nominal q = 0.05",
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · BY, nominal q = 0.05",
         "≥1 retained Functional endpoint, largest component",
     ]
     assert spec["title"]["text"] == expected_lines
@@ -329,7 +329,7 @@ def test_apply_figure_footer_preserves_existing_top_title() -> None:
         .properties(title=alt.TitleParams(text="Top Title", subtitle="My Subtitle"))
     )
     footer_text = (
-        "Candidate graph: Papkou threshold (T = −0.5077739708744209) · "
+        "Papkou + FDR graph: Papkou threshold (T = −0.5077739708744209) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
@@ -339,7 +339,7 @@ def test_apply_figure_footer_preserves_existing_top_title() -> None:
     svg = vl_convert.vegalite_to_svg(result.to_dict())
     assert "Top Title" in svg
     assert "My Subtitle" in svg
-    assert "Candidate graph: Papkou threshold" in svg
+    assert "Papkou + FDR graph: Papkou threshold" in svg
     assert "≥1 retained Functional endpoint" in svg
 
 
@@ -390,7 +390,7 @@ def test_apply_figure_footer_preserves_and_migrates_top_level_datasets() -> None
     chart = alt.Chart("named_data").mark_point().encode(x="x:Q", y="y:Q")
     chart.datasets = {"named_data": data}
     footer_text = (
-        "Candidate graph: Candidate threshold (T = −0.253159) · "
+        "Topographer + FDR graph: Topographer threshold (T = −0.253159) · "
         "BY, nominal q = 0.05 · "
         "≥1 retained Functional endpoint, largest component"
     )
@@ -400,4 +400,4 @@ def test_apply_figure_footer_preserves_and_migrates_top_level_datasets() -> None
     import vl_convert
 
     svg = vl_convert.vegalite_to_svg(result.to_dict())
-    assert "Candidate graph: Candidate threshold" in svg
+    assert "Topographer + FDR graph: Topographer threshold" in svg

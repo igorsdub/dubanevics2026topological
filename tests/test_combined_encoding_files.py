@@ -70,15 +70,24 @@ def test_the_combined_files_use_the_encoded_layout_and_are_always_written() -> N
     )
 
 
-def test_the_manuscript_keeps_the_two_row_published_fdr_tree_and_no_combined_reflected_one() -> None:
+def test_the_manuscript_numbers_the_overlaid_combined_published_fdr_figures() -> None:
     entries = tomllib.loads((ROOT / "config/manuscript.toml").read_text("utf-8"))["figure"]
     supplementary = {
         entry["desc"]: entry.get("source")
         for entry in entries
         if entry.get("section") == "supplementary"
     }
-    assert supplementary["published_fdr_tree"] == (
-        "tree_persistence__thr=published_fdr=by_q=0.05_tree=nominal_style=annotated"
+    assert supplementary["papkou_fdr_tree_combined"] == (
+        "tree_persistence_combined__thr=published_fdr=by_q=0.05_tree=nominal_style=annotated"
+    )
+    assert supplementary["papkou_fdr_bootstrapped_combined"] == (
+        "bootstrap_combined__thr=published_fdr=by_q=0.05_draws=10000_seed=20261019"
+        "_tree=band_bandq=0.95_style=annotated"
+    )
+    # The stacked (two-row) stems are no longer numbered.
+    assert not any(
+        (source or "").startswith(("tree_persistence__", "bootstrap_stops__", "bootstrap_synonymous__"))
+        for source in supplementary.values()
     )
     assert not any(
         (source or "").startswith("tree_persistence_combined__thr=reflected_fdr")

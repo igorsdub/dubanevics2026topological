@@ -31,11 +31,16 @@ from dubanevics2026topological.figures._count_labels import (
     branch_count_labels,
     tree_geometry,
 )
+from dubanevics2026topological.figures.labels import (
+    ALL_BRANCHES,
+    KEM_BRANCH,
+    TCL_BRANCH,
+    TOPOGRAPHER_FDR_BOOTSTRAPPED,
+)
 from dubanevics2026topological.figures.palette import (
     EMPHASIS_BLACK,
     INK_GREY,
     KEM_BRANCH_COLOR,
-    OUTSIDE_GREY,
     TCL_BRANCH_COLOR,
 )
 
@@ -175,7 +180,7 @@ def _full_tree_chart(
 
     focused = [row for row in all_segments if on_ridge(row)]
     if not focused:
-        raise ValueError("The selected ridge has no drawable simplified-tree edges.")
+        raise ValueError("The selected branch has no drawable simplified-tree edges.")
     dimmed = [row for row in all_segments if not on_ridge(row)]
     colour = branch_count_color_encoding(rendering, count_domain)
 
@@ -755,8 +760,6 @@ def _heatmap(
     show_position_axis: bool,
     show_legend: bool = True,
     padding_fraction: float = 0.05,
-    outside_color: str = OUTSIDE_GREY,
-    article_span: tuple[float, float] | None = None,
     rect_opacity: float = 1.0,
     fitness_axis: dict[str, Any] | None = None,
 ) -> alt.LayerChart:
@@ -839,37 +842,7 @@ def _heatmap(
         )
         .properties(width=width, height=height)
     )
-    span = article_span or domain
-    filler = [
-        {"position_label": str(position), "lower": lower, "upper": upper}
-        for position in (1, 2, 3)
-        for lower, upper in ((span[0], population_min), (population_max, span[1]))
-        if lower < upper
-    ]
-    background = (
-        alt.Chart(alt.Data(values=filler))
-        .mark_rect(color=outside_color)
-        .encode(
-            x=alt.X(
-                "position_label:N",
-                sort=["1", "2", "3"],
-                axis=alt.Axis(labelAngle=0, domain=False)
-                if show_position_axis
-                else None,
-                title=position_axis_title if show_position_axis else None,
-            ),
-            y=alt.Y(
-                "lower:Q",
-                axis=_fitness_axis(fitness_axis),
-                title=fitness_axis["title"] if fitness_axis else None,
-                scale=alt.Scale(
-                    domain=list(domain), zero=False, padding=padding_fraction
-                ),
-            ),
-            y2="upper:Q",
-        )
-    )
-    return alt.layer(background, chart).properties(width=width, height=height)
+    return chart
 
 
 LEGEND_LINE_GAP = 3
@@ -939,14 +912,21 @@ def vertical_entropy_legend(
     return alt.layer(*layers).properties(width=int(width), height=int(height))
 
 
+SWEEP_TITLE_OFFSET = -6
 SWEEP_ORDER = ("kem", "tcl", "core")
-SWEEP_TITLES = {"kem": "KEM branch", "tcl": "TCL branch", "core": "All branches"}
+SWEEP_TITLES = {"kem": KEM_BRANCH, "tcl": TCL_BRANCH, "core": ALL_BRANCHES}
 
 
-def _tied_to_branch(chart: Any, title: str, color: str, *, bar: float) -> Any:
+def _tied_to_branch(
+    chart: Any, title: str, color: str, *, bar: float, dx: int = 0
+) -> Any:
     """Title a sweep panel in its branch's colour and rule its top edge in it.
 
-    ``bar`` is the rule's stroke width; zero draws no rule (the all-codon panel).
+    The title sits on the panel's left edge and on one baseline shared by all three
+    sweeps (``anchor="start"``, ``baseline="bottom"``, one offset), and every panel
+    gets the same rule: ``bar`` is its stroke width, zero draws none. ``dx`` moves the
+    title right by the width of the panel's own y axis, which a title anchored at the
+    panel's outer left edge would otherwise include.
     """
     layers = [chart]
     if bar > 0:
@@ -960,7 +940,14 @@ def _tied_to_branch(chart: Any, title: str, color: str, *, bar: float) -> Any:
         )
     return alt.layer(*layers).properties(
         title=alt.TitleParams(
-            title, anchor="start", color=color, fontWeight="bold", fontSize=15
+            title,
+            anchor="start",
+            baseline="bottom",
+            offset=SWEEP_TITLE_OFFSET,
+            dx=dx,
+            color=color,
+            fontWeight="bold",
+            fontSize=15,
         )
     )
 
@@ -1037,7 +1024,6 @@ def build_bootstrap_codon_entropy_figure(
     entropy_title = list(figure.get("entropy_title", ["Entropy", "(bits)"]))
     position_title = str(figure.get("position_axis_title", "Amino-acid position"))
     heading_font_size = int(rendering.get("heading_font_size", 18))
-    subtitle_font_size = int(rendering.get("subtitle_font_size", 14))
     font_size = int(figure.get("font_size", rendering.get("font_size", 15)))
     colors = _branch_colors(figure)
     bar = float(figure.get("sweep_tie_width", 4))
@@ -1061,8 +1047,6 @@ def build_bootstrap_codon_entropy_figure(
             show_position_axis=True,
             show_legend=False,
             padding_fraction=0.0,
-            outside_color=str(figure.get("entropy_outside_color", OUTSIDE_GREY)),
-            article_span=(min(all_fitness), max(all_fitness)),
             rect_opacity=float(figure.get("entropy_rect_opacity", 1.0)),
             fitness_axis={
                 "title": fitness_title,
@@ -1078,7 +1062,8 @@ def build_bootstrap_codon_entropy_figure(
                 heat,
                 SWEEP_TITLES[name],
                 colors.get(name, INK_GREY),
-                bar=bar if name in colors else 0,
+                bar=bar,
+                dx=y_axis_extent + font_size + 4 if position == 0 else 0,
             ).properties(width=sweep_width, height=sweep_height)
         )
 
@@ -1099,13 +1084,13 @@ def build_bootstrap_codon_entropy_figure(
     )
 
     core_title = (
-        f"{figure.get('candidate_title', 'Band-smoothed candidate graph')} · "
+        f"{figure.get('candidate_title', TOPOGRAPHER_FDR_BOOTSTRAPPED)} · "
         f"{quantities.display('candidate_graph.functional_count')} functional / "
         f"{quantities.display('candidate_graph.vertex_count')} total sequences"
     )
     sweep_title = (
-        f"Codon entropy · KEM ridge "
-        f"{quantities.display('ridges.band_view.kem.functional_count')} and TCL ridge "
+        f"Codon entropy · {KEM_BRANCH} "
+        f"{quantities.display('ridges.band_view.kem.functional_count')} and {TCL_BRANCH} "
         f"{quantities.display('ridges.band_view.tcl.functional_count')} "
         "functional sequences"
     )
@@ -1133,18 +1118,6 @@ def build_bootstrap_codon_entropy_figure(
     return (
         alt.vconcat(*rows, spacing=row_gap)
         .resolve_scale(color="independent", x="independent", y="independent")
-        .properties(
-            title=alt.TitleParams(
-                str(
-                    figure.get("entropy_outside_label", "Gray: outside population span")
-                ),
-                orient="bottom",
-                anchor="end",
-                offset=10,
-                fontSize=subtitle_font_size,
-                fontWeight="normal",
-            )
-        )
         .configure(font=rendering.get("font_family", "Arial, Liberation Sans, Helvetica, sans-serif"))
         .configure_view(stroke=None)
         .configure_axis(grid=False, labelFontSize=font_size, titleFontSize=font_size)

@@ -35,8 +35,9 @@ import polars as pl
 
 from ._charts import peak_annotation_kinds, peak_annotation_style
 from ._count_labels import count_label_text
-from ._four_graphs import PANELS
-from ._leaf_data import LeafTables, figure_graph, fitness_axis, leaf_tables
+from ._four_graphs import PANELS, STATES, panel_title
+from ._leaf_data import LeafTables, band_heading, figure_graph, fitness_axis, leaf_tables
+from .labels import fdr_level_text, settings_fdr_q
 from .palette import EMPHASIS_BLACK, PEAK_GREY, SYNONYMOUS_GREEN
 
 SUFFIX = "leaf_swarm"
@@ -372,7 +373,7 @@ def build_leaf_swarm_band_figure(
     ``payload`` is ``load_band_leaf_inputs``' result; the counts are those of the
     saved band tree's leaf tables.
     """
-    slug, _, heading = figure_graph(figure_id, BAND_SUFFIX)
+    slug, _, _heading = figure_graph(figure_id, BAND_SUFFIX)
     panel = payload["panels"][slug]
     tables = panel["leaf_tables"]
     appearance = {
@@ -384,9 +385,10 @@ def build_leaf_swarm_band_figure(
         f"{count_label_text(tables.members.height)} sequences in hills · bootstrap "
         f"band quantile {panel['band_quantile']}, {count_label_text(panel['draws'])} draws"
     )
-    return _swarm_figure(
-        tables, appearance, f"{heading}, BY band-simplified tree", first_line
-    )
+    level = fdr_level_text(settings_fdr_q(settings))
+    if level:  # the bootstrapped trees are BY-selected: print the level once
+        first_line = f"{first_line} · {level}"
+    return _swarm_figure(tables, appearance, band_heading(slug), first_line)
 
 
 # The four graphs of the saved-variant swarm figures (``_four_graphs``). The Published
@@ -404,12 +406,16 @@ def _panel_tables(payload: dict[str, Any], slug: str) -> LeafTables:
         raise ValueError(f"The four-graph payload lacks the {variant!r} leaves.") from error
 
 
-def _panel_subtitle(tables: LeafTables, overlapping: int, per_row: int) -> list[str]:
+def _panel_subtitle(
+    tables: LeafTables, overlapping: int, per_row: int, fdr_level: str | None = None
+) -> list[str]:
     lines = [
         f"{count_label_text(tables.leaves.height)} leaves · "
         f"{count_label_text(tables.members.height)} sequences in hills",
         f"Leaves in the order they appear on the tree, left to right, {per_row} per row",
     ]
+    if fdr_level:
+        lines.insert(0, fdr_level)
     if overlapping:
         lines.append(_overlap_note(overlapping))
     return lines
@@ -422,7 +428,6 @@ def build_leaf_swarm_panel_figure(
     slug = figure_id.removesuffix(f"_{SUFFIX}")
     if slug not in PANEL_SLUGS or not figure_id.endswith(f"_{SUFFIX}"):
         raise ValueError(f"{figure_id!r} is not a leaf swarm panel ID.")
-    _, graph, selection = PANEL_SLUGS[slug]
     appearance = {
         **settings["figures"].get("rendering", {}),
         **settings["figures"]["figures"][figure_id],
@@ -431,8 +436,13 @@ def build_leaf_swarm_panel_figure(
     panels, datasets, overlapping, per_row = swarm_rows(tables, appearance)
     chart = alt.vconcat(*panels, spacing=int(appearance.get("row_gap", 14))).properties(
         title=alt.TitleParams(
-            text=f"{graph} · {selection}: sequences of every leaf",
-            subtitle=_panel_subtitle(tables, overlapping, per_row),
+            text=f"{panel_title(slug)}: sequences of every leaf",
+            subtitle=_panel_subtitle(
+                tables,
+                overlapping,
+                per_row,
+                fdr_level_text(settings_fdr_q(settings)) if STATES[slug].endswith("_by") else None,
+            ),
             fontSize=int(appearance.get("heading_font_size", 18)),
             subtitleFontSize=int(appearance.get("subtitle_font_size", 14)),
             fontWeight="bold",

@@ -14,6 +14,23 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from ..analysis.describe import SUMMARY_COLUMNS
+from ..figures.labels import state_label
+
+# The saved product columns keep their identity names; a reader sees the state labels of
+# ``figures/labels.py``. The order is that of ``SUMMARY_COLUMNS``.
+_STATE_ORDER = (
+    "full",
+    "published",
+    "reflected",
+    "published_by",
+    "published_by_band",
+    "reflected_by",
+    "reflected_by_band",
+)
+SUMMARY_DISPLAY: dict[str, str] = {
+    column: state_label(state)
+    for column, state in zip(SUMMARY_COLUMNS, _STATE_ORDER, strict=True)
+}
 
 
 def export_landscape_summary(
@@ -48,7 +65,7 @@ def export_landscape_summary(
     ]
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=("Metric", *names), lineterminator="\n")
-    writer.writeheader()
+    writer.writerow({"Metric": "Metric", **SUMMARY_DISPLAY})
     writer.writerows(rows)
 
     def display(value: object, metric: str = "") -> str:
@@ -62,8 +79,9 @@ def export_landscape_summary(
         return str(value)
 
     headers = ("Metric", *names)
+    shown = {"Metric": "Metric", **SUMMARY_DISPLAY}
     html_header = "".join(
-        f'<th scope="col">{html.escape(name)}</th>' for name in headers
+        f'<th scope="col">{html.escape(shown[name])}</th>' for name in headers
     )
     html_rows = "".join(
         '<tr><th scope="row">'
@@ -85,7 +103,7 @@ def export_landscape_summary(
     )
     md = (
         f"# {dataset} landscape summary\n\n| "
-        + " | ".join(headers)
+        + " | ".join(shown[name] for name in headers)
         + " |\n| "
         + " | ".join(["---"] * len(headers))
         + " |\n"

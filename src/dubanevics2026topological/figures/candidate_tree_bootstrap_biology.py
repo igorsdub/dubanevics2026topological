@@ -55,6 +55,7 @@ from .candidate_tree_biology import (
     outcome_legend_entries,
     visible_segments,
 )
+from .labels import TOPOGRAPHER_FDR_BOOTSTRAPPED
 from .palette import OUTCOME_COLORS, SURVIVES_COLOR, tree_panel_size
 
 FIGURE_ID = "candidate_tree_bootstrap_biology"
@@ -88,7 +89,7 @@ DEFAULT_NOMINAL_ROW_SUBTITLE = (
     "Stop codon containing peaks: crimson × on the tree, crimson × inside the triangle on the diagram",
 )
 DEFAULT_BAND_ROW_TITLE = (
-    "Band-simplified tree · {peaks} peaks, all with persistence > threshold · "
+    "Bootstrapped tree · {peaks} peaks, all with persistence > threshold · "
     "{absorbed} of {input_peaks} nominal peaks absorbed"
 )
 DEFAULT_BAND_ROW_SUBTITLE = (
@@ -135,7 +136,7 @@ def legend_labels(
 
 def dataset_label(rendering: dict[str, Any]) -> str:
     """Name the dataset in row subtitles."""
-    return str(rendering.get("dataset_label", "Papkou et al. (2023) · candidate graph"))
+    return str(rendering.get("dataset_label", f"Papkou et al. (2023) · {TOPOGRAPHER_FDR_BOOTSTRAPPED}"))
 
 
 def peak_branch_segments(

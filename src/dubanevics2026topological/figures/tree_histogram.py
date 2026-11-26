@@ -1,4 +1,4 @@
-"""Full, Published and Candidate single-population tree-histogram figures."""
+"""Full, Papkou and Topographer single-population tree-histogram figures."""
 
 from __future__ import annotations
 

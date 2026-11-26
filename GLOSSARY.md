@@ -10,12 +10,18 @@
 
 **Full graph**: The graph containing every sequence in the dataset.
 
-**Published graph**: The subgraph that the source study constructed and analysed, selected by the Published functional threshold.
+**Papkou graph**: The subgraph that the source study constructed and analysed, selected by the Papkou threshold.
+_Avoid_: Published graph
 
-**Selected graph**: A graph named by its functional threshold and its classification: the Published graph (published, point estimate), the Median-reflected graph (median-reflected, point estimate), the Mixture graph (mixture quantile, mixture probability; historical/alternative), the Published BY graph and the Median-reflected BY graph (fixed threshold, BY at nominal q = 0.05 with pooled standard errors). Its label fields are `thr=<published|reflected|mixture>` and `fdr=<none|by>`, with `q=<level>` after `fdr=by` and `p=<level>` for the Mixture graph; the Full graph is `graph=full`.
-_Avoid_: Candidate graph (historical; it named four different selections)
+**Topographer graph**: The subgraph selected by the Topographer threshold.
+_Avoid_: Median-reflected graph, Candidate graph (historical; it named four different selections)
 
-**Candidate graph** (historical): The name earlier outputs used for whichever graph the active Selection rule produced. Read the archive's recorded selection to learn which Selected graph it was; new outputs never use the name.
+**Papkou + FDR graph**: The Papkou graph with the Benjamini-Yekutieli false discovery rate selection at nominal q = 0.05 with pooled standard errors; the **Topographer + FDR graph** is the same selection applied to the Topographer threshold. In a figure, "Papkou + FDR, bootstrapped" and "Topographer + FDR, bootstrapped" name the same graph with the bootstrapped persistence threshold applied to its tree.
+_Avoid_: Published BY graph, Median-reflected BY graph, Candidate graph
+
+**Display names and state names**: Figures and tables show the display names (Full, Papkou, Papkou + FDR, Papkou + FDR, bootstrapped, Topographer, Topographer + FDR, Topographer + FDR, bootstrapped). The unchanged internal state names in code, configuration and file paths are `full`, `published`, `published_by`, `published_by_band`, `reflected`, `reflected_by` and `reflected_by_band`, in that order.
+
+**Selected graph**: A graph named by its functional threshold and its classification: the Papkou graph (`published`, point estimate), the Topographer graph (`reflected`, point estimate), the Mixture graph (mixture quantile, mixture probability; historical/alternative), the Papkou + FDR graph and the Topographer + FDR graph (fixed threshold, BY at nominal q = 0.05 with pooled standard errors). Its label fields are `thr=<published|reflected|mixture>` and `fdr=<none|by>`, with `q=<level>` after `fdr=by` and `p=<level>` for the Mixture graph; the Full graph is `graph=full`.
 
 **Persistence diagram**: A plot of each topological feature as a point at its birth and death values, so that distance from the diagonal shows its persistence.
 
@@ -64,7 +70,7 @@ _Avoid_: Open marker, hollow peak, valley triangle
 
 **Threshold-selected graph**: The graph containing original mutation edges with at least one functional-core endpoint and their endpoints, including the nonfunctional fringe, before largest-component selection.
 
-**Selection rule**: The named procedure that turns the Full graph into a Selected graph. The active publication configuration token `"fdr_fixed_cutoff"` (user lock 2026-11-12) maps to `thr=<published|reflected>_fdr=by_q=0.05`, keeping functional sequences rejecting $H_0: s \le T$ under Benjamini–Yekutieli FDR control at nominal $q = 0.05$, retaining nonfunctional fringe endpoints, and taking the largest connected component; the checked-in default uses the median-reflected cutoff. Point-estimate rules (`"published"`, `"median_reflected"`) keep vertices whose raw fitness $s \ge T$ under the same edge and component rules; the alternative rule `"mixture_quantile"` (available as `config/variants/mixture_quantile.toml`) keeps mixture-probability functional vertices. Every quantity computed on a Selected graph names its selection rule.
+**Selection rule**: The named procedure that turns the Full graph into a Selected graph. The active publication configuration token `"fdr_fixed_cutoff"` (user lock 2026-11-12) maps to `thr=<published|reflected>_fdr=by_q=0.05`, keeping functional sequences rejecting $H_0: s \le T$ under Benjamini–Yekutieli FDR control at nominal $q = 0.05$, retaining nonfunctional fringe endpoints, and taking the largest connected component; the checked-in default uses the Topographer threshold. Point-estimate rules (`"published"`, `"median_reflected"`) keep vertices whose raw fitness $s \ge T$ under the same edge and component rules; the alternative rule `"mixture_quantile"` (available as `config/variants/mixture_quantile.toml`) keeps mixture-probability functional vertices. Every quantity computed on a Selected graph names its selection rule.
 
 **Largest-component landscape**: The connected component containing the greatest number of sequences in a declared prepared landscape. Other retained components are excluded from this analysis population.
 
@@ -109,21 +115,20 @@ _Avoid_: Statistically significant peak
 
 **Neighbour q-value threshold**: The largest allowed adjusted q-value for every neighbour comparison of a local maximum. Lower thresholds require stronger evidence and retain fewer maxima.
 
-**Published population**: Every sequence in the Published-functional-threshold selected graph used for the Published graph and codon-entropy analysis, including below-threshold fringe endpoints. Fitness values remain raw; the functional threshold determines graph selection.
+**Papkou population**: Every sequence in the Papkou-threshold selected graph used for the Papkou graph and codon-entropy analysis, including below-threshold fringe endpoints. Fitness values remain raw; the functional threshold determines graph selection.
+_Avoid_: Published population
 
-**KEM/TCL ridge population**: All sequence identities in the superlevel component containing the nominated KEM or TCL summit immediately above their common saddle. The saddle and shared trunk belong to neither ridge. Other summit-side components are unassigned.
+**KEM branch / TCL branch**: The two named populations of a Selected graph, each all sequence identities in the superlevel component containing the nominated KEM or TCL summit immediately above their common saddle. The saddle and shared trunk belong to neither. Other summit-side components are unassigned. "Branch" alone keeps its merge-tree meaning (an edge of a tree, as in Branch vertex count, Dimmed branch or Branch decomposition); a KEM or TCL branch is a population of several leaves, and one terminal branch of a merge tree stays a leaf.
+_Avoid_: Ridge, KEM/TCL ridge population, a bare "branch" for either population
 
-**Two-functional-ridges share**: The functional sequences in a Selected graph assigned to the KEM or TCL ridge over all functional sequences in that Selected graph, compared with the configured minimum `two_functional_ridges_share_minimum`. In the codon-entropy claim summary its boolean is `claim_meets_minimum`, true when the share is at least the minimum (`>=`, so a share exactly equal to it meets it). The per-ridge position-2 E/D enrichment rows of the same table use `claim_exceeds_baseline` instead, true only when the ridge frequency strictly exceeds the baseline (`>`); each boolean is null on the other rows' kind.
+**Two-functional-ridges share**: The functional sequences in a Selected graph assigned to the KEM or TCL branch over all functional sequences in that Selected graph, compared with the configured minimum `two_functional_ridges_share_minimum`. In the codon-entropy claim summary its boolean is `claim_meets_minimum`, true when the share is at least the minimum (`>=`, so a share exactly equal to it meets it). The per-branch position-2 E/D enrichment rows of the same table use `claim_exceeds_baseline` instead, true only when the branch frequency strictly exceeds the baseline (`>`); each boolean is null on the other rows' kind.
 
 **Leaf population**: The terminal merge-tree branch from a local peak down to its first adjacent descending saddle. Membership includes the upper endpoint (peak) and represented interior sequences and excludes the lower saddle; it does not necessarily extend to the persistence-paired death saddle.
-_Avoid_: Ridge (reserved for multi-leaf KEM/TCL populations), branch population
+_Avoid_: Ridge, branch population (a Branch is a KEM or TCL population of several leaves)
 
-**Ridge**: A nominated high-fitness region in a Selected graph containing multiple terminal leaves that connect above a shared saddle, specifically the KEM or TCL ridge populations.
-_Avoid_: Ridge for a single terminal merge-tree branch (use Leaf population)
+**Focused branch**: In a cropped tree excerpt, the branch under discussion, drawn at full opacity.
 
-**Focused ridge**: In a cropped tree excerpt, the ridge under discussion, drawn at full opacity.
-
-**Dimmed branch**: In a cropped tree excerpt, any branch other than the focused ridge, drawn at reduced opacity with its colour unchanged.
+**Dimmed branch**: In a cropped tree excerpt, any branch other than the focused branch, drawn at reduced opacity with its colour unchanged.
 
 **Non-significant singleton leaf**: A terminal branch representing only its peak sequence, whose peak-to-adjacent-saddle adjusted q-value is greater than the declared q-value threshold. Failure to reject this comparison does not establish equal fitness.
 
@@ -187,15 +192,19 @@ _Avoid_: Elder-rule branch (a peak's whole path to the saddle where it meets an 
 **Horton–Strahler order (smoothed tree)**: The Horton–Strahler order of the edges of a smoothed split tree, computed on the smoothed tree itself. A terminal edge has order 1; the edge below a saddle has the larger order of the arms that meet there, plus one when the two largest are equal. An absorbed hill is no longer an arm, so it does not raise the orders below it, and the same landscape can have a lower order in its smoothed tree than in its nominal one. A branch has the order of its edge, so a branch has order 1 exactly when it is terminal. It describes the shape of the tree, not fitness or statistical support.
 _Avoid_: Order of the nominal tree, for a smoothed tree
 
-**Topological noise band** (retained for the `median_reflected` comparison rule only): The square of the mirrored persistence diagram between the global minimum fitness `g` and its reflection through the median `m`, the median-reflected functional threshold `m + (m − g)`; the spread of non-functional fitness below the median, reflected above it on the assumption that non-functional variation is symmetric about the median. It is not a calibrated error estimate.
+**Topological noise band** (retained for the `median_reflected` comparison rule only): The square of the mirrored persistence diagram between the global minimum fitness `g` and its reflection through the median `m`, the Topographer threshold `m + (m − g)`; the spread of non-functional fitness below the median, reflected above it on the assumption that non-functional variation is symmetric about the median. It is not a calibrated error estimate.
 _Avoid_: Bootstrap persistence band (reserved for the bootstrap band), error band
 
-**Functional threshold**: The fitness boundary $T$ separating functional from below-threshold sequences in a Selected graph, defined by an explicit rule such as the Published threshold, the median-reflected threshold, or a mixture quantile.
+**Functional threshold**: The fitness boundary $T$ separating functional from below-threshold sequences in a Selected graph, defined by an explicit rule such as the Papkou threshold, the Topographer threshold, or a mixture quantile.
 _Avoid_: Cutoff
 
 **Candidate functional threshold** (historical): The fitness threshold $T$ at a declared quantile of the non-functional fitness distribution read from a fitted mixture in earlier workflows; kept for historical records.
 
-**Published functional threshold**: The fitness threshold −0.507774 used by Papkou et al. (2023) to define their functional population; it selects the Published graph.
+**Papkou threshold**: The fitness threshold −0.507774 used by Papkou et al. (2023) to define their functional population; it selects the Papkou graph.
+_Avoid_: Published functional threshold, Published threshold
+
+**Topographer threshold**: The functional threshold obtained by reflecting the lower half of the fitness distribution about its median, T = m + (m − g) for the median m and the global minimum g; its value is −0.253159. It selects the Topographer graph.
+_Avoid_: Median-reflected threshold
 
 **Non-functional component**: A mixture component holding at least a declared share of the double-stop-codon sequences' summed posterior responsibility. The union of these components is the non-functional fitness distribution.
 
@@ -214,7 +223,7 @@ _Avoid_: Lowest-mean rule (that is the Replication cell's rule)
 
 **Acceptance checks**: Criteria declared before a run that the canonical classification must meet. For the Sensitivity scan they are (a) at least 99% of the double-stop sequences lie below `T`, (b) the 95% resampled interval on `T` is narrower than 2 × 1.96 × the median pooled standard error, and (c) one scan step from the canonical cell on any axis flips fewer than 5% of the Functional set. A failed check is reported, and the rule is not re-tuned to pass it.
 
-**Median gap** (retained for the `median_reflected` comparison rule only): `h = m − g`, the distance from the full-graph median raw fitness `m` down to the global minimum `g`. Reflecting it above the median gives the median-reflected threshold.
+**Median gap** (retained for the `median_reflected` comparison rule only): `h = m − g`, the distance from the full-graph median raw fitness `m` down to the global minimum `g`. Reflecting it above the median gives the Topographer threshold.
 
 **Leading saddle**: In a merge tree, the saddle at which the first ordinary H0 pair closes during the sweep; qualified by tree kind. In the split tree it is the highest split saddle; in the join tree it is the lowest join saddle. It is a reported quantity and selects no graph.
 
@@ -270,7 +279,7 @@ _Avoid_: Legacy unparsed directory tags
 
 **Product**: A typed, saved output artifact of the analysis pipeline: `fitness` (threshold $T$ plus sequence-level statistics and classifications), `landscape` (selected graph), `tree` (nominal or band merge tree), `bootstrap` (multi-file bootstrap draws and summary), `leaves` (leaf population membership and characteristics), `landscape_summary` (graph and population metrics), or `ridges` (KEM/TCL ridge memberships and metrics).
 
-**Described products**: The existing summary, biological-annotation, and ridge-count outputs returned by the single `analysis.describe(...)` entry point.
+**Described products**: The existing summary, biological-annotation, and branch-count outputs returned by the single `analysis.describe(...)` entry point.
 
 **Run fields**: Execution-context identifiers (`host=<hpc|local>_run=<id>`) recording where and when a job ran, positioned immediately before `hash=<8hex>` in file names and excluded from the scientific identity hash.
 

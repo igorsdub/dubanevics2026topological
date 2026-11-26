@@ -642,7 +642,7 @@ def test_annotated_threshold_is_a_dashed_rule_with_one_axis_label_and_a_caption(
         and isinstance(layer["mark"].get("text"), list)
     ]
     # A list of lines: Vega draws one line per item (a "\n" in one string would not wrap).
-    assert caption["mark"]["text"] == ["Median-reflected", "threshold"]
+    assert caption["mark"]["text"] == ["Topographer", "threshold"]
     mark = caption["mark"]
     assert (mark["align"], mark["baseline"], mark["color"]) == (
         "right",
@@ -661,7 +661,7 @@ def test_vanilla_draws_no_threshold_rule_label_text_or_apex_but_the_noise_square
     assert not [
         layer for layer in scatter["layer"] if layer["mark"].get("shape") == "square"
     ]
-    assert "Median-reflected\nthreshold" not in spec_text(spec)
+    assert "Topographer\nthreshold" not in spec_text(spec)
     assert not [
         layer
         for layer in scatter["layer"]
@@ -877,7 +877,7 @@ def test_the_mixture_rule_draws_no_noise_band(variant):
         for layer in scatter["layer"]
         if layer["mark"].get("shape") == "square"
     ]
-    assert "Median-reflected\nthreshold" not in spec_text(spec)
+    assert "Topographer\nthreshold" not in spec_text(spec)
     assert not _threshold_rule(scatter)
 
 
@@ -1195,7 +1195,7 @@ def test_threshold_rule_is_drawn_whenever_the_cutoff_is_median_reflected(variant
             layer
             for layer in scatter["layer"]
             if layer["mark"].get("shape") == "square"
-            or layer["mark"].get("text") == "Median-reflected\nthreshold"
+            or layer["mark"].get("text") == "Topographer\nthreshold"
         ]
         return
     (rule,) = _threshold_rule(scatter)

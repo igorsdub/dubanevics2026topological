@@ -1,4 +1,4 @@
-"""The two BY band-quantile panels and the figure built from fixture scans."""
+"""The four band-quantile panels (no FDR and BY, per threshold) and the figure built from fixture scans."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from dubanevics2026topological.analysis.band_quantile_scan_panels import (
     PANELS,
     load_grid,
     panel_for_variant,
+    scan_panel_for_variant,
     variant_declaration,
 )
 from dubanevics2026topological.figures import bootstrap_band_quantile_scan as fig
@@ -49,9 +50,11 @@ def _write(directory: Path, panel, persistence: list[float]) -> None:
     )
 
 
-def test_the_panels_are_the_two_by_graphs() -> None:
+def test_the_panels_are_the_four_graphs_of_the_2x2() -> None:
     assert [(panel.threshold, panel.fdr, panel.state) for panel in PANELS] == [
+        ("published", "none", "published"),
         ("published", "by", "published_by"),
+        ("candidate", "none", "reflected"),
         ("candidate", "by", "reflected_by"),
     ]
     by = variant_declaration("threshold=reflected_fdr=by_q=0.05")
@@ -72,19 +75,29 @@ def test_a_default_job_is_the_candidate_by_panel_only_when_the_declaration_match
     }
     assert panel_for_variant(None, settings).state == "reflected_by"
     assert panel_for_variant("threshold=published_fdr=by_q=0.05").state == "published_by"
-    # Point-estimate selections have no bootstrap draw set, so no panel.
+    # The bootstrap stage publishes BY draw evidence only; the scan stage maps all four cells.
     assert panel_for_variant("threshold=published_fdr=none") is None
+    assert scan_panel_for_variant("threshold=published_fdr=none").state == "published"
+    assert scan_panel_for_variant("threshold=reflected_fdr=none").state == "reflected"
+    assert scan_panel_for_variant("threshold=reflected_fdr=by_q=0.05").state == "reflected_by"
+    assert scan_panel_for_variant(None, settings).state == "reflected_by"
+    assert scan_panel_for_variant("mixture_quantile") is None
     assert panel_for_variant("mixture_quantile") is None
     assert panel_for_variant(None, {"analysis": {}}) is None
 
 
-def test_load_grid_reads_the_two_state_directories_and_names_gaps(tmp_path: Path) -> None:
+def test_load_grid_reads_the_four_state_directories_and_names_gaps(tmp_path: Path) -> None:
     for index, panel in enumerate(PANELS):
         _write(
             tmp_path / "band_quantile_scan" / panel.state, panel, [0.2 + index, 0.8]
         )
     loaded = load_grid(tmp_path)
-    assert [item["panel"].state for item in loaded] == ["published_by", "reflected_by"]
+    assert [item["panel"].state for item in loaded] == [
+        "published",
+        "published_by",
+        "reflected",
+        "reflected_by",
+    ]
     missing = tmp_path / "band_quantile_scan" / "published_by"
     for path in missing.rglob("*"):
         if path.is_file():
@@ -93,15 +106,33 @@ def test_load_grid_reads_the_two_state_directories_and_names_gaps(tmp_path: Path
         load_grid(tmp_path)
 
 
-def test_a_directory_that_is_not_a_by_state_is_ignored(tmp_path: Path) -> None:
+def test_a_directory_that_is_not_a_panel_state_is_ignored(tmp_path: Path) -> None:
     _write(tmp_path / "band_quantile_scan" / "full", PANELS[0], [0.2, 0.8])
     with pytest.raises(FileNotFoundError):
         load_grid(tmp_path)
 
 
-def test_grid_figure_is_one_row_of_the_two_by_panels() -> None:
+def test_absent_no_fdr_scans_leave_the_by_panels(tmp_path: Path) -> None:
+    for panel in PANELS:
+        if panel.fdr == "by":
+            _write(tmp_path / "band_quantile_scan" / panel.state, panel, [0.2, 0.8])
+    loaded = load_grid(tmp_path)
+    assert [item["panel"].state for item in loaded] == ["published_by", "reflected_by"]
+
+
+def test_a_present_no_fdr_scan_is_included_and_a_missing_by_scan_still_stops(
+    tmp_path: Path,
+) -> None:
+    for panel in PANELS:
+        if panel.state != "reflected_by":
+            _write(tmp_path / "band_quantile_scan" / panel.state, panel, [0.2, 0.8])
+    with pytest.raises(FileNotFoundError, match=r"\(reflected_by\)"):
+        load_grid(tmp_path)
+
+
+def _grid_panels(selected) -> list[dict]:
     panels = []
-    for index, panel in enumerate(PANELS):
+    for index, panel in enumerate(selected):
         persistence = [0.3 + 0.1 * index, 1.2]
         panels.append(
             {
@@ -121,6 +152,43 @@ def test_grid_figure_is_one_row_of_the_two_by_panels() -> None:
                 },
             }
         )
+    return panels
+
+
+def test_grid_figure_without_no_fdr_scans_is_one_row_of_the_by_panels() -> None:
+    by = [panel for panel in PANELS if panel.fdr == "by"]
+    spec = fig.build_bootstrap_band_quantile_scan_grid(
+        _grid_panels(by),
+        {
+            "analysis": {"clamped": {"candidate_functional_threshold": {"q": 0.05}}},
+            "figures": {"figures": {fig.GRID_FIGURE_ID: {"panel_size": 180}}},
+        },
+    ).to_dict()
+    (framed,) = spec["vconcat"]
+    (grid,) = framed["hconcat"]
+    (row,) = grid["vconcat"]
+    assert [cell["title"]["text"] for cell in row["hconcat"]] == [
+        "Papkou + FDR",
+        "Topographer + FDR",
+    ]
+
+
+def test_grid_figure_prints_the_fdr_level_once_from_the_settings() -> None:
+    settings = {
+        "analysis": {"clamped": {"candidate_functional_threshold": {"q": 0.1}}},
+        "figures": {"figures": {fig.GRID_FIGURE_ID: {"title": "T"}}},
+    }
+    spec = fig.build_bootstrap_band_quantile_scan_grid(
+        _grid_panels(PANELS), settings
+    ).to_dict()
+    assert spec["title"]["subtitle"] == "FDR: BY, q = 0.1"
+    import json as _json
+
+    assert _json.dumps(spec).count("FDR: BY") == 1
+
+
+def test_grid_figure_is_the_2x2_titled_by_state() -> None:
+    panels = _grid_panels(PANELS)
     spec = fig.build_bootstrap_band_quantile_scan_grid(
         panels,
         {"figures": {"figures": {fig.GRID_FIGURE_ID: {"panel_size": 180, "tau_axis_max": 1.5}}}},
@@ -131,11 +199,13 @@ def test_grid_figure_is_one_row_of_the_two_by_panels() -> None:
     (grid,) = left["hconcat"]
     assert grid["title"]["orient"] == "bottom"
     assert grid["title"]["text"] == "Persistence threshold"
-    cells = grid["hconcat"]
-    assert [cell["title"]["text"] for cell in cells] == [
-        "Published graph · BY q = 0.05",
-        "Candidate graph · BY q = 0.05",
+    top, bottom = grid["vconcat"]
+    rows = [top["hconcat"], bottom["hconcat"]]
+    assert [[cell["title"]["text"] for cell in row] for row in rows] == [
+        ["Papkou", "Topographer"],
+        ["Papkou + FDR", "Topographer + FDR"],
     ]
+    cells = [cell for row in rows for cell in row]
     assert grid["resolve"]["scale"] == {"x": "shared", "y": "independent"}
     for cell in cells:
         assert cell["width"] == cell["height"] == 180
@@ -155,8 +225,8 @@ def test_grid_figure_is_one_row_of_the_two_by_panels() -> None:
     assert svg.count(">Peaks with persistence > threshold<") + svg.count(">Peaks with persistence &gt; threshold<") == 1
 
 
-def test_the_grid_needs_exactly_two_panels() -> None:
-    with pytest.raises(ValueError, match="two panels"):
+def test_the_grid_needs_the_by_panels() -> None:
+    with pytest.raises(ValueError, match="two BY panels"):
         fig.build_bootstrap_band_quantile_scan_grid([], {})
 
 
@@ -224,7 +294,7 @@ def load_grid_one(directory: Path):
     return _read_panel(directory, PANELS[0])
 
 
-def test_a_point_estimate_job_publishes_no_scan(tmp_path, monkeypatch) -> None:
+def test_a_no_fdr_scan_is_published_to_its_processed_state(tmp_path, monkeypatch) -> None:
     result = _fake_result([0.2, 0.5])
     monkeypatch.setattr(
         scan_module, "load_cached_bootstrap_smoothed_tree", lambda given, **_: result
@@ -233,6 +303,22 @@ def test_a_point_estimate_job_publishes_no_scan(tmp_path, monkeypatch) -> None:
     variant = "threshold=published_fdr=none"
     scan_module.compute_bootstrap_band_quantile_scan(
         _by_settings(variant), context=_by_context(tmp_path, variant)
+    )
+    published = tmp_path / "processed" / "band_quantile_scan" / "published"
+    record = json.loads((published / "provenance.json").read_text(encoding="utf-8"))
+    assert record["graph"]["fdr"] == "none"
+    assert (published / "scan.parquet").is_file()
+
+
+def test_a_job_outside_the_four_variants_publishes_no_scan(tmp_path, monkeypatch) -> None:
+    result = _fake_result([0.2, 0.5])
+    monkeypatch.setattr(
+        scan_module, "load_cached_bootstrap_smoothed_tree", lambda given, **_: result
+    )
+    monkeypatch.setattr(scan_module, "band_width", lambda draws, q: 0.1)
+    scan_module.compute_bootstrap_band_quantile_scan(
+        _by_settings("threshold=published_fdr=none"),
+        context=_by_context(tmp_path, "mixture_quantile"),
     )
     assert not (tmp_path / "processed").exists()
 

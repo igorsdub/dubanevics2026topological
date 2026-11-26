@@ -13,7 +13,10 @@ from dubanevics2026topological.analysis.graph_summary import (
     landscape_summary_column,
 )
 from dubanevics2026topological.analysis.leaves import Leaves
-from dubanevics2026topological.tables.graph_summary import export_landscape_summary
+from dubanevics2026topological.tables.graph_summary import (
+    SUMMARY_DISPLAY,
+    export_landscape_summary,
+)
 
 
 class Graph:
@@ -106,7 +109,9 @@ def test_seven_columns_mixture_and_exports(tmp_path):
     paths = export_landscape_summary(result, "toy", tmp_path)
     with paths[0].open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert tuple(rows[0]) == ("Metric", *SUMMARY_COLUMNS)
+    # The identity column names stay in the saved values; a reader sees the state labels.
+    assert tuple(rows[0]) == ("Metric", *SUMMARY_DISPLAY.values())
+    assert tuple(SUMMARY_DISPLAY) == SUMMARY_COLUMNS
     assert "eligible leaves" in paths[1].read_text()
     assert "Full-library" in paths[2].read_text()
 

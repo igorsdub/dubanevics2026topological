@@ -9,10 +9,10 @@ and authorized autonomous implementation using small buckets and lighter agents.
 ## Settled presentation decisions
 
 - Use the entropy figure's heading/subtitle layout across the publication set.
-  Comparison headings are Full graph, Published graph, and Candidate graph.
+  Comparison headings are Full graph, Papkou graph, and Topographer graph.
   Subtitles carry the reference, peak counts, functional and total sequence
   counts, and applicable threshold. Counts come from the plotted population.
-- Entropy uses Published graph in place of the former study tree label. Preserve ridge context.
+- Entropy uses Papkou graph in place of the former study tree label. Preserve branch context.
 - Biology headings state the computed count and category, for example
   “43 stop-codon containing peaks” or “111 synonymous leaves”.
 - Use peaks in place of maxima in reader-facing labels. Preserve scientific

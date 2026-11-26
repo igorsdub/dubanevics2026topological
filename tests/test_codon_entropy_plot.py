@@ -256,13 +256,13 @@ def test_build_draws_the_tree_over_three_sweeps():
     assert sweep_row["spacing"] == 8
     assert "title" not in tree  # a tree-level title would widen the panel
     assert tree_row["title"]["text"] == (
-        "Band-smoothed candidate graph · "
+        "Topographer + FDR, bootstrapped · "
         f"{SENTINEL['candidate_graph.functional_count']} functional / "
         f"{SENTINEL['candidate_graph.vertex_count']} total sequences"
     )
     assert sweep_row["title"]["text"] == (
-        f"Codon entropy · KEM ridge "
-        f"{SENTINEL['ridges.band_view.kem.functional_count']} and TCL ridge "
+        f"Codon entropy · KEM branch "
+        f"{SENTINEL['ridges.band_view.kem.functional_count']} and TCL branch "
         f"{SENTINEL['ridges.band_view.tcl.functional_count']} functional sequences"
     )
     assert _render_requested_keys() == (
@@ -273,7 +273,7 @@ def test_build_draws_the_tree_over_three_sweeps():
     )
     assert result["config"]["axis"]["labelFontSize"] == 15
     assert result["config"]["legend"]["titleFontSize"] == 15
-    assert result["title"]["orient"] == "bottom"  # the gray-region note stays
+    assert "title" not in result  # no footer: the variant footer states the threshold and q
 
 
 def _render_requested_keys():
@@ -291,6 +291,28 @@ def test_the_sweeps_are_kem_tcl_and_all_codons_in_that_order(rendered):
         "TCL branch",
         "All branches",
     ]
+
+
+def test_the_sweep_headings_share_alignment_baseline_and_rule(rendered):
+    sweeps = _sweep_panels(rendered)
+    titles = [panel["title"] for panel in sweeps]
+    assert {(t["anchor"], t["baseline"], t["offset"]) for t in titles} == {
+        ("start", "bottom", -6)
+    }
+    for panel in sweeps:
+        rules = [
+            item
+            for item in _walk_specs(panel)
+            if isinstance(item.get("mark"), dict)
+            and item["mark"].get("type") == "rule"
+        ]
+        assert len(rules) == 1
+        assert rules[0]["mark"]["color"] == panel["title"]["color"]
+
+
+def test_the_sweeps_have_no_outside_span_fill(rendered):
+    text = str(rendered)
+    assert "#f5f5f5" not in text and "outside" not in text.lower()
 
 
 def test_the_sweeps_share_one_fitness_axis_one_position_axis_and_one_colour_bar(
@@ -780,9 +802,9 @@ def test_the_untitled_twin_keeps_the_two_row_headings_and_the_note():
     assert len(result["vconcat"]) == 2
     # the Candidate and sweep row headings (with counts) are content and stay
     assert all("title" in row for row in result["vconcat"][:2])
-    assert result["vconcat"][0]["title"]["text"].startswith("Band-smoothed")
-    assert result["title"]["orient"] == "bottom"  # the gray-region note stays
-    assert chart.to_dict()["vconcat"][0]["title"]["text"].startswith("Band-smoothed")
+    assert result["vconcat"][0]["title"]["text"].startswith("Topographer + FDR, bootstrapped")
+    assert "title" not in result  # no footer: the variant footer states the threshold and q
+    assert chart.to_dict()["vconcat"][0]["title"]["text"].startswith("Topographer + FDR, bootstrapped")
 
 
 def test_the_figure_converts_to_png_through_vl_convert():

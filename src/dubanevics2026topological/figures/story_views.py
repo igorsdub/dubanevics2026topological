@@ -24,6 +24,14 @@ from ..results import parse_label
 from ._count_labels import count_label_text
 from .bootstrap_band_view import build_bootstrap_band_figure
 from .graph_codon_entropy import build_graph_codon_entropy_figure
+from .labels import (
+    fdr_level_text,
+    settings_fdr_q,
+    PAPKOU_FDR_BOOTSTRAPPED,
+    TOPOGRAPHER_FDR_BOOTSTRAPPED,
+    graph_label,
+    state_label,
+)
 from .ridge_entropy_view import build_ridge_entropy_figure
 from .tree_comparison_view import COLUMNS, ComparisonPanel
 from .tree_comparison_view import (
@@ -70,29 +78,53 @@ class FigureOutput:
     sidecar: Mapping[str, Any] | None = None
 
 
-_THRESHOLDS = {"published": "Published threshold", "reflected": "Candidate threshold"}
 _NOT_LANDSCAPE_KEYS = frozenset({"hash", "tree", "draws", "seed"})
 _COMPARISON_TITLES = {
     "tree_comparison_thresholds": "Threshold selections on one fitness axis",
     "tree_comparison_fdr": "Point estimate versus BY selection",
-    "tree_comparison_band": "Band-simplified trees: Published BY versus Candidate threshold BY",
+    "tree_comparison_band": f"Bootstrapped trees: {PAPKOU_FDR_BOOTSTRAPPED} versus {TOPOGRAPHER_FDR_BOOTSTRAPPED}",
 }
 
 
-def population_title(params: Mapping[str, Any]) -> str:
+def population_title(params: Mapping[str, Any], *, fdr_q: float | None = None) -> str:
     """Display title of a nominal tree's population from its label keys."""
+    return state_label(_state(params, fdr_q=fdr_q))
+
+
+def _state(
+    params: Mapping[str, Any], *, band: bool = False, fdr_q: float | None = None
+) -> str:
+    """The graph state name of a saved product's label keys (``reflected_by_band`` and so on).
+
+    The state names carry no q: a BY product maps to ``_by`` only when its recorded q is the
+    analysis level ``fdr_q`` (the level the figure prints once), otherwise it is refused.
+    """
     if params.get("graph") == "full":
-        return "Full graph"
-    title = _THRESHOLDS[str(params["thr"])]
+        return "full"
+    state = str(params["thr"])
     if params.get("fdr") == "by":
-        return f"{title}, BY q = {params['q']}"
-    return title
+        if fdr_q is not None and float(params.get("q", fdr_q)) != float(fdr_q):
+            raise ValueError(
+                f"A BY tree at q = {params['q']} is not the analysis level q = {fdr_q}; "
+                "the state labels do not record q."
+            )
+        state += "_by"
+        if band or params.get("tree") == "band":
+            state += "_band"
+    return state
 
 
-def panel_title(params: Mapping[str, Any]) -> str:
+def panel_title(params: Mapping[str, Any], *, fdr_q: float | None = None) -> str:
     """Panel heading: the population, plus the band state for a band tree."""
-    title = population_title(params)
-    return f"{title}, band-simplified" if params.get("tree") == "band" else title
+    return population_title(params, fdr_q=fdr_q)
+
+
+def _with_fdr(subtitle: str, params_list: Sequence[Mapping[str, Any]], fdr_q: float | None) -> str:
+    """Append the FDR level once when any drawn state is selected with FDR."""
+    level = fdr_level_text(fdr_q)
+    if level and any(params.get("fdr") == "by" for params in params_list):
+        return f"{subtitle} · {level}"
+    return subtitle
 
 
 def split_comparison_id(comparison_id: str) -> tuple[str, str]:
@@ -185,11 +217,14 @@ def tree_persistence_outputs(
     payload: Mapping[str, Any], settings: dict[str, Any], style: str
 ) -> Iterator[FigureOutput]:
     """Each nominal tree's ``tree_persistence`` files in one style."""
+    fdr_q = settings_fdr_q(settings)
     for label, inputs in payload["nominal"].items():
         params = dict(parse_label(label, validate=False).params)
-        subtitle = (
+        subtitle = _with_fdr(
             f"Papkou et al. (2023) · {count_label_text(inputs.vertex_count)} sequences · "
-            f"{count_label_text(inputs.persistence_table.height)} peaks"
+            f"{count_label_text(inputs.persistence_table.height)} peaks",
+            [params],
+            fdr_q,
         )
         for out_view, layout in layout_outputs(TREE_PERSISTENCE_ID, style):
             yield FigureOutput(
@@ -199,7 +234,7 @@ def tree_persistence_outputs(
                         inputs,
                         settings,
                         style,
-                        title=population_title(params),
+                        title=population_title(params, fdr_q=fdr_q),
                         subtitle=subtitle,
                         layout=layout,
                     )
@@ -214,11 +249,14 @@ def bootstrap_band_outputs(
     payload: Mapping[str, Any], settings: dict[str, Any], style: str
 ) -> Iterator[FigureOutput]:
     """Each band tree's ``bootstrap_band`` files in one style."""
+    fdr_q = settings_fdr_q(settings)
     for label, item in payload["band"].items():
         params = dict(parse_label(label, validate=False).params)
-        subtitle = (
+        subtitle = _with_fdr(
             f"Papkou et al. (2023) · {count_label_text(item.nominal.vertex_count)} sequences · "
-            f"bootstrap band quantile {params['bandq']}, {params['draws']} draws"
+            f"bootstrap band quantile {params['bandq']}, {params['draws']} draws",
+            [params],
+            fdr_q,
         )
         for out_view, layout in layout_outputs(BOOTSTRAP_BAND_ID, style):
             yield FigureOutput(
@@ -230,7 +268,7 @@ def bootstrap_band_outputs(
                         item.survival,
                         settings,
                         style,
-                        title=population_title(params),
+                        title=population_title(params, fdr_q=fdr_q),
                         subtitle=subtitle,
                         layout=layout,
                     )
@@ -246,9 +284,13 @@ def tree_comparison_outputs(
 ) -> Iterator[FigureOutput]:
     """Each declared comparison's two-row and combined files, with their JSON sidecars."""
     del variant  # comparisons have no style: one set of files
+    fdr_q = settings_fdr_q(settings)
     figures = settings["figures"]
     bands = payload["band"]
-    trees = {**payload["nominal"], **{label: item.band for label, item in bands.items()}}
+    trees = {
+        **payload["nominal"],
+        **{label: item.band for label, item in bands.items()},
+    }
     peak_labels_wanted = bool(
         figures["d10"]["tree_comparison"].get("peak_identity_labels", True)
     )
@@ -261,13 +303,16 @@ def tree_comparison_outputs(
             comparison_specification(view, name, comparison),
         )
         panels = []
+        comparison_params = [
+            dict(parse_label(label, validate=False).params) for label in labels
+        ]
         for label, item in zip(labels, loaded, strict=True):
             params = dict(parse_label(label, validate=False).params)
             peaks = item.persistence_table.height
             band = params.get("tree") == "band"
             panels.append(
                 ComparisonPanel(
-                    title=panel_title(params),
+                    title=panel_title(params, fdr_q=fdr_q),
                     subtitle=(
                         f"{count_label_text(item.vertex_count)} sequences · {count_label_text(peaks)} "
                         f"{'surviving ' if band else ''}"
@@ -275,21 +320,27 @@ def tree_comparison_outputs(
                         f" · {count_label_text(plot_branch_count(item))} branches"
                     ),
                     inputs=item,
-                    peak_labels=bands[label].peaks if band and peak_labels_wanted else None,
+                    peak_labels=bands[label].peaks
+                    if band and peak_labels_wanted
+                    else None,
                 )
             )
         for layout, shown in comparison_layouts(name):
             yield FigureOutput(
-                stable_stem(
-                    view, comparison_figure_name(view, shown, digest, "png")
-                ),
-                lambda layout=layout, panels=panels, view=view: build_tree_comparison_chart(
-                    view,
-                    panels,
-                    settings,
-                    title=_COMPARISON_TITLES[view],
-                    subtitle="Papkou et al. (2023) · common fitness axis",
-                    layout=layout,
+                stable_stem(view, comparison_figure_name(view, shown, digest, "png")),
+                lambda layout=layout, panels=panels, view=view: (
+                    build_tree_comparison_chart(
+                        view,
+                        panels,
+                        settings,
+                        title=_COMPARISON_TITLES[view],
+                        subtitle=_with_fdr(
+                            "Papkou et al. (2023) · common fitness axis",
+                            comparison_params,
+                            fdr_q,
+                        ),
+                        layout=layout,
+                    )
                 ),
                 comparison_sidecar_document(
                     view=view,
@@ -307,22 +358,27 @@ def ridge_entropy_outputs(
     payload: Mapping[str, Any], settings: dict[str, Any], style: str
 ) -> Iterator[FigureOutput]:
     """Each saved ``ridge_entropy_sweeps`` product's ``ridge_entropy`` file in one style."""
+    fdr_q = settings_fdr_q(settings)
     for label, item in payload.items():
         params = dict(parse_label(label, validate=False).params)
         entropy = item["entropy"]
-        subtitle = (
+        subtitle = _with_fdr(
             f"Papkou et al. (2023) · {count_label_text(entropy.sidecar['counts']['core'])} sequences · "
-            f"bootstrap band quantile {params['bandq']}, {params['draws']} draws"
+            f"bootstrap band quantile {params['bandq']}, {params['draws']} draws",
+            [params],
+            fdr_q,
         )
         yield FigureOutput(
             _single_stem(RIDGE_ENTROPY_ID, params, style),
-            lambda item=item, params=params, subtitle=subtitle: build_ridge_entropy_figure(
-                item["entropy"],
-                item["functional"],
-                settings,
-                style,
-                title=f"{population_title(params)}, band-simplified",
-                subtitle=subtitle,
+            lambda item=item, params=params, subtitle=subtitle: (
+                build_ridge_entropy_figure(
+                    item["entropy"],
+                    item["functional"],
+                    settings,
+                    style,
+                    title=state_label(_state(params, band=True, fdr_q=fdr_q)),
+                    subtitle=subtitle,
+                )
             ),
         )
 
@@ -333,7 +389,7 @@ def ridge_entropy_outputs(
 def graph_codon_entropy_outputs(
     payload: Mapping[str, Any], settings: dict[str, Any], style: str
 ) -> Iterator[FigureOutput]:
-    """Supplementary S7: the Full and Published graphs' entropy, with its JSON sidecar."""
+    """Supplementary S14: the Full and Papkou graphs' entropy, with its JSON sidecar."""
     entropy = payload["entropy"]
     digests = entropy.sidecar["population_sha256"]
     digest = comparison_hash(
@@ -341,8 +397,8 @@ def graph_codon_entropy_outputs(
         {"sweep_points": payload["sweep_points"], "populations": ["full", "published"]},
     )
     subtitle = (
-        f"Full graph {count_label_text(entropy.sidecar['counts']['full'])} sequences · "
-        f"Published graph {count_label_text(entropy.sidecar['counts']['published'])} sequences"
+        f"{graph_label('full')} {count_label_text(entropy.sidecar['counts']['full'])} sequences · "
+        f"{graph_label('published')} {count_label_text(entropy.sidecar['counts']['published'])} sequences"
     )
     yield FigureOutput(
         stable_stem(

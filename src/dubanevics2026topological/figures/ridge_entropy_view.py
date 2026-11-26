@@ -4,7 +4,7 @@ Spec 2, Section 6, supplementary view. Three heatmaps of one band-simplified tre
 share a vertical raw-fitness axis: the whole selected graph (core) and its KEM and
 TCL ridges. Each cell is the Shannon entropy in bits of the amino acid at one codon
 position, over the sequences of that population at or above the cell's fitness
-threshold. Fitness outside a population's own span is grey. The ``annotated``
+threshold. Fitness outside a population's own span is left blank. The ``annotated``
 style adds each ridge's functional count and the legend note. Everything is read
 from a saved ``ridge_entropy_sweeps`` product (``analysis.ridge_entropy``) and
 its ridges summary; nothing is recomputed.
@@ -21,14 +21,14 @@ import polars as pl
 from ..analysis.ridge_entropy import POPULATION_NAMES, RidgeEntropy
 from ._count_labels import count_label_text
 from .codon_entropy import MAX_ENTROPY
-from .palette import OUTSIDE_GREY
+from .labels import KEM_BRANCH, TCL_BRANCH
 from .tree_persistence_view import STYLES
 
 POSITIONS = ("1", "2", "3")
 HEADINGS = {
     "core": "Band-simplified graph",
-    "kem": "KEM ridge",
-    "tcl": "TCL ridge",
+    "kem": KEM_BRANCH,
+    "tcl": TCL_BRANCH,
 }
 
 
@@ -78,10 +78,9 @@ def _panel(
     show_axis: bool,
     show_legend: bool,
 ) -> alt.LayerChart:
-    """One population's heatmap; an empty population is grey over the whole axis."""
+    """One population's heatmap; outside its span, and for an empty population, nothing is drawn."""
     width = int(rendering.get("heatmap_width", 220))
     height = int(rendering.get("heatmap_height", 320))
-    outside = str(rendering.get("outside_color", OUTSIDE_GREY))
     x = alt.X(
         "position:N",
         sort=list(POSITIONS),
@@ -91,18 +90,6 @@ def _panel(
     )
     y_scale = alt.Scale(domain=list(domain), zero=False, nice=False)
     cells = [] if span is None else entropy_cells(sweep, *span)
-    pieces = [(domain[0], domain[1])] if span is None else []
-    if span is not None:
-        pieces = [
-            (lower, upper)
-            for lower, upper in ((domain[0], span[0]), (span[1], domain[1]))
-            if lower < upper
-        ]
-    filler = [
-        {"position": position, "lower": lower, "upper": upper}
-        for position in POSITIONS
-        for lower, upper in pieces
-    ]
     y_encoding = alt.Y(
         "lower:Q",
         scale=y_scale,
@@ -115,11 +102,12 @@ def _panel(
         if show_axis
         else None,
     )
+    # An empty rectangle that carries the shared axes; outside the span nothing is drawn.
     layers = [
         alt.Chart(
-            alt.Data(values=filler or [{"position": "1", "lower": 0, "upper": 0}])
+            alt.Data(values=[{"position": "1", "lower": domain[0], "upper": domain[0]}])
         )
-        .mark_rect(color=outside)
+        .mark_rect(opacity=0)
         .encode(x=x, y=y_encoding, y2="upper:Q")
     ]
     if cells:
@@ -206,11 +194,7 @@ def build_ridge_entropy_figure(
                 )
             )
         )
-    note = (
-        "Grey: outside the population's fitness span"
-        if annotated
-        else "Entropy of the amino acid at each codon position"
-    )
+    note = "Entropy of the amino acid at each codon position"
     font_size = int(rendering.get("font_size", 15))
     chart = (
         alt.hconcat(*panels, spacing=int(rendering.get("panel_gap", 12)))

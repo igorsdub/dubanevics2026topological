@@ -199,7 +199,7 @@ def _build_toy_output(toy: Toy) -> None:
             context.raw_data_dir / name, f"raw {name}", expect=False
         ).read_bytes()
     # -- the band-quantile scan tables the stage publishes directly into processed
-    for state in ("published_by", "reflected_by"):
+    for state in ("published", "published_by", "reflected", "reflected_by"):
         directory = context.processed_root / scan_panels.SCAN_DIR_NAME / state
         directory.mkdir(parents=True)
 
@@ -299,6 +299,7 @@ INPUT_COVERAGE = {
     "four_graph_comparisons": "variants/<v>/analysis/clamped_comparison (comparison/<state>)",
     "full_fitness": "data/raw",
     "graph_tree_persistence": "processed graph_tree_persistence",
+    "graph_codon_entropy": "processed landscape/full and landscape/published",
     "growth_rates": "processed growth_rates",
     "manuscript_quantities": "tables/manuscript_quantities and every registry upstream",
     "peak_panels": "variants/<v>/analysis/peak_uncertainty and peak_panels/<state>",

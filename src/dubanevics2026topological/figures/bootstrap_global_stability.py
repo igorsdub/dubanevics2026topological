@@ -396,12 +396,17 @@ def _diagram_panel(
 def build_bootstrap_global_stability_figure(
     analysis: dict[str, Any], settings: dict[str, Any]
 ) -> Any:
-    """Draw the bottleneck histogram stacked over the nominal diagram and band."""
+    """Draw the bottleneck histogram, optionally over the nominal diagram and band.
+
+    ``show_diagram`` (``[figures.bootstrap_global_stability]``) is false for the numbered
+    figure, which is the histogram panel alone; true stacks the nominal persistence
+    diagram and band beneath it (the opt-in two-panel version).
+    """
     _, rendering, _, _ = biology_renderings(settings, FIGURE_ID)
+    show_diagram = bool(rendering.get("show_diagram", False))
     cached = analysis["bootstrap_smoothed"]
     verdict = _check_summary(cached.summary, cached.hills, cached.draw_stats)
 
-    points = diagram_points(cached.hills)
     quantities = analysis["manuscript_quantities"]
     shown = {
         "radius": quantities.display("bootstrap.persistence_threshold.radius"),
@@ -427,16 +432,24 @@ def build_bootstrap_global_stability_figure(
     }
     wrap = int(rendering.get("subtitle_wrap", 52))
     # Each phrase wraps on its own (balanced), so no line holds a lone leftover word.
+    phrases = (
+        (SUBTITLE_VERDICT, SUBTITLE_PEAKS, SUBTITLE_SANITY)
+        if show_diagram
+        else (SUBTITLE_VERDICT, SUBTITLE_SANITY)
+    )
     subtitle = [
-        *wrap_phrases([line.format(**shown) for line in SUBTITLE_VERDICT], wrap),
-        *wrap_phrases([line.format(**shown) for line in SUBTITLE_PEAKS], wrap),
-        *wrap_phrases([line.format(**shown) for line in SUBTITLE_SANITY], wrap),
+        line
+        for block in phrases
+        for line in wrap_phrases([text.format(**shown) for text in block], wrap)
     ]
     font_size = int(rendering.get("font_size", 10))
+    panels = [_distance_panel(cached.draw_stats, verdict, rendering)]
+    if show_diagram:
+        panels.append(
+            _diagram_panel(diagram_points(cached.hills), verdict, rendering)
+        )
     chart = alt.vconcat(
-        _distance_panel(cached.draw_stats, verdict, rendering),
-        _diagram_panel(points, verdict, rendering),
-        spacing=int(rendering.get("panel_gap", 40)),
+        *panels, spacing=int(rendering.get("panel_gap", 40))
     ).resolve_scale(x="independent", y="independent", color="independent")
     # Figure callers may supply partial presentation settings without a declaration.
     clamped_cfg = settings.get("analysis", {}).get("clamped", {})
@@ -445,14 +458,22 @@ def build_bootstrap_global_stability_figure(
         isinstance(declaration, Mapping)
         and declaration.get("rule") == FDR_FIXED_CUTOFF
     )
-    raw_title = str(
-        rendering.get(
-            "title",
-            "Nominal persistence diagram against the bootstrap "
-            "confidence band",
+    if show_diagram:
+        raw_title = str(
+            rendering.get(
+                "title",
+                "Nominal persistence diagram against the bootstrap "
+                "confidence band",
+            )
         )
-    )
-    if is_fdr:
+    else:
+        raw_title = str(
+            rendering.get(
+                "histogram_title",
+                "Bottleneck distance of the nominal and flat landscapes",
+            )
+        )
+    if is_fdr and show_diagram:
         raw_title = raw_title.replace("confidence band", "band")
 
     return (

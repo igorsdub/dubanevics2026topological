@@ -1,5 +1,7 @@
 # Candidate codon-entropy figure contract
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 The codon-entropy figure is `bootstrap_codon_entropy`. It was first drawn
 as `papkou2023_codon_entropy` on the peak-significance simplified tree; that figure
 was retired on 2026-10-21 and the contract below now applies to the band-simplified

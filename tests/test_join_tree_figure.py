@@ -150,9 +150,12 @@ def test_the_builder_accepts_later_graphs_and_only_full_is_loaded() -> None:
             _settings(),
             "vanilla",
         )
-        assert graph.replace("published", "Published").replace(
-            "candidate", "Candidate"
-        ).split()[0] + " graph" in " ".join(spec_texts(chart.to_dict()))
+        heading = {
+            "full": "Full graph",
+            "published": "Papkou graph",
+            "candidate": "Topographer + FDR graph",
+        }[graph]
+        assert heading in " ".join(spec_texts(chart.to_dict()))
     with pytest.raises(NotImplementedError, match="not wired"):
         payload_for_graph(
             "candidate",

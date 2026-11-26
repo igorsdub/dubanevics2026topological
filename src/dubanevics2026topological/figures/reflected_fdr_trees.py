@@ -19,11 +19,12 @@ from ._charts import (
     tree_histogram_settings,
 )
 from ._top_histogram import count_axis_limit
+from .labels import state_label
 from .palette import THRESHOLD_GREY
 
 ROWS = (
-    ("reflected", "Candidate threshold point estimate"),
-    ("reflected_by", "Candidate threshold"),
+    ("reflected", state_label("reflected")),
+    ("reflected_by", state_label("reflected_by")),
 )
 
 
@@ -36,7 +37,7 @@ def build_reflected_fdr_trees_figure(payload, settings):
     for key, title in ROWS:
         row = payload["rows"][key]
         if key == "reflected_by":
-            title = f"{title} {row['method'].upper()}, nominal q = {row['q']:g}"
+            title = f"{title} · {row['method'].upper()}, nominal q = {row['q']:g}"
         population, layout = row["population"], row["layout"]
         bins = compute_fitness_histogram_table(
             population.rename({"scalar": "raw_fitness"}), scalar_column="raw_fitness",

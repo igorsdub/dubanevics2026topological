@@ -1,10 +1,10 @@
-"""Supplementary S7: positional codon entropy of the Full and Published graphs.
+"""Supplementary S14: positional codon entropy of the Full and Papkou graphs.
 
 Two heatmaps, and no tree. Each cell is the Shannon entropy in bits of the amino
 acid at one codon position, over that graph's sequences at or above the cell's
 raw-fitness threshold. The values come from ``analysis.graph_codon_entropy``,
 which calls the same ``compute_entropy_sweeps`` as the main-text codon-entropy
-figure. Fitness outside a graph's own span is grey.
+figure. Fitness outside a graph's own span is left blank.
 """
 
 from __future__ import annotations
@@ -17,9 +17,10 @@ import polars as pl
 from ..analysis.graph_codon_entropy import POPULATION_NAMES, GraphCodonEntropy
 from ._count_labels import count_label_text
 from .ridge_entropy_view import _panel
+from .labels import graph_label
 from .tree_persistence_view import STYLES
 
-HEADINGS = {"full": "Full graph", "published": "Published graph"}
+HEADINGS = {"full": graph_label("full"), "published": graph_label("published")}
 
 
 def build_graph_codon_entropy_figure(
@@ -58,7 +59,9 @@ def build_graph_codon_entropy_figure(
             domain,
             rendering,
             show_axis=index == 0,
-            show_legend=index == len(POPULATION_NAMES) - 1,
+            # Every panel declares the same legend so the shared colour scale merges them
+            # into one bar; ``legend=None`` on any panel would suppress it.
+            show_legend=True,
         )
         panels.append(
             panel.properties(
@@ -69,11 +72,7 @@ def build_graph_codon_entropy_figure(
                 )
             )
         )
-    note = (
-        "Grey: outside the graph's fitness span"
-        if annotated
-        else "Entropy of the amino acid at each codon position"
-    )
+    note = "Entropy of the amino acid at each codon position"
     font_size = int(rendering.get("font_size", 15))
     chart = (
         alt.hconcat(*panels, spacing=int(rendering.get("panel_gap", 12)))

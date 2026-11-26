@@ -1,5 +1,7 @@
 # Published-threshold metric figure validation
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 The manuscript metric figure uses the cached Papkou2023 published-threshold landscape
 at raw fitness `-0.507774`. Its saved stable-identity support products contain
 1,013 branch records and 514 persistence pairs. The selected graph has 135,178

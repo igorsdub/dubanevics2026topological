@@ -1,4 +1,4 @@
-"""Split tree versus bootstrap-band tree for the median-reflected BY Candidate graph.
+"""Split tree versus bootstrap-band tree for the BY q = 0.05 Topographer graph.
 
 Column 1 is the nominal split tree of variant ``threshold=reflected_fdr=by_q=0.05``.
 Column 2 is that graph's band-simplified tree. The bootstrap checkpoint is only
@@ -13,6 +13,7 @@ is not used.
 from __future__ import annotations
 
 import csv
+import html
 import io
 import json
 from collections.abc import Mapping, Sequence
@@ -34,7 +35,7 @@ VARIANT = "threshold=reflected_fdr=by_q=0.05"
 TABLE_STEM = "candidate_band_comparison"
 SIDECAR_NAME = ".candidate-band-comparison-provenance.json"
 COLUMNS = ("statistic", "split_tree", "band_simplified_tree")
-COLUMN_TITLES = ("Split tree", "Band-simplified tree")
+COLUMN_TITLES = ("Split tree", "Bootstrapped tree")
 HS_ORDERS = (1, 2, 3, 4)
 
 
@@ -187,11 +188,11 @@ def sequences_from_assignments(
 
 def readme_text(*, n_replicates: int, seed: int, band_quantile: float) -> str:
     """How each row is defined, including the band settings actually used."""
-    return f"""# Candidate split tree and its bootstrap-band tree
+    return f"""# Topographer + FDR split tree and its bootstrap-band tree
 
-Variant `threshold=reflected_fdr=by_q=0.05`: the Candidate graph selected by Benjamini–Yekutieli at nominal q = 0.05 with the median-reflected cutoff. Column `split_tree` is that graph's nominal split tree. Column `band_simplified_tree` is the same tree after direct band simplification.
+Manuscript Table 2. Variant `threshold=reflected_fdr=by_q=0.05`: the Topographer + FDR graph selected by Benjamini–Yekutieli at nominal q = 0.05 with the median-reflected cutoff. Column `split_tree` is that graph's nominal split tree. Column `band_simplified_tree` is the same tree after direct band simplification.
 
-Band settings are those of the restored bootstrap checkpoint (`summary.json` `settings`), read by `load_cached_bootstrap_smoothed_tree`. This table does not draw. The values used are draws (n_replicates) = {n_replicates}, seed = {seed}, band quantile = {band_quantile}. `config/analysis.toml` `[bootstrap_smoothed_tree]` and the manuscript figure whose source stem is `bootstrap__thr=reflected_fdr=by_q=0.05_draws=10000_seed=20261019_tree=band_bandq=0.95_style=annotated` (manuscript figure 8, `bootstrap_simplification`) carry the same triple when those files are unchanged. No manuscript entry is numbered S6.
+Band settings are those of the restored bootstrap checkpoint (`summary.json` `settings`), read by `load_cached_bootstrap_smoothed_tree`. This table does not draw. The values used are draws (n_replicates) = {n_replicates}, seed = {seed}, band quantile = {band_quantile}. `config/analysis.toml` `[bootstrap_smoothed_tree]` carries the same triple when that file is unchanged. This table is manuscript Table 2.
 
 A branch is one edge of the tree after `absorb_terminal_branches`, as `analysis.branch_decomposition` defines it.
 
@@ -226,7 +227,7 @@ def render_png(rows: Sequence[Mapping[str, str]], path: Path) -> None:
     figure, axis = plt.subplots(figsize=(14, 0.55 * (len(rows) + 2) + 0.8))
     axis.axis("off")
     axis.set_title(
-        "Candidate graph, BY q = 0.05: split tree and band-simplified tree",
+        "Topographer + FDR: split tree and band-simplified tree",
         loc="left",
         fontsize=12,
         pad=12,
@@ -246,6 +247,44 @@ def render_png(rows: Sequence[Mapping[str, str]], path: Path) -> None:
     plt.close(figure)
 
 
+def _markdown(rows: Sequence[Mapping[str, str]], *, note: str) -> str:
+    headers = ("Statistic", *COLUMN_TITLES)
+    lines = [
+        "# Topographer + FDR split tree and its bootstrap-band tree",
+        "",
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
+    for row in rows:
+        cells = (row["statistic"], row["split_tree"], row["band_simplified_tree"])
+        lines.append(
+            "| " + " | ".join(cell.replace("|", "\\|") for cell in cells) + " |"
+        )
+    return "\n".join(lines) + "\n\n" + note
+
+
+def _html_document(rows: Sequence[Mapping[str, str]]) -> str:
+    headers = ("Statistic", *COLUMN_TITLES)
+    head = "".join(f"<th>{html.escape(name)}</th>" for name in headers)
+    body = "".join(
+        "<tr>"
+        + "".join(
+            f"<td>{html.escape(row[name])}</td>"
+            for name in ("statistic", "split_tree", "band_simplified_tree")
+        )
+        + "</tr>"
+        for row in rows
+    )
+    title = "Topographer + FDR: split tree and band-simplified tree"
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        f"<title>{html.escape(title)}</title></head><body>"
+        f"<h1>{html.escape(title)}</h1>"
+        f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+        "</body></html>\n"
+    )
+
+
 def write_table(
     directory: Path,
     rows: Sequence[Mapping[str, str]],
@@ -256,22 +295,57 @@ def write_table(
     provenance: Mapping[str, Any],
     sidecar: Path,
 ) -> list[Path]:
-    """Write CSV, TSV, README, PNG and the provenance sidecar."""
+    """Write CSV, TSV, HTML, Markdown, README, PNG and the provenance sidecar."""
     directory.mkdir(parents=True, exist_ok=True)
+    note = readme_text(
+        n_replicates=n_replicates, seed=seed, band_quantile=band_quantile
+    )
+    payload = json.dumps(dict(provenance), indent=2) + "\n"
     csv_path = directory / f"{TABLE_STEM}.csv"
     tsv_path = directory / f"{TABLE_STEM}.tsv"
+    html_path = directory / f"{TABLE_STEM}.html"
+    md_path = directory / f"{TABLE_STEM}.md"
+    json_path = directory / f"{TABLE_STEM}.json"
     readme_path = directory / "README.md"
     png_path = directory / f"{TABLE_STEM}.png"
     _write_text(csv_path, _delimited(rows, ","))
     _write_text(tsv_path, _delimited(rows, "\t"))
-    _write_text(
-        readme_path,
-        readme_text(n_replicates=n_replicates, seed=seed, band_quantile=band_quantile),
-    )
+    _write_text(html_path, _html_document(rows))
+    _write_text(md_path, _markdown(rows, note=note))
+    _write_text(json_path, payload)
+    _write_text(readme_path, note)
     render_png(rows, png_path)
     sidecar.parent.mkdir(parents=True, exist_ok=True)
-    sidecar.write_text(json.dumps(dict(provenance), indent=2) + "\n", encoding="utf-8")
-    return [csv_path, tsv_path, readme_path, png_path, sidecar]
+    sidecar.write_text(payload, encoding="utf-8")
+    return [
+        csv_path,
+        tsv_path,
+        html_path,
+        md_path,
+        json_path,
+        readme_path,
+        png_path,
+        sidecar,
+    ]
+
+
+def copy_flat_tables(written: list[Path], table_dir: Path) -> list[Path]:
+    """Copy the bundle's csv/html/md/json beside it, under the run context's output root.
+
+    The namer reads these flat stems from ``<output_root>/tables/canonical``, not the bundle.
+    """
+    shelf = table_dir.parent
+    copied: list[Path] = []
+    for path in written:
+        if (
+            path.parent == table_dir
+            and path.name != "README.md"
+            and path.suffix in {".csv", ".html", ".md", ".json"}
+        ):
+            target = shelf / path.name
+            target.write_bytes(path.read_bytes())
+            copied.append(target)
+    return copied
 
 
 def build_candidate_band_comparison(context: Any | None = None) -> list[Path]:
@@ -296,7 +370,7 @@ def build_candidate_band_comparison(context: Any | None = None) -> list[Path]:
         context = RunContext(output_root=root, variant_name=VARIANT)
     if context.variant_name != VARIANT:
         raise ValueError(
-            f"This table is the {VARIANT} Candidate graph, got {context.variant_name!r}."
+            f"This table is the {VARIANT} Topographer + FDR graph, got {context.variant_name!r}."
         )
     settings = load_settings(context)
     bootstrap = load_cached_bootstrap_smoothed_tree(settings, context=context)
@@ -323,7 +397,7 @@ def build_candidate_band_comparison(context: Any | None = None) -> list[Path]:
     tables = Path(context.output_root, "tables")
     table_dir = Path(tables, "canonical", TABLE_STEM)
     sidecar = Path(tables, SIDECAR_NAME)
-    return write_table(
+    written = write_table(
         table_dir,
         rows,
         n_replicates=provenance["n_replicates"],
@@ -332,6 +406,8 @@ def build_candidate_band_comparison(context: Any | None = None) -> list[Path]:
         provenance=provenance,
         sidecar=sidecar,
     )
+    copied = copy_flat_tables(written, table_dir)
+    return [*written, *copied]
 
 
 def _column(view: Any, adjacency: pl.DataFrame) -> TreeColumn:

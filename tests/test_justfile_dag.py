@@ -78,6 +78,14 @@ def test_figures_only_renders_from_processed_data() -> None:
     assert any(line.endswith("landscape-summary-table") for line in figures["body"])
 
 
+def test_figures_builds_main_tables_1_and_2_before_naming() -> None:
+    """The namer reads the flat Table 1 and 2 stems, so their builders run before it."""
+    body = [line.split()[-1] for line in _recipes()["figures"]["body"]]
+    for recipe in ("graph-descriptive-statistics", "candidate-band-comparison-table"):
+        assert recipe in body
+        assert body.index(recipe) < body.index("name-outputs")
+
+
 def test_no_recipe_is_named_hpc() -> None:
     names = _recipes()
     assert not [name for name in names if "hpc" in name]

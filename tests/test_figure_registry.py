@@ -84,7 +84,11 @@ def test_spec_inputs_and_variants_are_valid() -> None:
     for spec in registry.FIGURE_SPECS:
         assert spec.inputs and spec.inputs <= registry.INPUT_NAMES
         assert spec.variants and spec.variants <= registry.VARIANT_NAMES
-        expected = "tree_comparison" if spec.figure_id == "reflected_fdr_trees" else spec.figure_id
+        expected = (
+            "tree_comparison"
+            if spec.figure_id == "reflected_fdr_trees"
+            else spec.figure_id
+        )
         assert spec.config_table == expected
 
 
@@ -275,7 +279,9 @@ def test_partial_intersection_renders_only_allowed_variants(variant_build) -> No
     assert variant_build == [("two_variants", "annotated")]
 
 
-def test_render_output_can_be_outside_repository(variant_build, tmp_path, monkeypatch, capsys) -> None:
+def test_render_output_can_be_outside_repository(
+    variant_build, tmp_path, monkeypatch, capsys
+) -> None:
     monkeypatch.setattr(build, "ROOT", tmp_path / "repo")
     outputs = build.build_figures(("peak_uncertainty",), variants=("vanilla",))
     assert len(outputs) == 1 and outputs[0].is_file()
@@ -300,7 +306,15 @@ def test_keep_going_reports_input_failure_and_renders_other_figure(
     context = RunContext(root=tmp_path, output_root=tmp_path, env={})
     monkeypatch.setattr(build, "OUTPUT_AT_IMPORT", context.output_root)
     monkeypatch.setattr(build, "ANALYSIS_VARIANT_AT_IMPORT", context.variant_name)
-    args = ["figures", "--figure", "two_variants", "--figure", "peak_uncertainty", "--variant", "vanilla"]
+    args = [
+        "figures",
+        "--figure",
+        "two_variants",
+        "--figure",
+        "peak_uncertainty",
+        "--variant",
+        "vanilla",
+    ]
     assert build.main([*args, "--keep-going"], context=context) == 1
     assert variant_build == [("peak_uncertainty", "vanilla")]
     assert (tmp_path / "figures/canonical/peak_uncertainty.svg").is_file()
@@ -310,12 +324,17 @@ def test_keep_going_reports_input_failure_and_renders_other_figure(
     assert shared["exception_type"] == "RuntimeError"
     assert "missing input" in shared["traceback"]
     assert (failure["figure_id"], failure["variant"]) == ("two_variants", "vanilla")
-    assert (failure["exception_type"], failure["message"]) == ("RuntimeError", "missing input")
+    assert (failure["exception_type"], failure["message"]) == (
+        "RuntimeError",
+        "missing input",
+    )
     assert "RuntimeError: missing input" in failure["traceback"]
     output = capsys.readouterr().out
     assert "FAILED two_variants (vanilla): RuntimeError: missing input" in output
     assert "FAILED shared figure inputs" in output
-    record = json.loads((tmp_path / "figures/.records/peak_uncertainty.svg.json").read_text())
+    record = json.loads(
+        (tmp_path / "figures/.records/peak_uncertainty.svg.json").read_text()
+    )
     assert record["keep_going_provenance"] == "incomplete: shared input loading failed"
 
     variant_build.clear()
@@ -334,8 +353,10 @@ def test_keep_going_reports_render_and_partial_format_failures(
 
     first, second = build.FIGURE_SPECS
     if failure_stage == "render":
+
         def broken(*args):
             raise ValueError("render failed")
+
         first = replace(first, render=broken)
         monkeypatch.setattr(build, "FIGURE_SPECS", (first, second))
     else:
@@ -349,18 +370,26 @@ def test_keep_going_reports_render_and_partial_format_failures(
         monkeypatch.setattr(build, "_render_one", fail_png)
     context = SimpleNamespace(output_root=tmp_path, variant_name=None)
     assert not build.build_figures_keep_going(
-        ["two_variants", "peak_uncertainty"], variants=["vanilla"],
-        formats=["svg", "png"], context=context,
+        ["two_variants", "peak_uncertainty"],
+        variants=["vanilla"],
+        formats=["svg", "png"],
+        context=context,
     )
-    failures = json.loads((tmp_path / "figures/figure-failures.json").read_text())["failures"]
+    failures = json.loads((tmp_path / "figures/figure-failures.json").read_text())[
+        "failures"
+    ]
     assert len(failures) == 1
     assert failures[0]["figure_id"] == "two_variants"
-    assert failures[0]["exception_type"] == ("ValueError" if failure_stage == "render" else "OSError")
+    assert failures[0]["exception_type"] == (
+        "ValueError" if failure_stage == "render" else "OSError"
+    )
     assert "failed" in failures[0]["traceback"]
     assert (tmp_path / "figures/canonical/peak_uncertainty.svg").is_file()
     if failure_stage == "second_format":
         assert (tmp_path / "figures/canonical/two_variants_vanilla.svg").is_file()
-        assert not (tmp_path / "figures/.records/two_variants_vanilla.png.json").exists()
+        assert not (
+            tmp_path / "figures/.records/two_variants_vanilla.png.json"
+        ).exists()
 
 
 def test_keep_going_invalidates_old_record_after_render_failure(
@@ -385,7 +414,9 @@ def test_keep_going_invalidates_old_record_after_render_failure(
     assert not record.exists()
 
 
-def test_keep_going_preserves_full_plan_product_records(variant_build, tmp_path, monkeypatch):
+def test_keep_going_preserves_full_plan_product_records(
+    variant_build, tmp_path, monkeypatch
+):
     import json
     from dataclasses import replace
     from types import SimpleNamespace
@@ -398,21 +429,30 @@ def test_keep_going_preserves_full_plan_product_records(variant_build, tmp_path,
 
     first, peak = build.FIGURE_SPECS
     monkeypatch.setattr(
-        build, "FIGURE_SPECS", (first, replace(peak, inputs=frozenset({"pooled_scatter"})))
+        build,
+        "FIGURE_SPECS",
+        (first, replace(peak, inputs=frozenset({"pooled_scatter"}))),
     )
     monkeypatch.setattr(build, "load_figure_inputs", load_inputs)
     context = SimpleNamespace(output_root=tmp_path, variant_name=None)
     selected = ["two_variants", "peak_uncertainty"]
     build.build_figures(selected, variants=["vanilla"], force=True, context=context)
     records = tmp_path / "figures/.records"
-    baseline = {path.name: json.loads(path.read_text()) for path in records.glob("*.json")}
+    baseline = {
+        path.name: json.loads(path.read_text()) for path in records.glob("*.json")
+    }
     assert len(baseline) == 2
     assert baseline["peak_uncertainty.svg.json"]["saved_products"] == {
-        "two_variants": "two_variants-product", "peak_uncertainty": "peak_uncertainty-product",
+        "two_variants": "two_variants-product",
+        "peak_uncertainty": "peak_uncertainty-product",
         "pooled_scatter": "pooled-product",
     }
-    assert build.build_figures_keep_going(selected, variants=["vanilla"], force=True, context=context)
-    assert {path.name: json.loads(path.read_text()) for path in records.glob("*.json")} == baseline
+    assert build.build_figures_keep_going(
+        selected, variants=["vanilla"], force=True, context=context
+    )
+    assert {
+        path.name: json.loads(path.read_text()) for path in records.glob("*.json")
+    } == baseline
 
 
 def test_spec_notebooks_match_config_notebook_keys() -> None:
@@ -703,9 +743,7 @@ def test_tree_comparison_record_tracks_its_own_config(tmp_path, monkeypatch) -> 
         monkeypatch.setattr(build, "ROOT", tmp_path)
         monkeypatch.setattr(build, "OUTPUT", tmp_path)
         build.build_figures()
-        (path,) = (tmp_path / "figures/.records").glob(
-            "tree_comparison*.json"
-        )
+        (path,) = (tmp_path / "figures/.records").glob("tree_comparison*.json")
         return json.loads(path.read_text())
 
     first = record_for(0.5)
@@ -769,9 +807,7 @@ def test_tree_comparison_record_records_saved_products_with_layout_ids(
         monkeypatch.setattr(build, "ROOT", tmp_path)
         monkeypatch.setattr(build, "OUTPUT", tmp_path)
         build.build_figures()
-        (path,) = (tmp_path / "figures/.records").glob(
-            "tree_comparison*.json"
-        )
+        (path,) = (tmp_path / "figures/.records").glob("tree_comparison*.json")
         return json.loads(path.read_text())
 
     rec = record_for()
@@ -816,8 +852,13 @@ def _inputs_requested(monkeypatch, selected) -> set[str]:
 
 def test_only_the_unnumbered_bootstrap_figures_are_opt_in() -> None:
     # The manuscript bootstrap figures are default; the bootstrap checkpoint they read is cached.
+    # The bootstrap tree histogram is no longer numbered, so it is opt-in.
     opt_in = {f for f in BOOTSTRAP_FIGURES if not registry.get_spec(f).default}
-    assert opt_in == {"candidate_tree_bootstrap_biology", "bootstrap_band_quantile_scan"}
+    assert opt_in == {
+        "candidate_tree_bootstrap_biology",
+        "bootstrap_band_quantile_scan",
+        "bootstrap_tree_histogram",
+    }
 
 
 def test_default_selection_reads_the_cached_bootstrap(monkeypatch) -> None:
@@ -945,9 +986,7 @@ def test_formats_override_renders_only_requested_format(
     )
     assert {path.suffix for path in outputs} == {".svg"}
     assert png.read_bytes() == b"keep"
-    assert not (
-        tmp_path / "figures/.records/peak_uncertainty.png.json"
-    ).exists()
+    assert not (tmp_path / "figures/.records/peak_uncertainty.png.json").exists()
 
 
 def _justfile_figure_recipes() -> dict[str, tuple[str, list[str]]]:
@@ -991,6 +1030,7 @@ def test_story_views_are_multi_output_families() -> None:
         *STORY_VIEW_IDS,
         "ridge_entropy",
         "graph_codon_entropy",
+        "papkou_agreement",
     }
     for figure_id in STORY_VIEW_IDS:
         spec = registry.get_spec(figure_id)
@@ -999,11 +1039,12 @@ def test_story_views_are_multi_output_families() -> None:
     assert registry.get_spec("tree_comparison_views").variants == {"annotated"}
 
 
-def test_graph_codon_entropy_is_an_opt_in_family() -> None:
+def test_graph_codon_entropy_is_a_default_family() -> None:
     spec = registry.get_spec("graph_codon_entropy")
-    assert spec.default is False
+    assert spec.default is True
     assert spec.multi is True
-    assert spec.variants == {"vanilla", "annotated"}
+    # The stem carries no style, so one variant only: two would overwrite each other.
+    assert spec.variants == {"annotated"}
     assert spec.inputs == frozenset({"graph_codon_entropy"})
     assert "graph_codon_entropy" in build.NON_CANDIDATE_FIGURE_IDS
 
@@ -1015,6 +1056,8 @@ _FAMILY_OF_STEM = {
     "bootstrap_stops": "bootstrap_band",
     "bootstrap_synonymous": "bootstrap_band",
     "bootstrap_combined": "bootstrap_band",
+    "graph_codon_entropy_fullpublished": "graph_codon_entropy",
+    "papkou2023_fitness_and_se_barseqfit_agreement": "papkou_agreement",
 }
 
 
@@ -1031,8 +1074,10 @@ def test_every_manuscript_source_resolves_to_a_default_figure() -> None:
         source = entry.get("source")
         if source is None:
             continue
-        figure_id = source if source in FIGURE_IDS else _FAMILY_OF_STEM.get(
-            source.split("__")[0]
+        figure_id = (
+            source
+            if source in FIGURE_IDS
+            else _FAMILY_OF_STEM.get(source.split("__")[0])
         )
         if figure_id is None:
             unresolved.append(source)

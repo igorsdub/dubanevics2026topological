@@ -1,22 +1,27 @@
 """Descriptive statistics of the four publication graphs.
 
-Columns are built, not relabelled. Full is the whole sequence graph. Published is
-the published-threshold landscape. The no-FDR Candidate is the median-reflected
-point-estimate graph (``threshold=reflected_fdr=none``). The BY Candidate is built by
+Columns are built, not relabelled. Full is the whole sequence graph. Papkou is
+the Papkou-threshold landscape. Topographer is the median-reflected
+point-estimate graph (``threshold=reflected_fdr=none``). Topographer + FDR is built by
 loading ``threshold=reflected_fdr=by_q=0.05`` and running ``prepare_selected_landscape``
 on that declaration. Counts and degrees are computed from those networks.
+Manuscript Table 1 exports nodes, edges, percent functional and the two degree rows.
 """
 
 from __future__ import annotations
 
 import csv
+import html
 import io
 import json
+import shutil
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean, median
 from typing import Any
+
+from ..figures.labels import FULL, PAPKOU, TOPOGRAPHER, TOPOGRAPHER_FDR
 
 TABLE_ID = "graph_descriptive_statistics"
 POINT_VARIANT = "threshold=reflected_fdr=none"
@@ -25,10 +30,21 @@ EN_DASH = "\u2013"
 SIDECAR_SCHEMA = 1
 
 COLUMNS: tuple[str, ...] = (
-    "Full",
-    "Published",
-    "Candidate (median-reflected threshold, no FDR)",
-    "Candidate (BY q = 0.05)",
+    FULL,
+    PAPKOU,
+    TOPOGRAPHER,
+    TOPOGRAPHER_FDR,
+)
+# Manuscript Table 1. The second item is the key ``summarize_graph`` stores.
+MANUSCRIPT_ROWS: tuple[tuple[str, str], ...] = (
+    ("nodes", "number of nodes"),
+    ("edges", "number of edges"),
+    ("% functional", "% functional"),
+    ("mean degree (undirected)", "mean degree (undirected)"),
+    (
+        "mean in/out degree (directed uphill)",
+        "mean in/out degree (in = out)",
+    ),
 )
 ROWS: tuple[str, ...] = (
     "number of nodes",
@@ -197,42 +213,78 @@ def _cell(value: object) -> str:
     return str(value)
 
 
+def _manuscript_line(
+    table: Mapping[str, Mapping[str, object]], label: str, source: str
+) -> tuple[str, ...]:
+    return (label, *(_cell(table[source][column]) for column in COLUMNS))
+
+
 def _delimited(table: Mapping[str, Mapping[str, object]], delimiter: str) -> str:
     stream = io.StringIO(newline="")
     writer = csv.writer(stream, delimiter=delimiter, lineterminator="\n")
     writer.writerow(("metric", *COLUMNS))
-    for row in ROWS:
-        writer.writerow((row, *(_cell(table[row][label]) for label in COLUMNS)))
+    for label, source in MANUSCRIPT_ROWS:
+        writer.writerow(_manuscript_line(table, label, source))
     return stream.getvalue()
+
+
+def _html_document(table: Mapping[str, Mapping[str, object]]) -> str:
+    headers = ("metric", *COLUMNS)
+    head = "".join(f"<th>{html.escape(name)}</th>" for name in headers)
+    body = "".join(
+        "<tr>"
+        + "".join(
+            f"<td>{html.escape(cell)}</td>"
+            for cell in _manuscript_line(table, label, source)
+        )
+        + "</tr>"
+        for label, source in MANUSCRIPT_ROWS
+    )
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        "<title>Graph descriptive statistics</title></head><body>"
+        "<h1>Graph descriptive statistics</h1>"
+        f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+        "</body></html>\n"
+    )
+
+
+def _markdown(table: Mapping[str, Mapping[str, object]]) -> str:
+    headers = ("metric", *COLUMNS)
+    lines = [
+        "# Graph descriptive statistics",
+        "",
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
+    for label, source in MANUSCRIPT_ROWS:
+        lines.append("| " + " | ".join(_manuscript_line(table, label, source)) + " |")
+    lines.extend(["", _readme().split("\n", 1)[1]])
+    return "\n".join(lines)
 
 
 def _readme() -> str:
     return """# Graph descriptive statistics
 
-Four graphs, one column each. Every cell is computed from that column's network.
-An en dash means the quantity is undefined for that graph.
+Manuscript Table 1. Four graphs, one column each. Every cell is computed from
+that column's network. An en dash means the quantity is undefined for that graph.
+`summarize_graph` still computes fitness, threshold and functional-count metrics;
+they are not rows of this table.
 
 | Column | Graph |
 | --- | --- |
 | Full | Every sequence in the dataset. No functional threshold is applied. |
-| Published | Published functional threshold, then the largest connected component of the edges that touch a vertex at or above that threshold. A vertex is functional when its raw fitness is at least the threshold. |
-| Candidate (median-reflected threshold, no FDR) | The median-reflected point-estimate graph (`threshold=reflected_fdr=none`): threshold `T = m + (m − g)` from the Full-graph raw fitness, vertices with raw fitness at least `T` are functional, same edge and largest-component rule. No FDR classes. |
-| Candidate (BY q = 0.05) | Built by loading variant `threshold=reflected_fdr=by_q=0.05` and selecting with `prepare_selected_landscape`. Functional and non-functional counts follow that variant's saved classes, not a relabeling of the no-FDR Candidate. The reported threshold is the variant's threshold. |
+| Papkou | Papkou threshold, then the largest connected component of the edges that touch a vertex at or above that threshold. A vertex is functional when its raw fitness is at least the threshold. |
+| Topographer | The Topographer point-estimate graph (median-reflected threshold) (`threshold=reflected_fdr=none`): threshold `T = m + (m − g)` from the Full-graph raw fitness, vertices with raw fitness at least `T` are functional, same edge and largest-component rule. No FDR classes. |
+| Topographer + FDR | Built (Benjamini–Yekutieli, nominal q = 0.05) by loading variant `threshold=reflected_fdr=by_q=0.05` and selecting with `prepare_selected_landscape`. `% functional` follows that variant's saved `functional` class, not a relabeling of the Topographer column. |
 
 ## Rows
 
-- **number of nodes**: vertices in the graph.
-- **number of edges**: undirected edges in the graph.
-- **minimum fitness**: smallest raw fitness among the vertices.
-- **maximum fitness**: largest raw fitness among the vertices.
-- **mean fitness**: arithmetic mean of the vertices' raw fitness.
-- **median fitness**: median of the vertices' raw fitness (the mean of the two central values when the count is even).
-- **functional threshold**: the threshold used to build the graph. Undefined for Full.
-- **functional count**: vertices classed functional. For Published and the no-FDR Candidate that is raw fitness at or above the threshold. For the BY column it is the saved `functional` class. Undefined for Full.
-- **non-functional count**: the remaining vertices under a threshold rule, or the saved `non_functional` class on the BY graph. Uncertain BY vertices are in neither count. Undefined for Full.
-- **% functional**: `100 * functional count / number of nodes`. Undefined for Full.
+- **nodes**: vertices in the graph.
+- **edges**: undirected edges in the graph.
+- **% functional**: `100 * functional count / number of nodes`. Undefined for Full. For Papkou and Topographer, functional is raw fitness at or above the threshold. For Topographer + FDR it is the saved `functional` class. Uncertain BY vertices are not functional.
 - **mean degree (undirected)**: `2 * number of edges / number of nodes`.
-- **mean in/out degree (in = out)**: each undirected edge is oriented once, from the endpoint of lower raw fitness to the endpoint of higher raw fitness (equal fitness points from the lexicographically smaller DNA identity to the larger). Mean in-degree equals mean out-degree because every edge contributes one to each sum, so the row is `number of edges / number of nodes`.
+- **mean in/out degree (directed uphill)**: each undirected edge is oriented once, from the endpoint of lower raw fitness to the endpoint of higher raw fitness (equal fitness points from the lexicographically smaller DNA identity to the larger). Mean in-degree equals mean out-degree because every edge contributes one to each sum, so the row is `number of edges / number of nodes`.
 """
 
 
@@ -251,12 +303,15 @@ def render_png(
     import matplotlib.pyplot as plt
 
     family = font_family.split(",")[0].strip() or "sans-serif"
-    cell_text = [[_cell(table[row][label]) for label in COLUMNS] for row in ROWS]
-    figure, axes = plt.subplots(figsize=(16, 6.5))
+    cell_text = [
+        list(_manuscript_line(table, label, source)[1:])
+        for label, source in MANUSCRIPT_ROWS
+    ]
+    figure, axes = plt.subplots(figsize=(14, 2.8))
     axes.axis("off")
     drawn = axes.table(
         cellText=cell_text,
-        rowLabels=list(ROWS),
+        rowLabels=[label for label, _source in MANUSCRIPT_ROWS],
         colLabels=list(COLUMNS),
         loc="center",
         cellLoc="center",
@@ -279,15 +334,19 @@ def export_table(
     font_size: float = 15,
     dpi: float = 300,
 ) -> list[Path]:
-    """Write CSV, TSV, README, PNG and the provenance sidecar."""
+    """Write the manuscript table and the descriptive bundle beside it."""
     directory.mkdir(parents=True, exist_ok=True)
     csv_path = directory / f"{TABLE_ID}.csv"
     tsv_path = directory / f"{TABLE_ID}.tsv"
+    html_path = directory / f"{TABLE_ID}.html"
+    md_path = directory / f"{TABLE_ID}.md"
     readme_path = directory / "README.md"
     png_path = directory / f"{TABLE_ID}.png"
     sidecar_path = directory / f"{TABLE_ID}.json"
     csv_path.write_text(_delimited(table, ","), encoding="utf-8")
     tsv_path.write_text(_delimited(table, "\t"), encoding="utf-8")
+    html_path.write_text(_html_document(table), encoding="utf-8")
+    md_path.write_text(_markdown(table), encoding="utf-8")
     readme_path.write_text(_readme(), encoding="utf-8")
     render_png(
         table,
@@ -303,7 +362,15 @@ def export_table(
         + "\n",
         encoding="utf-8",
     )
-    return [csv_path, tsv_path, readme_path, png_path, sidecar_path]
+    return [
+        csv_path,
+        tsv_path,
+        html_path,
+        md_path,
+        readme_path,
+        png_path,
+        sidecar_path,
+    ]
 
 
 def _load_settings(context: Any) -> dict[str, Any]:
@@ -376,7 +443,7 @@ def assemble_columns(
         or point_selection.classes is not None
     ):
         raise ValueError(
-            "The no-FDR Candidate must be the median-reflected point estimate."
+            "The Topographer column must be the median-reflected point estimate."
         )
     if by_selection.rule != "fdr_fixed_cutoff" or by_selection.classes is None:
         raise ValueError(
@@ -392,7 +459,7 @@ def assemble_columns(
         raise ValueError("The BY variant cutoff must be median_reflected.")
     columns = (
         GraphColumn("Full", network, None, None),
-        GraphColumn("Published", published.network, published_threshold, None),
+        GraphColumn(COLUMNS[1], published.network, published_threshold, None),
         GraphColumn(
             COLUMNS[2],
             point_prepared.network,
@@ -410,7 +477,7 @@ def assemble_columns(
         "columns": [
             {"display": "Full", "graph": "full", "functional_rule": None},
             {
-                "display": "Published",
+                "display": COLUMNS[1],
                 "graph": "published",
                 "threshold_source": "analysis.clamped.published_functional_threshold",
                 "functional_rule": "raw_fitness_at_or_above_threshold",
@@ -435,7 +502,7 @@ def assemble_columns(
 def output_directory(context: Any) -> Path:
     from ..output_paths import table_path
 
-    return table_path(context.output_root, TABLE_ID).parent
+    return table_path(context.output_root, TABLE_ID).parent / TABLE_ID
 
 
 def publish(context: Any) -> list[Path]:
@@ -444,11 +511,28 @@ def publish(context: Any) -> list[Path]:
     rendering = settings["figures"]["rendering"]
     columns, provenance = assemble_columns(settings, context)
     table = statistics_table(columns)
-    return export_table(
+    directory = output_directory(context)
+    written = export_table(
         table,
-        output_directory(context),
+        directory,
         provenance=provenance,
-        font_family=str(rendering.get("font_family", "Arial, Liberation Sans, Helvetica, sans-serif")),
+        font_family=str(
+            rendering.get(
+                "font_family", "Arial, Liberation Sans, Helvetica, sans-serif"
+            )
+        ),
         font_size=float(rendering.get("font_size", 15)),
         dpi=float(settings["figures"].get("png_dpi", 300)),
     )
+    # The namer reads flat stems beside canonical/README.md, not the bundle directory.
+    shelf = directory.parent
+    copied: list[Path] = []
+    for path in written:
+        if (
+            path.suffix in {".csv", ".html", ".md", ".json"}
+            and path.name != "README.md"
+        ):
+            target = shelf / path.name
+            shutil.copyfile(path, target)
+            copied.append(target)
+    return [*written, *copied]

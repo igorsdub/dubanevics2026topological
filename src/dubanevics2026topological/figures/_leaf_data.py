@@ -20,11 +20,12 @@ from typing import Any
 import polars as pl
 
 from ._charts import padded_scalar_domain, wild_type_identities
+from .labels import graph_label, state_label
 
 # Landscape key and heading of each graph the leaf figures cover, by ID slug.
 GRAPHS: dict[str, tuple[str, str]] = {
-    "published": ("study_clamped", "Published graph"),
-    "candidate": ("candidate_clamped", "Candidate graph"),
+    "published": ("study_clamped", graph_label("published")),
+    "candidate": ("candidate_clamped", graph_label("reflected_by")),
 }
 
 # Split-tree persistence tables hold ordinary pairs and exactly one "extended" pair,
@@ -42,6 +43,15 @@ class LeafTables:
 
     leaves: pl.DataFrame
     members: pl.DataFrame
+
+
+# Graph state of each leaf figure slug's band-simplified (bootstrapped) tree.
+BAND_STATES = {"published": "published_by_band", "candidate": "reflected_by_band"}
+
+
+def band_heading(slug: str) -> str:
+    """Heading of a slug's band-simplified tree, ``Papkou + FDR, bootstrapped``."""
+    return state_label(BAND_STATES[slug])
 
 
 def figure_graph(figure_id: str, suffix: str) -> tuple[str, str, str]:

@@ -5,9 +5,8 @@ from dubanevics2026topological.figures.reflected_fdr_trees import ROWS
 
 def test_row_order_and_selection_names():
     assert [row[0] for row in ROWS] == ["reflected", "reflected_by"]
-    assert "point" in ROWS[0][1].lower()
-    assert ROWS[1][1].lower().startswith("candidate threshold")
-    assert "point" not in ROWS[1][1].lower()
+    assert ROWS[0][1] == "Topographer"
+    assert ROWS[1][1] == "Topographer + FDR"
 
 
 def test_renderer_uses_each_rows_saved_threshold_and_selection(monkeypatch):
@@ -42,8 +41,8 @@ def test_renderer_uses_each_rows_saved_threshold_and_selection(monkeypatch):
     monkeypatch.setattr(module, "functional_threshold_layers", layers)
     result = module.build_reflected_fdr_trees_figure({"rows": rows}, settings).to_dict()
     assert seen == [-0.2, -0.2, -0.3, -0.3]
-    assert result["vconcat"][0]["hconcat"][0]["title"]["text"] == "Candidate threshold point estimate"
-    assert result["vconcat"][1]["hconcat"][0]["title"]["text"] == "Candidate threshold BY, nominal q = 0.05"    # Each row draws only a dashed rule, no text: the threshold is named by an extra
+    assert result["vconcat"][0]["hconcat"][0]["title"]["text"] == "Topographer"
+    assert result["vconcat"][1]["hconcat"][0]["title"]["text"] == "Topographer + FDR · BY, nominal q = 0.05"    # Each row draws only a dashed rule, no text: the threshold is named by an extra
     # three-decimal tick beside the three regular one-decimal ticks.
     assert label_texts == [None] * 4
     for row, threshold in zip(result["vconcat"], (-0.2, -0.3)):

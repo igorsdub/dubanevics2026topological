@@ -55,13 +55,17 @@ def test_figure_six_maps_the_peak_uncertainty_render(tmp_path: Path):
     assert entry.source == "peak_uncertainty" and entry.status != "planned"
     _png(tmp_path / "canonical" / "peak_uncertainty.png", b"figure six")
     name_outputs(tmp_path, [entry])
-    assert (tmp_path / "main" / "fig6_peak_uncertainty.png").read_bytes() == b"figure six"
+    assert (
+        tmp_path / "main" / "fig6_peak_uncertainty.png"
+    ).read_bytes() == b"figure six"
 
 
 def test_numbered_external_and_exploratory_copies(figures: Path):
     result = name_outputs(figures, ENTRIES)
     assert (figures / "main" / "fig1_tree.png").read_bytes() == b"tree"
-    assert (figures / "titled" / "main" / "fig1_tree.png").read_bytes() == b"tree titled"
+    assert (
+        figures / "titled" / "main" / "fig1_tree.png"
+    ).read_bytes() == b"tree titled"
     assert (figures / "main" / "fig2_workflow.png").read_bytes() == b"slide"
     assert (figures / "exploratory" / "grid.png").read_bytes() == b"grid"
     assert not (figures / "exploratory" / "tree.png").exists()
@@ -102,7 +106,7 @@ def test_missing_manuscript_external_figures_in_fresh_output(tmp_path: Path):
     assert [path for path in result.missing if path.startswith("external/")] == [
         "external/workflow.png",
         "external/merge_tree_simplification_parametric_bootstrap.png",
-        "external/candidate_fdr_tree_band_simplification.png",
+        "external/topographer_fdr_tree_band_simplification.png",
     ]
 
 
@@ -113,8 +117,14 @@ def test_missing_manuscript_external_figures_in_fresh_output(tmp_path: Path):
         [Entry(section="main", number="S1", desc="tree", source="tree")],
         [Entry(section="supplementary", number="2", desc="tree", source="tree")],
         [Entry(section="main", number="1", desc="Tree-Plot", source="tree")],
-        [Entry(section="main", number="1", desc="a", source="a"), Entry(section="main", number="1", desc="b", source="b")],
-        [Entry(section="main", number="1", desc="a", source="x"), Entry(section="main", number="2", desc="b", source="x")],
+        [
+            Entry(section="main", number="1", desc="a", source="a"),
+            Entry(section="main", number="1", desc="b", source="b"),
+        ],
+        [
+            Entry(section="main", number="1", desc="a", source="x"),
+            Entry(section="main", number="2", desc="b", source="x"),
+        ],
         [Entry(section="main", number="1", desc="a")],
         [Entry(section="main", number="1", desc="a", source="a", external=True)],
     ],
@@ -130,19 +140,25 @@ def test_justfile_has_name_outputs_recipe():
     assert "-m dubanevics2026topological.naming" in text
 
 
-def test_a_titled_twin_without_a_manuscript_entry_goes_to_titled_exploratory(figures: Path):
+def test_a_titled_twin_without_a_manuscript_entry_goes_to_titled_exploratory(
+    figures: Path,
+):
     name_outputs(figures, ENTRIES)
     _png(figures / "canonical" / "titled" / "grid.png", b"grid titled")
     name_outputs(figures, ENTRIES)
     assert (figures / "exploratory" / "grid.png").read_bytes() == b"grid"
-    assert (figures / "titled" / "exploratory" / "grid.png").read_bytes() == b"grid titled"
+    assert (
+        figures / "titled" / "exploratory" / "grid.png"
+    ).read_bytes() == b"grid titled"
 
 
 def test_repository_tables_are_built_and_valid():
     entries = load_table_map(ROOT / "config" / "manuscript.toml")
     assert [(e.number, e.desc, e.status) for e in entries] == [
-        ("1", "graph_summary", None),
-        ("2", "candidate_corrections", None),
+        ("1", "graph_descriptive", None),
+        ("2", "tree_descriptive", None),
+        ("S1", "graph_summary", None),
+        ("S2", "topographer_corrections", None),
     ]
 
 
@@ -178,7 +194,9 @@ def test_invalid_table_maps_are_refused(tmp_path: Path):
     from dubanevics2026topological.naming import _validate_tables
 
     with pytest.raises(ValueError):
-        _validate_tables([TableEntry(section="main", number="S1", desc="a", source="a")])
+        _validate_tables(
+            [TableEntry(section="main", number="S1", desc="a", source="a")]
+        )
     with pytest.raises(ValueError):
         _validate_tables([TableEntry(section="main", number="1", desc="a")])
 

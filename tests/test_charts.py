@@ -995,7 +995,7 @@ def test_functional_threshold_text_prints_the_registry_display_text_as_given():
 
 
 @pytest.mark.parametrize(
-    ("graph", "heading"), [("published", "Published"), ("candidate", "Candidate")]
+    ("graph", "heading"), [("published", "Papkou"), ("candidate", "Topographer + FDR")]
 )
 def test_population_subtitle_is_read_from_the_registry_not_recomputed(graph, heading):
     quantities = label_quantities()

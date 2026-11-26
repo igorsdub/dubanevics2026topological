@@ -1,5 +1,7 @@
 # Peak-pair distance analysis
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 Status: implemented (stage and figures; see `docs/figure-inventory.md`); glossary terms still proposed. Descriptive analysis; no ADR (reversible, captured here and in `GLOSSARY.md`).
 
 ## Question

@@ -1,5 +1,7 @@
 # Cutoff-landscape peak uncertainty figure
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 Status: Accepted after the issue #8 design interview and explicit author
 confirmation on 2026-10-04. The implementation follows the narrowed scope below.
 

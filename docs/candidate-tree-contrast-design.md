@@ -1,5 +1,7 @@
 # Candidate tree contrast design
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 ## Purpose
 
 Each edge of the Candidate split tree joins two critical points, a higher

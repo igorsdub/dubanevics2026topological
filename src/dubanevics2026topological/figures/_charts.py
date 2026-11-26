@@ -27,6 +27,7 @@ from ._branch_count_style import (
     branch_count_opacity,
     branch_count_teal,
 )
+from .labels import graph_label
 from .palette import (
     BAND_GREY,
     COUNT_BLACK,
@@ -185,7 +186,8 @@ def landscape_population_subtitle(
     """
     reference = "Papkou et al. (2023)"
     if include_graph:
-        reference = f"{graph.capitalize()} graph · {reference}"
+        state = {"published": "published", "candidate": "reflected_by"}[graph]
+        reference = f"{graph_label(state)} · {reference}"
     peaks = quantities.display(f"{graph}_graph.peak_count")
     total = quantities.display(f"{graph}_graph.vertex_count")
     functional = quantities.display(f"{graph}_graph.functional_count")

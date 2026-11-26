@@ -79,7 +79,7 @@ tables: selection analysis component-analysis peak-analysis codon-entropy-analys
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build landscape-summary-table
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build presentation-tables
 
-# Opt-in table: Candidate BY q=0.05 split tree vs its band-simplified tree.
+# Manuscript Table 2: BY q=0.05 Topographer split tree vs its band-simplified tree. Reads the saved bootstrap (draws none); a step of `just figures`.
 candidate-band-comparison-table:
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build candidate-band-comparison-table
 
@@ -192,7 +192,8 @@ codon-entropy-analysis: comparison-analysis peak-analysis
 figures-rotated: bootstrap-codon-entropy-product graph-tree-persistence-product manuscript-quantities
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build figures --label-collision rotate
 
-# Four-graph descriptive statistics (CSV, TSV, README, PNG) under output/tables/canonical/graph_descriptive_statistics/.
+# Manuscript Table 1: four-graph descriptive statistics under output/tables/canonical/graph_descriptive_statistics/,
+# with flat csv/html/md/json copied beside that directory for the namer. A step of `just figures` (and of `compute`).
 graph-descriptive-statistics:
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build graph-descriptive-statistics
 
@@ -202,6 +203,8 @@ figures: check-manifest
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build figures
     {{just_executable()}} landscape-summary-table
     {{just_executable()}} presentation-tables
+    {{just_executable()}} graph-descriptive-statistics
+    {{just_executable()}} candidate-band-comparison-table
     {{just_executable()}} name-outputs
 
 # Render every registered figure outside the default selection (the ones no manuscript entry needs) into canonical/ with `--keep-going`, then name-outputs copies them to exploratory/. Some of them need extra products and may fail; the failures are listed at the end. Run after `just figures`.
@@ -310,8 +313,8 @@ ridge-entropy-product: ridges-product
 landscape-summary-table:
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build landscape-summary-table
 
-# Manuscript presentation tables sliced from the same pinned landscape_summary products:
-# Table 1 Full vs Published, Table 2 Candidate Nominal|FDR|Bootstrap, supplementary Published simplification.
+# Supplementary landscape-summary slices: S1 Full vs Published, S2 Candidate Nominal|FDR|Bootstrap,
+# and the unnumbered Published simplification. Main Tables 1 and 2 are the descriptive tables.
 # A step of `tables` after landscape-summary-table and of the `figures` chain after manuscript-quantities.
 presentation-tables:
     PYTHONPATH=src {{python}} -m dubanevics2026topological.build presentation-tables

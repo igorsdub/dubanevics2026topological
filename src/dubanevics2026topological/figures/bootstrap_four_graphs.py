@@ -9,6 +9,7 @@ import altair as alt
 
 from ._charts import tree_histogram_chart_config
 from ._count_labels import count_label_text
+from .labels import PAPKOU_THRESHOLD, TOPOGRAPHER_THRESHOLD, graph_label
 from .tree_histogram import build_bootstrap_tree_histogram_figure
 
 FIGURE_ID = "bootstrap_four_graphs"
@@ -17,10 +18,10 @@ FIGURE_ID = "bootstrap_four_graphs"
 KEY_TEXTS = frozenset({"Branch vertex count", "Wild type", "Stop codon containing peaks"})
 
 PANEL_ORDER = (
-    ("threshold=published_fdr=none", "Published graph · fixed Papkou cutoff · point estimate"),
-    ("threshold=reflected_fdr=none", "Candidate graph · Candidate threshold · point estimate"),
-    ("threshold=published_fdr=by_q=0.05", "Published graph · Papkou cutoff · BY FDR q=0.05"),
-    ("threshold=reflected_fdr=by_q=0.05", "Candidate graph · Candidate threshold · BY FDR q=0.05"),
+    ("threshold=published_fdr=none", f"{graph_label('published')} · {PAPKOU_THRESHOLD} · point estimate"),
+    ("threshold=reflected_fdr=none", f"{graph_label('reflected')} · {TOPOGRAPHER_THRESHOLD} · point estimate"),
+    ("threshold=published_fdr=by_q=0.05", f"{graph_label('published_by')} · {PAPKOU_THRESHOLD} · BY FDR q=0.05"),
+    ("threshold=reflected_fdr=by_q=0.05", f"{graph_label('reflected_by')} · {TOPOGRAPHER_THRESHOLD} · BY FDR q=0.05"),
 )
 
 
@@ -29,8 +30,9 @@ def panel_title(variant: str, threshold: float) -> str:
     if variant not in {name for name, _ in PANEL_ORDER}:
         raise ValueError("Unknown bootstrap composite panel.")
     published = "threshold=published" in variant
-    graph = "Published graph" if published else "Candidate graph"
-    cutoff = f"T={threshold:.3f}" if published else f"Candidate threshold, T={threshold:.3f}"
+    state = "published" if published else "reflected"
+    graph = graph_label(f"{state}_by" if "fdr=by" in variant else state)
+    cutoff = f"T={threshold:.3f}" if published else f"{TOPOGRAPHER_THRESHOLD}, T={threshold:.3f}"
     method = "BY FDR q=0.05" if "fdr=by" in variant else "point estimate"
     return f"{graph} · {cutoff} · {method}"
 

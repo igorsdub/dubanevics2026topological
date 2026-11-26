@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "table_id": "graph_descriptive_statistics",
+  "columns": [
+    {
+      "display": "Full",
+      "graph": "full",
+      "functional_rule": null
+    },
+    {
+      "display": "Papkou",
+      "graph": "published",
+      "threshold_source": "analysis.clamped.published_functional_threshold",
+      "functional_rule": "raw_fitness_at_or_above_threshold"
+    },
+    {
+      "display": "Topographer",
+      "variant": "threshold=reflected_fdr=none",
+      "functional_rule": "raw_fitness_at_or_above_threshold",
+      "selection": {
+        "rule": "median_reflected"
+      }
+    },
+    {
+      "display": "Topographer + FDR",
+      "variant": "threshold=reflected_fdr=by_q=0.05",
+      "functional_rule": "saved_fdr_class",
+      "selection": {
+        "fdr_cutoff": "median_reflected",
+        "fdr_method": "by",
+        "fdr_q": 0.05,
+        "fdr_table_sha256": "3c16ddf2f1ab6276ac086b554bfc1b200f4998d3b236cf5ae8109276d7029457",
+        "rule": "fdr_fixed_cutoff",
+        "rounded_threshold": -0.253159,
+        "functional_vertex_count": 12960,
+        "functional_set_sha256": "3a2d593de2e548ce441b8b6568a0ad49d1d27569c982a914883dfb23687ca993"
+      }
+    }
+  ]
+}

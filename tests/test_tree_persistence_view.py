@@ -127,13 +127,14 @@ def test_band_trees_have_no_tree_persistence_name() -> None:
 
 
 def test_population_titles() -> None:
-    assert population_title({"graph": "full"}) == "Full graph"
+    assert population_title({"graph": "full"}) == "Full"
+    assert population_title({"thr": "reflected", "fdr": "none"}) == "Topographer"
     assert (
-        population_title({"thr": "reflected", "fdr": "none"}) == "Candidate threshold"
+        population_title({"thr": "published", "fdr": "by", "q": 0.05}) == "Papkou + FDR"
     )
     assert (
-        population_title({"thr": "published", "fdr": "by", "q": 0.05})
-        == "Published threshold, BY q = 0.05"
+        population_title({"thr": "reflected", "fdr": "by", "tree": "band"})
+        == "Topographer + FDR, bootstrapped"
     )
 
 
@@ -290,3 +291,14 @@ def test_shared_scalar_domain_replaces_the_tree_extent(monkeypatch) -> None:
         scalar_domain=(-1.2, 1.4),
     )
     assert domains == [(-1.2, 1.4)]
+
+
+def test_a_by_tree_at_another_q_is_refused_and_the_level_is_printed_once() -> None:
+    from dubanevics2026topological.figures.story_views import _with_fdr
+
+    with pytest.raises(ValueError, match="q = 0.1"):
+        population_title({"thr": "published", "fdr": "by", "q": 0.1}, fdr_q=0.05)
+    by = {"thr": "published", "fdr": "by", "q": 0.05}
+    none = {"thr": "published", "fdr": "none"}
+    assert _with_fdr("s", [by, by], 0.05) == "s · FDR: BY, q = 0.05"
+    assert _with_fdr("s", [none], 0.05) == "s"

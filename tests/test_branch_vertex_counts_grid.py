@@ -80,8 +80,8 @@ def test_the_grid_is_published_left_candidate_right_nominal_above_by_below() -> 
     spec = build_branch_vertex_counts_grid(_payload(), _settings()).to_dict()
     titles = [[cell["title"]["text"] for cell in row] for row in _cells(spec)]
     assert titles == [
-        ["Published graph · Nominal", "Candidate graph · Nominal"],
-        ["Published graph · BY q = 0.05", "Candidate graph · BY q = 0.05"],
+        ["Papkou", "Topographer"],
+        ["Papkou + FDR", "Topographer + FDR"],
     ]
     assert spec["title"]["text"] == "Branch vertex counts, four graphs"
 
@@ -89,10 +89,10 @@ def test_the_grid_is_published_left_candidate_right_nominal_above_by_below() -> 
 def test_each_panel_writes_its_branch_total_inside_the_plot() -> None:
     spec = build_branch_vertex_counts_grid(_payload(), _settings()).to_dict()
     branches = {
-        "Published graph · Nominal": 10,
-        "Candidate graph · Nominal": 13,
-        "Published graph · BY q = 0.05": 6,
-        "Candidate graph · BY q = 0.05": 5,
+        "Papkou": 10,
+        "Topographer": 13,
+        "Papkou + FDR": 6,
+        "Topographer + FDR": 5,
     }
     for row in _cells(spec):
         for cell in row:
@@ -121,7 +121,7 @@ def test_bars_count_branches_by_order_on_shared_edges() -> None:
         assert {(r["start"], r["end"]) for r in rows} == set(zip(edges[:-1], edges[1:], strict=True))
 
 
-def test_panels_overlay_in_the_purple_palette_and_share_axes() -> None:
+def test_panels_overlay_in_the_orange_palette_and_share_axes() -> None:
     spec = build_branch_vertex_counts_grid(_payload(), _settings()).to_dict()
     domains, ymaxes = set(), set()
     for row in _cells(spec):

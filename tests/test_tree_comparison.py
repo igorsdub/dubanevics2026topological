@@ -283,8 +283,8 @@ def test_comparison_stacks_independent_wt_only_tree_panels(monkeypatch):
     assert all(domain == pytest.approx([-1.2, 1.4]) for domain in scalar_domains)
     serialized = str(spec)
     assert "Full graph" in serialized
-    assert "Published graph" in serialized
-    assert "Candidate graph" in serialized
+    assert "Papkou graph" in serialized
+    assert "Topographer + FDR graph" in serialized
     assert "Papkou et al. (2023)" in serialized
     # Every number in the subtitles is the registry's display text: the sentinels
     # differ from anything these synthetic landscapes yield, so a recomputed count or

@@ -634,13 +634,14 @@ def test_leaf_swarm_subtitle_is_read_from_the_registry(graph) -> None:
 # -- registry and configuration -----------------------------------------------------
 
 
-def test_the_four_leaf_figures_are_registered_default_vanilla_comparison_figures() -> (
+def test_the_four_leaf_figures_are_registered_vanilla_comparison_figures() -> (
     None
 ):
     for figure_id in ALL_IDS:
         spec = figures.get_spec(figure_id)
         assert figure_id in figures.FIGURE_IDS
-        assert spec.default is True
+        # The swarms are manuscript figures (S10, S12); the persistence diagrams are opt-in.
+        assert spec.default is figure_id.endswith("_leaf_swarm")
         assert spec.inputs == frozenset(
             {"comparison", "manuscript_quantities", "annotations"}
         )
@@ -832,7 +833,10 @@ def _four_payload():
 def _four_settings():
     layout = {"leaves_per_row": 2, "row_width": 200, "row_height": 60}
     keys = {figure_id: layout for figure_id in FDR_PANEL_IDS}
-    return {"figures": {"rendering": {"font_size": 15}, "figures": keys}}
+    return {
+        "analysis": {"clamped": {"candidate_functional_threshold": {"q": 0.05}}},
+        "figures": {"rendering": {"font_size": 15}, "figures": keys},
+    }
 
 
 @pytest.mark.parametrize("figure_id", FDR_PANEL_IDS)
@@ -840,9 +844,10 @@ def test_each_by_panel_is_its_own_figure(figure_id) -> None:
     spec = build_leaf_swarm_panel_figure(
         _four_payload(), _four_settings(), figure_id
     ).to_dict()
-    graph = "Published" if figure_id.startswith("published") else "Candidate"
-    assert spec["title"]["text"] == f"{graph} graph · BY q = 0.05: sequences of every leaf"
-    assert spec["title"]["subtitle"][0] == "4 leaves · 7 sequences in hills"
+    graph = "Papkou" if figure_id.startswith("published") else "Topographer"
+    assert spec["title"]["text"] == f"{graph} + FDR: sequences of every leaf"
+    assert spec["title"]["subtitle"][0] == "FDR: BY, q = 0.05"
+    assert spec["title"]["subtitle"][1] == "4 leaves · 7 sequences in hills"
     assert len(spec["vconcat"]) == 2
     assert "leaf_swarm_row_0_members" in spec["datasets"]
 

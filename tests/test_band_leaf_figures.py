@@ -164,7 +164,7 @@ def test_band_leaf_subtitles_count_the_saved_tree_leaves() -> None:
         _band_settings(),
         "vanilla",
     ).to_dict()["title"]
-    assert persistence["text"].startswith("Candidate graph, BY band-simplified tree")
+    assert persistence["text"].startswith("Topographer + FDR, bootstrapped")
     assert persistence["subtitle"] == [
         "Papkou et al. (2023) · 4 leaves · bootstrap band quantile 0.95, 10,000 draws",
         "2 singleton hills · largest hill 3 sequences",
@@ -181,13 +181,32 @@ def test_band_leaf_subtitles_count_the_saved_tree_leaves() -> None:
     )
 
 
+def test_the_band_swarm_prints_the_fdr_level_once_when_declared() -> None:
+    settings = _band_settings()
+    settings["analysis"] = {
+        "clamped": {"candidate_functional_threshold": {"q": 0.05}}
+    }
+    subtitle = figures.render_payload(
+        figures.get_spec("published_leaf_swarm_band"),
+        _payload(),
+        settings,
+        "vanilla",
+    ).to_dict()["title"]["subtitle"]
+    assert subtitle[0] == (
+        "Papkou et al. (2023) · 4 leaves · 7 sequences in hills · "
+        "bootstrap band quantile 0.95, 10,000 draws · FDR: BY, q = 0.05"
+    )
+    assert subtitle[0].count("FDR") == 1
+
+
 def test_the_band_leaf_figures_are_vanilla_saved_product_figures() -> None:
     assert BAND_LEAF_FIGURE_IDS == frozenset(BAND_IDS)
     tables = tomllib.loads((ROOT / "config/figures.toml").read_text("utf-8"))["figures"]
     for figure_id in BAND_IDS:
         spec = figures.get_spec(figure_id)
-        # The Candidate band figures are manuscript figures (S24, S25), so built by default.
-        assert spec.default is figure_id.startswith("candidate_")
+        # The two band swarms are manuscript figures (S11, S13), so built by default.
+        assert spec.default is (figure_id in figures.registry.MANUSCRIPT_BAND_LEAF_IDS)
+        assert (figure_id in figures.registry.MANUSCRIPT_BAND_LEAF_IDS) is figure_id.endswith("swarm_band")
         assert spec.inputs == frozenset({"band_leaf_tables"})
         assert spec.inputs <= figures.registry.SAVED_PRODUCT_INPUTS
         assert spec.variants == frozenset({"vanilla"})

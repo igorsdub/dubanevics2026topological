@@ -81,7 +81,7 @@ def test_figure_has_core_kem_and_tcl_panels(settings, style) -> None:
     assert len(spec["hconcat"]) == 3
     text = json.dumps(spec)
     assert ("functional" in text) is (style == "annotated")
-    assert "KEM ridge" in text and "TCL ridge" in text
+    assert "KEM branch" in text and "TCL branch" in text
 
 
 def test_unknown_style_is_refused(settings) -> None:
@@ -111,13 +111,15 @@ def test_an_absent_ridge_is_a_grey_panel(settings) -> None:
     assert "absent" in json.dumps(chart.to_dict())
 
 
-def test_grey_outside_the_span_is_the_palette_colour(settings) -> None:
-    text = json.dumps(
-        build_ridge_entropy_figure(
-            _entropy(), {}, settings, "vanilla", title="t", subtitle="s"
-        ).to_dict()
-    )
-    assert palette.OUTSIDE_GREY in text
+def test_outside_the_span_is_left_blank(settings) -> None:
+    for style in ("vanilla", "annotated"):
+        text = json.dumps(
+            build_ridge_entropy_figure(
+                _entropy(), {}, settings, style, title="t", subtitle="s"
+            ).to_dict()
+        )
+        assert "#f5f5f5" not in text and "outside" not in text.lower()
+    assert not hasattr(palette, "OUTSIDE_GREY")
     assert "#" not in json.dumps(settings["figures"]["d10"]["ridge_entropy"])
 
 

@@ -577,7 +577,7 @@ def test_biology_has_two_rows_with_titles_counts_and_a_legend(monkeypatch):
         f"{shown['annotations.candidate.stop_codon_peak_count']} stop-codon containing"
     )
     dataset = (
-        f"Papkou et al. (2023) · candidate graph · {shown['bootstrap.draws']} "
+        f"Papkou et al. (2023) · Topographer + FDR, bootstrapped · {shown['bootstrap.draws']} "
         f"bootstrap draws · seed {shown['bootstrap.seed']}"
     )
     threshold = shown["bootstrap.persistence_threshold.value"]
@@ -595,7 +595,7 @@ def test_biology_has_two_rows_with_titles_counts_and_a_legend(monkeypatch):
         ),
     ]
     assert rows[1]["title"]["text"] == (
-        f"Band-simplified tree · {survive} peaks, all with persistence > "
+        f"Bootstrapped tree · {survive} peaks, all with persistence > "
         f"threshold · {absorbed} of {nominal} nominal peaks absorbed"
     )
     retained = shown["bootstrap.candidate.after_band_rule.retained_sequence_count"]

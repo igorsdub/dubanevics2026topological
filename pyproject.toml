@@ -1,6 +1,6 @@
 [project]
 name = "dubanevics2026topological"
-version = "1.0.0"
+version = "1.0.1"
 description = "Code and data pipeline for: Topological characterization of combinatorial fitness landscapes using merge trees"
 readme = "README.md"
 license = "MIT"

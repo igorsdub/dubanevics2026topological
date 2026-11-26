@@ -1,4 +1,4 @@
-# Candidate landscape: Nominal, FDR and Bootstrap
+# Topographer landscape: Nominal, FDR and Bootstrap
 
 | Metric | Nominal | FDR | Bootstrap |
 | --- | --- | --- | --- |
@@ -14,4 +14,4 @@
 | Mean fitness | -0.5460043567939297 | -0.5384973949474283 | — |
 | Median fitness | -0.6974224716378387 | -0.6963739799937592 | — |
 
-Table 2. Median-reflected Candidate at three stages: point-estimate Nominal, Benjamini–Yekutieli FDR (nominal q = 0.05), and the band-simplified Bootstrap tree on the FDR-selected graph. Bootstrap reports tree-level rows only (peak count and synonymous-leaf metrics); its graph-level cells are an em dash because that graph is the FDR column's (checked equal before blanking).
+Supplementary table S2. Topographer graph at three stages: point-estimate Nominal, Benjamini–Yekutieli FDR (nominal q = 0.05), and the band-simplified Bootstrap tree on the FDR-selected graph. Bootstrap reports tree-level rows only (peak count and synonymous-leaf metrics); its graph-level cells are an em dash because that graph is the FDR column's (checked equal before blanking).

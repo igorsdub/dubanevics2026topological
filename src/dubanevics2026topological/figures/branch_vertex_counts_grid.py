@@ -23,7 +23,7 @@ import numpy as np
 import polars as pl
 
 from ._count_labels import count_label_text
-from ._four_graphs import GRID_ORDER, PANELS
+from ._four_graphs import GRID_ORDER, PANELS, panel_title
 from .branch_decomposition_charts import histogram_rows, vertex_count_edges
 from .palette import HORTON_STRAHLER_COLORS, INK_GREY
 
@@ -261,11 +261,10 @@ def build_branch_vertex_counts_grid(
     for row_index, slugs in enumerate(GRID_ORDER):
         cells = []
         for column_index, slug in enumerate(slugs):
-            _, graph, selection = PANELS[slug]
             cells.append(
                 _panel(
                     rows[slug],
-                    title=f"{graph} · {selection}",
+                    title=panel_title(slug),
                     total_label=f"{count_label_text(tables[slug].height)} branches",
                     domain=domain,
                     log_scale=log_scale,

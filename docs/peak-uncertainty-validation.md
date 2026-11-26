@@ -1,5 +1,7 @@
 # Peak uncertainty evidence
 
+> Naming: this document keeps its original wording. The current display names (Papkou, Topographer, "+ FDR", bootstrapped, branch) and how they map to the internal state names are in [GLOSSARY.md](../GLOSSARY.md).
+
 The author-confirmed four-panel scope for issue #8 was evaluated against both
 full local Parquet inputs on 2026-10-04. Scientific inputs and source hashes
 are recorded in `output/analysis/peak_uncertainty/provenance.json`; public

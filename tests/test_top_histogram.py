@@ -19,15 +19,15 @@ from dubanevics2026topological.figures._top_histogram import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_horton_strahler_colors_run_from_light_lavender_to_near_black_purple() -> None:
+def test_horton_strahler_colors_run_from_light_orange_to_dark_brown_orange() -> None:
     colors = palette.HORTON_STRAHLER_COLORS
     assert len(colors) == 4
     rgb = [
         [int(color[i : i + 2], 16) for i in (1, 3, 5)] for color in colors
     ]
     for red, green, blue in rgb:
-        # Purple: blue dominates.
-        assert blue > max(red, green)
+        # Orange: red dominates, then green, then blue.
+        assert red > green > blue
     lightness = [sum(channels) for channels in rgb]
     assert lightness == sorted(lightness, reverse=True)
     assert len(set(colors)) == 4

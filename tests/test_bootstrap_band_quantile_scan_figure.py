@@ -123,7 +123,11 @@ def test_top_axis_ticks_range_and_grid_errors() -> None:
 def test_text_names_the_quantities_in_words_and_never_half_band() -> None:
     text = json.dumps(_spec(), ensure_ascii=False)
     assert "half band" not in text.lower()
-    assert "bootstrapped persistence threshold" in text
+    # The subtitle wraps by width, so a phrase can break across two lines: compare the
+    # subtitle lines joined as one sentence.
+    spec = _spec()
+    joined = " ".join(spec["title"]["subtitle"])
+    assert "bootstrapped persistence threshold" in joined
     assert "band quantile" in text
     for symbol in ("τ", "tau =", "tau(q)", "2c", "q = "):
         assert symbol not in text

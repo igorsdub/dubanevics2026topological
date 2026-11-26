@@ -22,11 +22,11 @@ written last, so it also marks a finished stage. The tables hold only counts and
 thresholds, never sequence identities. The stage reads the finished bootstrap checkpoint
 and never recomputes the bootstrap.
 
-Where the tables are kept: a scan of a BY variant (``published_by`` or ``reflected_by``) is
-also published to ``data/processed/band_quantile_scan/<state>/`` (``scan.parquet``,
-``survival.parquet`` and ``provenance.json``); the scan figures read that folder, and a
-missing scan in ``output/`` is restored from it. A selection without a bootstrap draw set
-(the point-estimate graphs) has no scan.
+Where the tables are kept: the scan of each of the four variants (``published``,
+``published_by``, ``reflected``, ``reflected_by``) is also published to
+``data/processed/band_quantile_scan/<state>/`` (``scan.parquet``, ``survival.parquet``
+and ``provenance.json``); the scan figures read that folder, and a missing scan in
+``output/`` is restored from it. A no-FDR scan exists only where its bootstrap result does.
 """
 
 from __future__ import annotations
@@ -297,9 +297,9 @@ def compute_bootstrap_band_quantile_scan(
         record = scan_record(
             path, survival_path, result.summary["settings"], step, scientific
         )
-        from .band_quantile_scan_panels import panel_for_variant
+        from .band_quantile_scan_panels import scan_panel_for_variant
 
-        panel = panel_for_variant(
+        panel = scan_panel_for_variant(
             None if context is None else getattr(context, "variant_name", None),
             settings,
         )
@@ -330,9 +330,9 @@ def ensure_scan_tables(
     survival_path = default_survival if survival_path is None else survival_path
     if path.is_file() and survival_path.is_file():
         return
-    from .band_quantile_scan_panels import panel_for_variant
+    from .band_quantile_scan_panels import scan_panel_for_variant
 
-    panel = panel_for_variant(
+    panel = scan_panel_for_variant(
         None if context is None else getattr(context, "variant_name", None), settings
     )
     if panel is None:

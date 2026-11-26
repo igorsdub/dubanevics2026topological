@@ -1,4 +1,4 @@
-"""Aggregated overview and exploratory filtering for Candidate edge evidence."""
+"""Aggregated overview and exploratory filtering for Topographer edge evidence."""
 
 from __future__ import annotations
 
@@ -98,18 +98,18 @@ def select_edges(
 def build_candidate_edge_evidence_figure(
     result: dict[str, Any], settings: dict[str, Any]
 ) -> alt.TopLevelMixin:
-    """Build four compact, aggregated views of all Candidate mutation edges."""
+    """Build four compact, aggregated views of all Topographer mutation edges."""
     try:
         edges = result["edges"]
     except KeyError as error:
-        raise KeyError("Candidate evidence result is missing 'edges'.") from error
+        raise KeyError("Topographer evidence result is missing 'edges'.") from error
     if not isinstance(edges, pl.DataFrame):
         edges = pl.DataFrame(edges)
     missing = _REQUIRED_COLUMNS - set(edges.columns)
     if missing:
-        raise ValueError(f"Candidate edge table is missing columns: {sorted(missing)}.")
+        raise ValueError(f"Topographer edge table is missing columns: {sorted(missing)}.")
     if edges.is_empty():
-        raise ValueError("Candidate edge evidence is empty.")
+        raise ValueError("Topographer edge evidence is empty.")
 
     appearance = settings["figures"]["figures"]["candidate_edge_evidence"]
     q_bins = _positive_bins(appearance.get("q_bins", 50), "q_bins")
@@ -151,7 +151,7 @@ def build_candidate_edge_evidence_figure(
                 scale=alt.Scale(domain=[0, 1], nice=False),
             ),
             x2="q_end:Q",
-            y=alt.Y("count:Q", title="Candidate edges", scale=alt.Scale(zero=True)),
+            y=alt.Y("count:Q", title="Topographer edges", scale=alt.Scale(zero=True)),
             tooltip=[
                 alt.Tooltip("q_start:Q", title="q from", format=".2f"),
                 alt.Tooltip("q_end:Q", title="q to", format=".2f"),

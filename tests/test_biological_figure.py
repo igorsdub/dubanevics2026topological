@@ -195,7 +195,7 @@ def test_biology_figure_uses_maximum_only_overlays_and_no_count_legend(monkeypat
     for row in spec["vconcat"]:
         assert row["title"]["subtitle"] == [
             (
-                "Published graph · Papkou et al. (2023) · "
+                "Papkou graph · Papkou et al. (2023) · "
                 f"{SENTINEL['published_graph.peak_count']} peaks"
             ),
             (

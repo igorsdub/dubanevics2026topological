@@ -130,12 +130,17 @@ def test_export_writes_an_en_dash_and_the_readme(tmp_path) -> None:
         for path in paths
         if path.suffix != ".png"
     }
-    assert EN_DASH in written["graph_descriptive_statistics.csv"]
-    assert "functional threshold" in written["graph_descriptive_statistics.csv"]
+    csv_text = written["graph_descriptive_statistics.csv"]
+    assert EN_DASH in csv_text
+    assert "functional threshold" not in csv_text
+    assert "Papkou" in csv_text and "Topographer + FDR" in csv_text
     header, first = written["graph_descriptive_statistics.tsv"].splitlines()[:2]
     assert "\t" in header
-    assert first.startswith("number of nodes\t4\t")
-    assert "mean in/out degree (in = out)" in written["README.md"]
+    assert first.startswith("nodes\t4\t")
+    assert "mean in/out degree (directed uphill)" in csv_text
+    assert "directed uphill" in written["README.md"]
+    assert "graph_descriptive_statistics.html" in written
+    assert "graph_descriptive_statistics.md" in written
     png = next(path for path in paths if path.suffix == ".png")
     assert png.read_bytes().startswith(b"\x89PNG")
 
@@ -218,7 +223,9 @@ def test_build_full_network_imports_the_repo_workflow(monkeypatch, tmp_path):
 
     for name in ("wt", "diff"):
         pl.DataFrame({"x": [1]}).write_parquet(tmp_path / f"{name}.parquet")
-    monkeypatch.setattr("dubanevics2026topological.papkou2023.Papkou2023Workflow", FakeWorkflow)
+    monkeypatch.setattr(
+        "dubanevics2026topological.papkou2023.Papkou2023Workflow", FakeWorkflow
+    )
     monkeypatch.setattr(
         analysis, "dataset_input_path", lambda path, context, root=None: path
     )
@@ -232,3 +239,34 @@ def test_build_full_network_imports_the_repo_workflow(monkeypatch, tmp_path):
     }
     assert mod.build_full_network(settings, None) == "NETWORK"
     assert seen["landscape"] == "full"
+
+
+def test_publish_copies_flat_stems_under_the_context_output_root(
+    monkeypatch, tmp_path
+) -> None:
+    from dubanevics2026topological.tables import graph_descriptive_statistics as module
+
+    network = _hand()
+    columns = (
+        GraphColumn(COLUMNS[0], network, None),
+        GraphColumn(COLUMNS[1], network, 1.0),
+        GraphColumn(COLUMNS[2], network, 1.0),
+        GraphColumn(
+            COLUMNS[3], network, 1.0, dict.fromkeys("abcd", "functional")
+        ),
+    )
+    monkeypatch.setattr(
+        module,
+        "_load_settings",
+        lambda context: {"figures": {"rendering": {}, "png_dpi": 50}},
+    )
+    monkeypatch.setattr(
+        module, "assemble_columns", lambda settings, context: (columns, {"columns": []})
+    )
+    context = SimpleNamespace(output_root=tmp_path / "root")
+    written = module.publish(context)
+    shelf = tmp_path / "root" / "tables" / "canonical"
+    for suffix in (".csv", ".html", ".md", ".json"):
+        assert (shelf / f"graph_descriptive_statistics{suffix}").is_file()
+    assert not (shelf / "README.md").exists()
+    assert all(tmp_path in path.parents for path in written)

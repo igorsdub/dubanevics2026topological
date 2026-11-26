@@ -1,9 +1,10 @@
 """Class proportions against the Benjamini-Yekutieli FDR target.
 
-Supplementary S2. Two panels, Published threshold and Candidate threshold.
+Supplementary S2. Two panels, Papkou threshold and Topographer threshold.
 Each panel shows the saved scan's Functional, Uncertain and Non-functional
 proportions at q = 0, 0.01, ..., 1, one stacked bar per q.
-``functional_counts_vs_q`` is against the Benjamini-Yekutieli target;
+``functional_counts_vs_q`` is against the Benjamini-Yekutieli target, with the
+proportion axis clipped at 0.1 like the other two;
 ``functional_counts_vs_q_bh`` and ``functional_counts_vs_q_bonferroni`` draw the
 same stacked chart against the Benjamini-Hochberg and Bonferroni q, with the
 proportion axis (of all genotypes) clipped at 0.1. The counts and fractions are
@@ -26,6 +27,7 @@ from dubanevics2026topological.threshold.classification_probability_scans import
 )
 
 from ._count_labels import fixed_label_text
+from .labels import PAPKOU_THRESHOLD, TOPOGRAPHER_THRESHOLD
 from .palette import ELDER_PROTECTED_ORANGE, SYNONYMOUS_GREEN
 
 FIGURE_ID = "functional_counts_vs_q"
@@ -39,12 +41,12 @@ METHOD_LABELS = {
     "bh": "Benjamini-Hochberg",
     "bonferroni": "Bonferroni",
 }
-# The six-decimal Candidate cutoff the median-reflected rule applies.
+# The six-decimal Topographer cutoff the median-reflected rule applies.
 CANDIDATE_THRESHOLD = -0.253159
 # Cutoff names written by the scan, in panel order.
 CUTOFFS = (
-    ("papkou_original", "Published threshold"),
-    ("median_reflected", "Candidate threshold"),
+    ("papkou_original", PAPKOU_THRESHOLD),
+    ("median_reflected", TOPOGRAPHER_THRESHOLD),
 )
 CLASSES = ("Functional", "Uncertain", "Non-functional")
 _COUNT = {
@@ -77,7 +79,7 @@ def candidate_threshold() -> float:
     applied = float(reflected.applied_threshold)
     if round(applied, 6) != CANDIDATE_THRESHOLD:
         raise ValueError(
-            "The median-reflected Candidate threshold is "
+            f"The {TOPOGRAPHER_THRESHOLD} is "
             f"{applied}, not {CANDIDATE_THRESHOLD} to six decimal places."
         )
     return applied
@@ -129,7 +131,7 @@ def by_scan(table: pl.DataFrame, method: str = "by") -> pl.DataFrame:
             saved = {float(value) for value in panel["applied_threshold"].to_list()}
             if any(round(value, 6) != CANDIDATE_THRESHOLD for value in saved):
                 raise ValueError(
-                    "The saved Candidate threshold "
+                    f"The saved {TOPOGRAPHER_THRESHOLD} "
                     f"{sorted(saved)} is not {CANDIDATE_THRESHOLD} to six decimal places."
                 )
         kept_rows = []
@@ -266,58 +268,10 @@ def _finish(chart: alt.Chart, appearance: dict[str, Any]) -> alt.Chart:
 def build_functional_counts_vs_q_figure(
     payload: dict[str, Any], settings: dict[str, Any]
 ) -> Any:
-    """Stacked bars: one bar per q, one panel per threshold."""
-    appearance = _appearance(settings, FIGURE_ID)
-    frame = long_proportions(payload["scan"])
-    width = int(appearance.get("panel_width", 420))
-    height = int(appearance.get("panel_height", 280))
-    colors = _colors(appearance)
-    panels = []
-    for _name, title in CUTOFFS:
-        panel_frame = frame.filter(pl.col("panel") == title)
-        bars = (
-            alt.Chart(panel_frame)
-            .mark_bar(size=float(appearance.get("bar_size", 2)))
-            .encode(
-                x=alt.X(
-                    "fdr_target:Q",
-                    title="Benjamini-Yekutieli FDR target q",
-                    scale=alt.Scale(domain=[0.0, 1.0], nice=False, zero=True),
-                    axis=alt.Axis(values=[0.0, 0.25, 0.5, 0.75, 1.0]),
-                ),
-                y=alt.Y(
-                    "proportion:Q",
-                    title="Proportion of genotypes",
-                    scale=alt.Scale(domain=[0.0, 1.0], nice=False, zero=True),
-                    stack="zero",
-                ),
-                color=alt.Color(
-                    "class:N",
-                    title=None,
-                    scale=alt.Scale(domain=list(CLASSES), range=colors),
-                    sort=list(CLASSES),
-                    legend=alt.Legend(orient="bottom", direction="horizontal"),
-                ),
-                order=alt.Order("stack_rank:Q", sort="ascending"),
-            )
-        )
-        panels.append(
-            bars.properties(
-                width=width,
-                height=height,
-                title=alt.TitleParams(text=title, anchor="start"),
-            )
-        )
-    chart = alt.hconcat(*panels, spacing=int(appearance.get("panel_gap", 24))).resolve_scale(
-        y="shared", color="shared"
+    """Stacked bars against the Benjamini-Yekutieli q, one panel per threshold, y clipped."""
+    return _method_stacked_figure(
+        payload, settings, figure_id=FIGURE_ID, method="by"
     )
-    heading = _heading(
-        appearance,
-        "Functional, uncertain and non-functional genotypes against the FDR target",
-    )
-    if heading is not None:
-        chart = chart.properties(title=alt.TitleParams(**heading))
-    return _finish(chart, appearance)
 
 
 def _method_stacked_figure(
