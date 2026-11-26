@@ -155,7 +155,9 @@ This is version 1.0.0 of the code (tag `v1.0.0`).
 
 The analysis uses two packages:
 
-- barseqfit 0.2.0 (https://github.com/oist/barseqfit): fitness and fitness-difference estimates from barcode sequencing counts.
-- topographer 0.5.0 (https://github.com/oist/topographer): merge trees for graphs carrying a scalar on each vertex.
+- barseqfit 0.2.0 (https://github.com/oist/barseqfit): fitness and fitness-difference estimates from barcode sequencing counts. Concept DOI: [10.5281/zenodo.24548492](https://doi.org/10.5281/zenodo.24548492).
+- topographer 0.5.0 (https://github.com/oist/topographer): merge trees for graphs carrying a scalar on each vertex. Concept DOI: [10.5281/zenodo.24548494](https://doi.org/10.5281/zenodo.24548494).
+
+The DOIs resolve to the latest archived version. The pinned tags 0.2.0 and 0.5.0 differ from the first archived versions (0.2.1 and 0.5.1) in release metadata only.
 
 If you use them, please cite each package using the `CITATION.cff` in its repository.

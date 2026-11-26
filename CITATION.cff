@@ -39,9 +39,11 @@ references:
       - family-names: Dubanevics
         given-names: Igors
     repository-code: "https://github.com/oist/barseqfit"
+    doi: "10.5281/zenodo.24548492"
   - type: software
     title: "topographer"
     authors:
       - family-names: Dubanevics
         given-names: Igors
     repository-code: "https://github.com/oist/topographer"
+    doi: "10.5281/zenodo.24548494"
