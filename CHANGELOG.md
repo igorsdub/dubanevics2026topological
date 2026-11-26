@@ -2,6 +2,7 @@
 
 One entry per merged pull request, newest first: `#number title (merge date)`. The earlier free-form detail is in git history (`git log -- CHANGELOG.md`).
 
+- The reported KEM/TCL common saddle setting (`reported_saddle_dna_sequence`) is now SCQ (`AGTTGCCAA`), not LCL (`CTCTGCTTG`); the codon-entropy stage, `manuscript_quantities` and the figures that read them (including `bootstrap_codon_entropy`) are rebuilt on the next run, because the `[codon_entropy]` settings are part of their fingerprints. The mechanism note states whether the computed saddle lies below or above the reported one.
 - Agent guidance files (`AGENTS.md`, `CLAUDE.md`) are part of the public tree.
 - 1.0.0 (2026-11-26) First public release, accompanying the manuscript "Topological characterization of combinatorial fitness landscapes using merge trees". Local-only pipeline: `data/processed/` is the single processed-data folder (`just all` writes it, `just figures` only renders from it, `just fetch-data` downloads it, `MANIFEST.tsv` checks it); the cluster workflow, the retained-archive pins, the tracked `data/reference/` mirrors and the draw-sliced bootstrap are removed; the band-quantile scan figure shows the two BY graphs; figure fonts fall back to Liberation Sans, then Helvetica
 - #317 refactor: rehome legacy/ into the main package, delete dead code and scripts (2026-11-25)

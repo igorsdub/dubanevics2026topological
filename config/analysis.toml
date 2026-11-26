@@ -51,7 +51,7 @@ candidate_population = "all_candidate_selected_graph_vertices_including_fringe"
 two_functional_ridges_share_minimum = 0.9
 kem_summit_dna_sequence = "AAGGAAATG"
 tcl_summit_dna_sequence = "ACCTGTCTT"
-reported_saddle_dna_sequence = "CTCTGCTTG"
+reported_saddle_dna_sequence = "AGTTGCCAA"
 
 # Merge-flow product settings (retired from active publication views; Ticket 19 abandoned
 # in favor of branch transparency / Ticket 20 log-opacity convention). Kept for historical

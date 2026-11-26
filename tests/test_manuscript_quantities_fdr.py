@@ -294,6 +294,50 @@ def test_fdr_saddle_differing_reports_finding_and_emits_difference_rows(
     assert mechanism == expected_mechanism
 
 
+def test_fdr_saddle_computed_above_reported_says_above(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The computed saddle (CTCTGCTTG) lies above the reported one (AGTTGCCAA)."""
+    monkeypatch.setattr(
+        mq, "_lookup_fdr_sequence", lambda dna, declaration: (-0.42699, "uncertain")
+    )
+    write_upstream(tmp_path, band=True)
+    tree = _tree("CTCTGCTTG")
+    for i in tree.node_indices():
+        if tree[i]["dna_sequence"] == "CTCTGCTTG":
+            tree[i]["scalar"] = -0.229093
+    config = {
+        "clamped": {
+            **CONFIG["clamped"],
+            "candidate_functional_threshold": {
+                "rule": "fdr_fixed_cutoff",
+                "decimals": 6,
+                "cutoff": "median_reflected",
+                "method": "by",
+                "q": 0.05,
+                "input_dir": SNAPSHOT,
+            },
+        },
+        "codon_entropy": {
+            **CONFIG["codon_entropy"],
+            "reported_saddle_dna_sequence": "AGTTGCCAA",
+        },
+    }
+    rows = {
+        r["key"]: r
+        for r in mq.build_rows(load(tmp_path, tree), config, git_commit=None)
+    }
+    assert rows["common_saddle.dna_sequence"]["value"] == "CTCTGCTTG"
+    assert rows["common_saddle.reported_raw_fitness"]["display_value"] == "-0.43"
+    assert rows["common_saddle.merge_height_difference"]["display_value"] == "-0.20"
+    assert rows["common_saddle.mechanism"]["value"] == (
+        "The reported saddle AGTTGCCAA is classed uncertain under the BY, "
+        "nominal q = 0.05 screen at cutoff T; in this Candidate graph (edges need "
+        "≥1 retained Functional endpoint) KEM and TCL first merge at CTCTGCTTG "
+        "(s = -0.23), 0.20 above the reported saddle (s = -0.43)."
+    )
+
+
 def test_lookup_fdr_sequence_fails_closed() -> None:
     # 1. Missing sequence raises ValueError
     decl = {
@@ -412,6 +456,12 @@ def test_manuscript_quantities_stage_with_median_reflected_variant(
             analysis[section] = values
     settings = {"analysis": analysis, "figures": {}}
 
+    # The shipped reported saddle is now the computed one; this test exercises the
+    # difference rows, so it reports the other sequence.
+    analysis["codon_entropy"] = {
+        **analysis["codon_entropy"],
+        "reported_saddle_dna_sequence": "CTCTGCTTG",
+    }
     stage, stage_config = build._manuscript_quantities_stage(settings, sources)
 
     # 1. Declaration passes into stage_config["clamped"] and stage fingerprint

@@ -502,7 +502,7 @@ def extract_codon_entropy_populations(
     if common_saddle is None or common_saddle in {kem_idx, tcl_idx}:
         raise ValueError("KEM and TCL summits do not have a distinct shared saddle.")
     saddle = nodes[common_saddle]
-    reported_saddle = settings.get("reported_saddle_dna_sequence", "CTCTGCTTG")
+    reported_saddle = settings.get("reported_saddle_dna_sequence", "AGTTGCCAA")
 
     kem_nodes, kem_subroot = _ridge_nodes(tree, common_saddle, kem_idx)
     tcl_nodes, tcl_subroot = _ridge_nodes(tree, common_saddle, tcl_idx)

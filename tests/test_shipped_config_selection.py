@@ -162,3 +162,10 @@ def test_shipped_selection_routes_to_processed_product(monkeypatch, case, shippe
     )
     assert result["mode"] == "legacy_mixture"
     assert not names
+
+
+def test_shipped_reported_saddle_is_scq() -> None:
+    """The reported KEM/TCL common saddle is SCQ (AGTTGCCAA), not LCL (CTCTGCTTG)."""
+    with (ROOT / "config/analysis.toml").open("rb") as stream:
+        entropy = tomllib.load(stream)["codon_entropy"]
+    assert entropy["reported_saddle_dna_sequence"] == "AGTTGCCAA"

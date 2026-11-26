@@ -1783,12 +1783,22 @@ def _summits(
         disp_rep = display_spec(
             value_text(reported_fitness), "fitness", "summit_fitness"
         )[1]
-        disp_diff = display_spec(value_text(merge_diff), "fitness", "summit_fitness")[1]
+        disp_diff = display_spec(
+            value_text(abs(merge_diff)), "fitness", "summit_fitness"
+        )[1]
+        # merge_diff is reported minus computed: positive means the computed saddle
+        # lies below the reported one, negative above it.
+        if merge_diff > 0:
+            position = f"{disp_diff} below"
+        elif merge_diff < 0:
+            position = f"{disp_diff} above"
+        else:
+            position = "level with"
         mechanism_note = (
             f"The reported saddle {reported_dna} is classed {fdr_class} under the {method}, "
             f"nominal q = {q:g} screen at cutoff T; in this Candidate graph (edges need "
             f"≥1 retained Functional endpoint) KEM and TCL first merge at {computed_seq} "
-            f"(s = {disp_comp}), {disp_diff} below the reported saddle (s = {disp_rep})."
+            f"(s = {disp_comp}), {position} the reported saddle (s = {disp_rep})."
         )
         rows.put(
             "common_saddle.reported_dna_sequence",
