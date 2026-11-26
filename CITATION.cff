@@ -9,8 +9,16 @@ abstract: >-
   combinatorial fitness landscapes using merge trees": the topology of the
   Papkou et al. 2023 fitness landscape.
 type: software
-version: 1.0.1
+version: 1.0.2
 date-released: 2026-11-26
+doi: "10.5281/zenodo.24550751"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24550751"
+    description: "Code, all versions"
+  - type: doi
+    value: "10.5281/zenodo.24545428"
+    description: "Result files of the analysis run (dataset)"
 license: MIT
 repository-code: "https://github.com/igorsdub/dubanevics2026topological"
 authors:
@@ -47,3 +55,23 @@ references:
         given-names: Igors
     repository-code: "https://github.com/oist/topographer"
     doi: "10.5281/zenodo.24548494"
+  - type: data
+    title: "Data for Dubanevics et al. 2026 Topological characterization of combinatorial fitness landscapes using merge trees"
+    authors:
+      - family-names: Dubanevics
+        given-names: Igors
+        orcid: "https://orcid.org/0000-0002-9989-6649"
+      - family-names: Draganov
+        given-names: Ondřej
+        orcid: "https://orcid.org/0000-0003-0464-3823"
+      - family-names: Esposito
+        given-names: Amedeo Roberto
+        orcid: "https://orcid.org/0000-0002-9478-9852"
+      - family-names: Kondrashov
+        given-names: Fyodor A.
+        orcid: "https://orcid.org/0000-0001-8243-4694"
+    version: "1.0.0"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.24545428"

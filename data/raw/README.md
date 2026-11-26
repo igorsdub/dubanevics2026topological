@@ -8,10 +8,11 @@ files are ignored by Git (full size), and rebuilt from the record by the recipes
 
 ## Processed data
 
-`data/processed/` (ignored by Git) holds every finished result; it is written by `just all` and
-is the Zenodo deposit. `just figures` renders from it and computes nothing; `just fetch-data`
-downloads it from our Zenodo record (`zenodo_record` in `config/data.toml`) and runs
-`just check-manifest`, which compares the folder with `MANIFEST.tsv` (path, bytes, sha256).
+`data/processed/` (ignored by Git) holds every finished result; it is written by `just all`. No
+`data/processed/` deposit exists yet, so `just fetch-data` (which would download it from the record
+named by `zenodo_record` in `config/data.toml`, now empty) stays unavailable until one is published.
+`just figures` renders from it and computes nothing; `just check-manifest` compares the folder with
+`MANIFEST.tsv` (path, bytes, sha256).
 The BarSeq counts the growth-rate stage reads come from barseqfit (`just barseq-export`).
 
 ## Rebuild

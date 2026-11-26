@@ -52,7 +52,7 @@ md5_file = "config/papkou2023_authors_scripts.md5"
 store_dir = "ampseq-nextflow"
 source_env = "PAPKOU2023_AMPSEQ_DIR"
 
-# Our own Zenodo record: the processed-data folder (data/processed, MANIFEST.tsv at its root). Empty until the DOI is minted.
+# Our own Zenodo record for the processed-data folder (data/processed, MANIFEST.tsv at its root). No such deposit exists yet, so this stays empty and `just fetch-data` is unavailable until one is published.
 [ours]
 zenodo_record = ""
 # Files are routed by the first matching glob; {store} is the Papkou store, paths are relative

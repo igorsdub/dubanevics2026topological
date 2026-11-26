@@ -12,14 +12,14 @@ Install uv and just (`brew install just` on macOS with Homebrew; the repository 
 uv sync --locked
 just all            # download, compute, collect into data/processed/, write MANIFEST.tsv, render the figures
 just figures        # render only, from data/processed/ (it checks MANIFEST.tsv first and computes nothing)
-just fetch-data     # download data/processed/ from our Zenodo record instead of computing it, then check MANIFEST.tsv (available once the record is published; until then run the pipeline with `just all`)
+just fetch-data     # unavailable until a data/processed/ deposit is published (none exists yet); run `just all` to produce data/processed/
 ```
 
 `just all` is `compute`, `processed-manifest` and `figures`. `compute` downloads the Papkou et al. 2023 record (`fetch-papkou2023`), rebuilds `data/raw/` (`make-raw`), exports the BarSeq counts with barseqfit (`barseq-export`, which runs `just export-papkou` in the barseqfit checkout `$BARSEQFIT`, default `../barseqfit`), then runs every stage from the growth rates to the quantity registry. Each stage output is collected into `data/processed/` under its state name and `processed-manifest` writes `MANIFEST.tsv` (path, bytes, sha256) last.
 
 ### The processed-data folder
 
-`data/processed/` (ignored by Git) is the single folder of finished results and is the Zenodo deposit. The directory name is the identity: `growth_rates/`, `classification/<published|reflected>/`, `bootstrap/<published_by|reflected_by>/`, `band_quantile_scan/<published_by|reflected_by>/`, `landscape/`, `tree/`, `leaves/`, `tree_layout/`, `tree_annotations/`, `landscape_summary/`, `ridges/`, `ridge_entropy_sweeps/` and `merge_flow/` (each `<state>/`, the seven states being `full`, `published`, `reflected`, `published_by`, `published_by_band`, `reflected_by`, `reflected_by_band`), `comparison/`, `peak_panels/` and `pooled_scatter/` (per graph; the default output root is `default`), `raw/` (the four `data/raw` files with their README, credit to Papkou et al. under CC-BY-4.0; `just figures` restores them to `data/raw/`), `stage_outputs/` (verbatim copies of the checkpoints, records and tables the figures read from `output/`, restored by `just figures`), and `threshold_diagnostics/`, `codon_entropy/`, `bootstrap_codon_entropy/`, `graph_tree_persistence/`, `manuscript_quantities/`, `presentation_tables/` and `graph_descriptive_statistics/`. Products keep their own `manifest.json`; `just check-manifest` compares the whole folder with `MANIFEST.tsv` and fails on a missing, extra, resized or modified file.
+`data/processed/` (ignored by Git) is the single folder of finished results; `just all` produces it. No `data/processed/` deposit exists yet, so `just fetch-data` stays unavailable until one is published. The directory name is the identity: `growth_rates/`, `classification/<published|reflected>/`, `bootstrap/<published_by|reflected_by>/`, `band_quantile_scan/<published_by|reflected_by>/`, `landscape/`, `tree/`, `leaves/`, `tree_layout/`, `tree_annotations/`, `landscape_summary/`, `ridges/`, `ridge_entropy_sweeps/` and `merge_flow/` (each `<state>/`, the seven states being `full`, `published`, `reflected`, `published_by`, `published_by_band`, `reflected_by`, `reflected_by_band`), `comparison/`, `peak_panels/` and `pooled_scatter/` (per graph; the default output root is `default`), `raw/` (the four `data/raw` files with their README, credit to Papkou et al. under CC-BY-4.0; `just figures` restores them to `data/raw/`), `stage_outputs/` (verbatim copies of the checkpoints, records and tables the figures read from `output/`, restored by `just figures`), and `threshold_diagnostics/`, `codon_entropy/`, `bootstrap_codon_entropy/`, `graph_tree_persistence/`, `manuscript_quantities/`, `presentation_tables/` and `graph_descriptive_statistics/`. Products keep their own `manifest.json`; `just check-manifest` compares the whole folder with `MANIFEST.tsv` and fails on a missing, extra, resized or modified file.
 
 Only the two BY graphs have a bootstrap, so the band-quantile scan figure shows those two graphs.
 
@@ -151,7 +151,9 @@ Full and Published equivalents are `full_tree_histogram` and `published_tree_his
 
 ## Software
 
-This is version 1.0.1 of the code (tag `v1.0.1`).
+This is version 1.0.2 of the code (tag `v1.0.2`). Concept DOI (all versions of the code): [10.5281/zenodo.24550751](https://doi.org/10.5281/zenodo.24550751).
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24550751.svg)](https://doi.org/10.5281/zenodo.24550751)
 
 The analysis uses two packages:
 
@@ -161,3 +163,7 @@ The analysis uses two packages:
 The DOIs resolve to the latest archived version. The pinned tags 0.2.0 and 0.5.0 differ from the first archived versions (0.2.1 and 0.5.1) in release metadata only.
 
 If you use them, please cite each package using the `CITATION.cff` in its repository.
+
+## Data
+
+The result files of the analysis run are archived at [doi:10.5281/zenodo.24545428](https://doi.org/10.5281/zenodo.24545428). They are the results the tracked figures and tables were rendered from. They use the folder layout and working names of release 1.0.0, not the `data/processed/` layout; the README of the deposit maps the names. `just fetch-data` cannot read this deposit.

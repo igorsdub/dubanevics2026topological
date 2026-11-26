@@ -1,6 +1,6 @@
 # Repository guidance
 
-All computation runs locally through `just`: `just all` downloads and computes everything, collects it into `data/processed/` and renders the figures; `just figures` renders only, from `data/processed/`; `just fetch-data` downloads `data/processed/` from the project's Zenodo record once that record is published (none exists yet; until then run the pipeline with `just all`). Never borrow another checkout's virtual environment; each checkout uses its own `uv sync --locked`.
+All computation runs locally through `just`: `just all` downloads and computes everything, collects it into `data/processed/` and renders the figures; `just figures` renders only, from `data/processed/`; `just fetch-data` stays unavailable until a `data/processed/` deposit is published (none exists yet; `just all` produces `data/processed/`). Never borrow another checkout's virtual environment; each checkout uses its own `uv sync --locked`.
 
 This repository supports the manuscript "Topological characterization of combinatorial fitness landscapes using merge trees" through reproducible analysis code, figures, and tables. Keep manuscript prose and captions in their separate source.
 
@@ -17,7 +17,7 @@ This repository supports the manuscript "Topological characterization of combina
 - Use stable descriptive figure identifiers rather than manuscript numbering.
 - Preserve sequence identities in exported results; never expose Rustworkx indices as scientific identifiers.
 - Keep branch span, ordinary H0 persistence (the global maximum's pair closed at the global minimum by convention), and extended persistence (not computed) as distinct quantities.
-- Treat `data/raw/` as local input storage and `data/processed/` as the finished results (ignored by Git, the Zenodo deposit, `MANIFEST.tsv` at its root; never edit a file in it by hand). Local `output/` is disposable once `just all` has collected it into `data/processed/`. Exception: a bootstrap run that has not been published to `data/processed/bootstrap/<state>/` (its `output/checkpoints/bootstrap_smoothed_tree/` and `.replaced-*` copies) must be copied before deleting `output/` or a worktree.
+- Treat `data/raw/` as local input storage and `data/processed/` as the finished results (ignored by Git, `MANIFEST.tsv` at its root; never edit a file in it by hand). Local `output/` is disposable once `just all` has collected it into `data/processed/`. Exception: a bootstrap run that has not been published to `data/processed/bootstrap/<state>/` (its `output/checkpoints/bootstrap_smoothed_tree/` and `.replaced-*` copies) must be copied before deleting `output/` or a worktree.
 
 ## Package boundaries
 
