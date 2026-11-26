@@ -53,6 +53,11 @@ def test_user_facing_files_have_no_dev_addresses(exported, name):
     assert "igorsdub/" + "topographer" not in text
 
 
+def test_agent_guidance_files_are_present(exported):
+    assert (exported / "AGENTS.md").is_file()
+    assert (exported / "CLAUDE.md").read_text() == "@AGENTS.md\n"
+
+
 def test_private_paths_are_absent(exported):
     assert not (exported / "tools" / "private").exists()
     assert not (exported / "docs" / "adr").exists()
